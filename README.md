@@ -1,4 +1,4 @@
-![ryde banner](/docs/img/Ryde_With_Menu_Small.jpg)
+![ryde banner](/docs/Ryde_With_Menu_Small.jpg)
 # Ryde DATV Receiver Build For RPi 4
 
 **NOT YET COMPLETE - DO NOT TRY THIS AT HOME (or anywhere else!**
