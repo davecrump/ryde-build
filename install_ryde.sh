@@ -79,9 +79,9 @@ sudo apt-get -y install python3-pygame
 sudo apt-get -y install python3-vlc
 sudo apt-get -y install python3-evdev
 sudo apt-get -y install python3-pil
-sudo pip3 install evdev
-sudo pip3 install python-vlc
-sudo pip3 install Pillow
+//sudo pip3 install evdev
+//sudo pip3 install python-vlc
+//sudo pip3 install Pillow
 
 # Download the previously selected version of Ryde Build
 echo
@@ -126,19 +126,20 @@ python3 setup.py build_ext --inplace
 
 cd /home/pi
 
-# Download the previously selected version of Ryde
+# Download the previously selected version of Rydeplayer
 echo
-echo "---------------------------"
-echo "----- Installing Ryde -----"
-echo "---------------------------"
+echo "---------------------------------"
+echo "----- Installing Rydeplayer -----"
+echo "---------------------------------"
 
-cd /home/pi
-mkdir ryde
-cd ryde
-unzip -o ../ryde-alpha.zip
+wget https://github.com/eclispe/rydeplayer/archive/master.zip
+# wget https://github.com/${GIT_SRC}/rydeplayer/archive/master.zip
+unzip -o master.zip
+mv rydeplayer-master ryde
+rm master.zip
 
-cp /home/pi/pydispmanx/pydispmanx.cpython-37m-arm-linux-gnueabihf.so pydispmanx.cpython-37m-arm-linux-gnueabihf.so
-
+cp /home/pi/pydispmanx/pydispmanx.cpython-37m-arm-linux-gnueabihf.so \
+   /home/pi/ryde/pydispmanx.cpython-37m-arm-linux-gnueabihf.so
 
 cd /home/pi
 
@@ -158,12 +159,12 @@ sudo sed -i '/#dtoverlay=gpio-ir,gpio_pin=17/c\dtoverlay=gpio-ir,gpio_pin=17' /b
 
 #Modify .bashrc for autostart
 
-#if !(grep Ryde ~/.bashrc) then
-#  echo if test -z \"\$SSH_CLIENT\" >> ~/.bashrc 
-#  echo then >> ~/.bashrc
-#  echo /home/pi/Ryde/run >> ~/.bashrc
-#  echo fi >> ~/.bashrc
-#fi
+echo  >> ~/.bashrc
+echo if test -z \"\$SSH_CLIENT\" >> ~/.bashrc 
+echo then" >> ~/.bashrc
+echo "  /home/pi/ryde-build/rx.sh" >> ~/.bashrc
+echo fi >> ~/.bashrc
+echo  >> ~/.bashrc
 
 
 #echo
@@ -171,7 +172,7 @@ sudo sed -i '/#dtoverlay=gpio-ir,gpio_pin=17/c\dtoverlay=gpio-ir,gpio_pin=17' /b
 #echo "----- Compiling Ancilliary programs -----"
 #echo "-----------------------------------------"
 
-
+# None yet!
 
 echo
 echo "--------------------------------------"
@@ -183,10 +184,6 @@ echo "alias ryde='/home/pi/ryde-build/rx.sh'" >> /home/pi/.bash_aliases
 echo "alias menu='/home/pi/ryde-build/menu.sh'"  >> /home/pi/.bash_aliases
 echo "alias stop='/home/pi/ryde-build/stop.sh'"  >> /home/pi/.bash_aliases
 
-
-# Modify .bashrc to run startup script on ssh logon
-cd /home/pi
-#sed -i 's|/home/pi/Langstone/run|source /home/pi/rpidatv/scripts/startup.sh|' .bashrc
 
 # Record Version Number
 cd /home/pi/ryde-build/

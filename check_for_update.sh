@@ -65,14 +65,14 @@ then
     read -n 1
     printf "\n"
     if [[ "$REPLY" = "y" || "$REPLY" = "Y" ]]; then  ## Force upgrade requested
-        printf "\nUpgrading now...\n"
-        cd /home/pi
-        rm update.sh >/dev/null 2>/dev/null
-        wget https://raw.githubusercontent.com/BritishAmateurTelevisionClub/ryde-build/master/update.sh
-        chmod +x update.sh
-        /home/pi/update.sh -p
-        exit
-    elif [[ "$REPLY" = "d" || "$REPLY" = "D" ]]; then  ## Development upgrade requested
+#        printf "\nUpgrading now...\n"
+#        cd /home/pi
+#        rm update.sh >/dev/null 2>/dev/null
+#        wget https://raw.githubusercontent.com/BritishAmateurTelevisionClub/ryde-build/master/update.sh
+#        chmod +x update.sh
+#        /home/pi/update.sh -p
+#        exit
+#    elif [[ "$REPLY" = "d" || "$REPLY" = "D" ]]; then  ## Development upgrade requested
         printf "\nUpgrading now to the Development Version...\n"
         cd /home/pi
         rm update.sh >/dev/null 2>/dev/null
@@ -98,7 +98,8 @@ then
         printf "\nUpgrading now...\n"
         cd /home/pi
         rm update.sh >/dev/null 2>/dev/null
-        wget https://raw.githubusercontent.com/BritishAmateurTelevisionClub/ryde-build/master/update.sh
+#        wget https://raw.githubusercontent.com/BritishAmateurTelevisionClub/ryde-build/master/update.sh
+        wget https://raw.githubusercontent.com/davecrump/ryde-build/master/update.sh
         chmod +x update.sh
         source /home/pi/update.sh -p
         exit
@@ -116,14 +117,14 @@ else                                            ## Version Error
     read -n 1
     printf "\n"
     if [[ "$REPLY" = "y" || "$REPLY" = "Y" ]]; then  ## Force upgrade requested
-        printf "\nUpgrading now...\n"
-        cd /home/pi
-        rm update.sh >/dev/null 2>/dev/null
-        wget https://raw.githubusercontent.com/BritishAmateurTelevisionClub/ryde-build/master/update.sh
-        chmod +x update.sh -p
-        /home/pi/update.sh
-        exit
-    elif [[ "$REPLY" = "d" || "$REPLY" = "D" ]]; then  ## Development upgrade requested
+#        printf "\nUpgrading now...\n"
+#        cd /home/pi
+#        rm update.sh >/dev/null 2>/dev/null
+#        wget https://raw.githubusercontent.com/BritishAmateurTelevisionClub/ryde-build/master/update.sh
+#        chmod +x update.sh -p
+#        /home/pi/update.sh
+#        exit
+#    elif [[ "$REPLY" = "d" || "$REPLY" = "D" ]]; then  ## Development upgrade requested
         printf "\nUpgrading now to the Development Version...\n"
         cd /home/pi
         rm update.sh >/dev/null 2>/dev/null

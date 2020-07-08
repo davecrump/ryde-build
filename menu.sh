@@ -12,9 +12,107 @@ do_info()
   /home/pi/ryde-build/display_info.sh
 }
 
+do_Set_RC_Protocol()
+{  
+  menuchoice=$(whiptail --title "Set Remote Control Protocol" --menu "Select Choice" 20 78 12 \
+    "1 nec" "For most Japanese Remotes"  \
+    "2 rc-5" "For most European Remotes" \
+    "3 rc-6" "For newer European Remotes" \
+    "4 jvc" "For most JVC Remotes" \
+    "5 sony" "For most Sony Remotes" \
+    "6 sanyo" "For most European Remotes" \
+    "7 rc-5-sz" "Who knows?" \
+    "8 sharp" "For most Sharp Remotes" \
+    "9 mce-kbd" "Who knows?" \
+    "10 xmp" "Who knows?" \
+    "11 imon" "Who knows?" \
+    "12 Exit" "Exit without changing" \
+      3>&2 2>&1 1>&3)
+    case "$menuchoice" in
+        1\ *) PROTOCOL="nec" ;;
+        2\ *) PROTOCOL="rc-5" ;;
+        3\ *) PROTOCOL="rc-6" ;;
+        4\ *) PROTOCOL="jvc" ;;
+        5\ *) PROTOCOL="sony" ;;
+        6\ *) PROTOCOL="sanyo" ;;
+        7\ *) PROTOCOL="rc-5-sz" ;;
+        8\ *) PROTOCOL="sharp" ;;
+        9\ *) PROTOCOL="mce-kbd" ;;
+        10\ *) PROTOCOL="xmp" ;;
+        11\ *) PROTOCOL="rc-5" ;;
+        12\ *) PROTOCOL="exit" ;;
+    esac
+
+  if [ "$PROTOCOL" != "exit" ]; then
+    # Set the current setting
+    sudo ir-keytable -p $PROTOCOL >/dev/null 2>/dev/null
+
+    # And change it for the future
+    sed -i "/ir-keytable/c\sudo ir-keytable -p $PROTOCOL >/dev/null 2>/dev/null" /home/pi/ryde-build/rx.sh
+  fi
+}
+
+do_Set_RC_Type()
+{
+  menuchoice=$(whiptail --title "Set Remote Control Model" --menu "Select Choice" 20 78 12 \
+    "1 Default" "Simple NEC Remote"  \
+    "2 Nebula" "Nebula DigiTV DVB-T USB Receiver" \
+    "3  " " " \
+    "4  " " " \
+    "5  " " " \
+    "6  " " " \
+    "7  " " " \
+    "8  " " " \
+    "9  " " " \
+    "10  " " " \
+    "11  " " " \
+    "12 Exit" "Exit without changing remote control model" \
+      3>&2 2>&1 1>&3)
+    case "$menuchoice" in
+        1\ *) RC_FILE="config.sample.yaml"; PROTOCOL="nec" ;;
+        2\ *) RC_FILE="nebula_usb.yaml"; PROTOCOL="rc-5" ;;
+        3\ *) RC_FILE="config.sample.yaml" ;;
+        4\ *) RC_FILE="config.sample.yaml" ;;
+        5\ *) RC_FILE="config.sample.yaml" ;;
+        6\ *) RC_FILE="config.sample.yaml" ;;
+        7\ *) RC_FILE="config.sample.yaml" ;;
+        8\ *) RC_FILE="config.sample.yaml" ;;
+        9\ *) RC_FILE="config.sample.yaml" ;;
+        10\ *) RC_FILE="config.sample.yaml" ;;
+        11\ *) RC_FILE="config.sample.yaml" ;;
+        12\ *) RC_FILE="exit" ;;
+    esac
+
+  if [ "$RC_FILE" != "exit" ]; then
+    # Load the requested file
+    cp /home/pi/ryde-build/rc_configs/"$RC_FILE" /home/pi/ryde/config.yaml
+
+    # Set the requested protocol setting
+    sudo ir-keytable -p $PROTOCOL >/dev/null 2>/dev/null
+
+    # And change it for the future
+    sed -i "/ir-keytable/c\sudo ir-keytable -p $PROTOCOL >/dev/null 2>/dev/null" /home/pi/ryde-build/rx.sh
+  fi
+}
+
+do_Check_RC_Codes()
+{
+  reset
+  ir-keytable -t
+}
+
 do_remote_change()
 {
-  :
+  menuchoice=$(whiptail --title "Remote Control Configuration Menu" --menu "Select Choice" 16 78 10 \
+    "1 Set Protocol" "Do this first"  \
+    "2 Set RC Type" "Then set the RC Type here" \
+    "3 Check RC Codes" "For a new Remote Control" \
+      3>&2 2>&1 1>&3)
+    case "$menuchoice" in
+        1\ *) do_Set_RC_Protocol ;;
+        2\ *) do_Set_RC_Type ;;
+        3\ *) do_Check_RC_Codes ;;
+    esac
 }
 
 do_Reboot()
@@ -276,6 +374,12 @@ menuchoice=$(whiptail --title "Shutdown Menu" --menu "Select Choice" 16 78 10 \
 do_stop()
 {
   sudo killall python3
+  
+  sleep 1
+  if pgrep -x "python3" >/dev/null
+  then
+    sudo killall -9 python3
+  fi
 }
 
 do_receive()
@@ -305,7 +409,7 @@ while [ "$status" -eq 0 ]
 	"0 Receive" "Start the Ryde Receiver" \
         "1 Stop" "Start the Ryde Receiver" \
 	"2 Video" "Select the Video Output Mode" \
-	"3 Remote" "Select the Remote Control Type" \
+	"3 Remote" "Select the Remote Control Protocol and Type" \
 	"4 Info" "Display System Info" \
 	"5 Update" "Check for Update" \
 	"6 Shutdown" "Reboot or Shutdown" \

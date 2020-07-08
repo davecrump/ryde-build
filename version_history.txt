@@ -1,2 +1,4 @@
 202007080
 Add ssh console menu and update script
+Include rydeplayer code
+Add first remote control files

@@ -2,7 +2,6 @@
 
 # Created by davecrump 20200708 for Ryde on Buster Raspios
 
-
 echo
 echo "------------------------------------------"
 echo "----- Updating Ryde Receiver Software-----"
@@ -18,6 +17,11 @@ mkdir "$PATHUBACKUP" >/dev/null 2>/dev/null
 cp -f -r /home/pi/ryde-build/installed_version.txt "$PATHUBACKUP"/prev_installed_version.txt
 
 # Make a safe copy of the Config files in "$PATHUBACKUP" to restore at the end
+
+cp -f -r /home/pi/ryde/config.yaml "$PATHUBACKUP"/config.yaml
+
+# And capture the RC protocol in the rx.sh file:
+cp -f -r /home/pi/ryde-build/rx.sh "$PATHUBACKUP"/rx.sh
 
 echo
 echo "------------------------------------------"
@@ -90,14 +94,24 @@ echo "----- Updating Ryde -----"
 echo "-------------------------"
 echo
 rm -rf /home/pi/ryde
-cd /home/pi
-mkdir ryde
-cd ryde
-unzip -o ../ryde-alpha.zip
+wget https://github.com/eclispe/rydeplayer/archive/master.zip
+# wget https://github.com/${GIT_SRC}/rydeplayer/archive/master.zip
+unzip -o master.zip
+mv rydeplayer-master ryde
+rm master.zip
+cd /home/pi/ryde
 
 cp /home/pi/pydispmanx/pydispmanx.cpython-37m-arm-linux-gnueabihf.so pydispmanx.cpython-37m-arm-linux-gnueabihf.so
 
+cd /home/pi
+
 # Restore the user's original config files here
+
+# Restore the user's config
+cp -f -r "$PATHUBACKUP"/config.yaml /home/pi/ryde/config.yaml
+
+# And restore the RC protocol in the rx.sh file:
+cp -f -r "$PATHUBACKUP"/rx.sh /home/pi/ryde-build/rx.sh 
 
 # Record the version numbers
 
