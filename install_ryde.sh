@@ -79,9 +79,9 @@ sudo apt-get -y install python3-pygame
 sudo apt-get -y install python3-vlc
 sudo apt-get -y install python3-evdev
 sudo apt-get -y install python3-pil
-//sudo pip3 install evdev
-//sudo pip3 install python-vlc
-//sudo pip3 install Pillow
+#sudo pip3 install evdev
+#sudo pip3 install python-vlc
+#sudo pip3 install Pillow
 
 # Download the previously selected version of Ryde Build
 echo
