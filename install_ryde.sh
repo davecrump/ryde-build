@@ -20,12 +20,14 @@ if [ "$1" == "-d" ]; then
   echo "-------------------------------------------------------------"
   echo "----- Installing Ryde development version from davecrump-----"
   echo "-------------------------------------------------------------"
+  echo
 elif [ "$1" == "-t" ]; then
   GIT_SRC="eclispe";
   echo
   echo "-------------------------------------------------------------"
   echo "----- Installing Ryde development version from eclispe-----"
   echo "-------------------------------------------------------------"
+  echo
 elif [ "$1" == "-u" -a ! -z "$2" ]; then
   GIT_SRC="$2"
   echo
@@ -40,6 +42,7 @@ else
   echo "-------------------------------------------"
   echo "----- Installing BATC Production Ryde -----"
   echo "-------------------------------------------"
+  echo
 fi
 
 # Update the package manager
@@ -47,6 +50,7 @@ echo
 echo "------------------------------------"
 echo "----- Updating Package Manager -----"
 echo "------------------------------------"
+echo
 sudo dpkg --configure -a
 sudo apt-get update
 
@@ -59,6 +63,7 @@ echo
 echo "-----------------------------------"
 echo "----- Performing dist-upgrade -----"
 echo "-----------------------------------"
+echo
 sudo apt-get -y dist-upgrade
 
 # Install the packages that we need
@@ -67,6 +72,7 @@ echo
 echo "------------------------------------------------"
 echo "----- Installing Packages Required by Ryde -----"
 echo "------------------------------------------------"
+echo
 
 sudo apt-get -y install git cmake libusb-1.0-0-dev
 sudo apt-get -y install vlc
@@ -88,10 +94,12 @@ echo
 echo "------------------------------------------"
 echo "----- Installing Ryde Build Utilities-----"
 echo "------------------------------------------"
+echo
+
 wget https://github.com/davecrump/ryde-build/archive/master.zip
 # wget https://github.com/${GIT_SRC}/ryde-build/archive/master.zip
 unzip -o master.zip
-mv ryde-build--master ryde-build
+mv ryde-build-master ryde-build
 rm master.zip
 
 
@@ -100,6 +108,8 @@ echo
 echo "--------------------------------------------"
 echo "----- Installing the LongMynd Receiver -----"
 echo "--------------------------------------------"
+echo
+
 wget https://github.com/eclispe/longmynd/archive/master.zip
 # wget https://github.com/${GIT_SRC}/longmynd/archive/master.zip
 unzip -o master.zip
@@ -115,6 +125,7 @@ echo
 echo "---------------------------------"
 echo "----- Installing pyDispmanx -----"
 echo "---------------------------------"
+echo
 
 wget https://github.com/eclispe/pyDispmanx/archive/master.zip
 # wget https://github.com/${GIT_SRC}/pyDispmanx/archive/master.zip
@@ -131,8 +142,9 @@ echo
 echo "---------------------------------"
 echo "----- Installing Rydeplayer -----"
 echo "---------------------------------"
+echo
 
-wget https://github.com/eclispe/rydeplayer/archive/master.zip
+wget https://github.com/davecrump/rydeplayer/archive/master.zip
 # wget https://github.com/${GIT_SRC}/rydeplayer/archive/master.zip
 unzip -o master.zip
 mv rydeplayer-master ryde
@@ -148,6 +160,7 @@ echo
 echo "----------------------------------------------------"
 echo "----- Setting up the Operating System for Ryde -----"
 echo "----------------------------------------------------"
+echo
 
 # Set auto login to command line.
 sudo raspi-config nonint do_boot_behaviour B2
@@ -161,7 +174,7 @@ sudo sed -i '/#dtoverlay=gpio-ir,gpio_pin=17/c\dtoverlay=gpio-ir,gpio_pin=17' /b
 
 echo  >> ~/.bashrc
 echo if test -z \"\$SSH_CLIENT\" >> ~/.bashrc 
-echo then" >> ~/.bashrc
+echo then >> ~/.bashrc
 echo "  /home/pi/ryde-build/rx.sh" >> ~/.bashrc
 echo fi >> ~/.bashrc
 echo  >> ~/.bashrc
@@ -171,6 +184,7 @@ echo  >> ~/.bashrc
 #echo "-----------------------------------------"
 #echo "----- Compiling Ancilliary programs -----"
 #echo "-----------------------------------------"
+#echo
 
 # None yet!
 
@@ -178,6 +192,7 @@ echo
 echo "--------------------------------------"
 echo "----- Configure the Menu Aliases -----"
 echo "--------------------------------------"
+echo
 
 # Install the menu aliases
 echo "alias ryde='/home/pi/ryde-build/rx.sh'" >> /home/pi/.bash_aliases
@@ -198,9 +213,10 @@ echo
 echo "--------------------------------"
 echo "----- Complete.  Rebooting -----"
 echo "--------------------------------"
+echo
 sleep 1
 
-# sudo reboot now
+sudo reboot now
 exit
 
 

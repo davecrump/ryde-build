@@ -51,7 +51,7 @@ rm -rf /home/pi/ryde-build
 wget https://github.com/davecrump/ryde-build/archive/master.zip
 # wget https://github.com/${GIT_SRC}/ryde-build/archive/master.zip
 unzip -o master.zip
-mv ryde-build--master ryde-build
+mv ryde-build-master ryde-build
 rm master.zip
 
 
@@ -94,7 +94,7 @@ echo "----- Updating Ryde -----"
 echo "-------------------------"
 echo
 rm -rf /home/pi/ryde
-wget https://github.com/eclispe/rydeplayer/archive/master.zip
+wget https://github.com/davecrump/rydeplayer/archive/master.zip
 # wget https://github.com/${GIT_SRC}/rydeplayer/archive/master.zip
 unzip -o master.zip
 mv rydeplayer-master ryde
