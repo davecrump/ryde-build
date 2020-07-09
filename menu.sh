@@ -57,7 +57,7 @@ do_Set_RC_Type()
   menuchoice=$(whiptail --title "Set Remote Control Model" --menu "Select Choice" 20 78 12 \
     "1 Default" "Simple NEC Remote"  \
     "2 Nebula" "Nebula DigiTV DVB-T USB Receiver" \
-    "3  " " " \
+    "3 DVB-T2-S2" "eBay DVB-T2-S2 Combo with 12v in " \
     "4  " " " \
     "5  " " " \
     "6  " " " \
@@ -71,7 +71,7 @@ do_Set_RC_Type()
     case "$menuchoice" in
         1\ *) RC_FILE="config.sample.yaml"; PROTOCOL="nec" ;;
         2\ *) RC_FILE="nebula_usb.yaml"; PROTOCOL="rc-5" ;;
-        3\ *) RC_FILE="config.sample.yaml" ;;
+        3\ *) RC_FILE="hd-dvb-t2-s2-rx.yaml"; PROTOCOL="nec" ;;
         4\ *) RC_FILE="config.sample.yaml" ;;
         5\ *) RC_FILE="config.sample.yaml" ;;
         6\ *) RC_FILE="config.sample.yaml" ;;
@@ -97,7 +97,9 @@ do_Set_RC_Type()
 
 do_Check_RC_Codes()
 {
+  sudo ir-keytable -p all >/dev/null 2>/dev/null
   reset
+  echo "After ctrl-c, type menu to get back to the Menu System"
   ir-keytable -t
 }
 
@@ -373,12 +375,12 @@ menuchoice=$(whiptail --title "Shutdown Menu" --menu "Select Choice" 16 78 10 \
 
 do_stop()
 {
-  sudo killall python3
+  sudo killall python3 >/dev/null 2>/dev/null
   
   sleep 1
-  if pgrep -x "python3" >/dev/null
+  if pgrep -x "python3" >/dev/null 2>/dev/null
   then
-    sudo killall -9 python3
+    sudo killall -9 python3 >/dev/null 2>/dev/null
   fi
 }
 
@@ -398,6 +400,8 @@ do_receive()
 #************************* Execution of Console Menu starts here *************************
 
 status=0
+
+do_stop
 
 # Loop round main menu
 while [ "$status" -eq 0 ] 
