@@ -1,3 +1,9 @@
+202007140
+Split files for remote control and config
+Change Logo
+Add more remotes
+Implement production and Dev updates
+
 202007080
 Add ssh console menu and update script
 Include rydeplayer code

@@ -3,7 +3,7 @@
 reset
 
 ## Check which version number to look up. From M0DNY 201905090
-GIT_SRC_FILE=".portsdown_gitsrc"
+GIT_SRC_FILE=".ryde_gitsrc"
 if [ -e ${GIT_SRC_FILE} ]; then
   GIT_SRC=$(</home/pi/${GIT_SRC_FILE})
 else
@@ -15,8 +15,6 @@ if [ "$GIT_SRC" == "davecrump" ]; then
   GIT_SRC="BritishAmateurTelevisionClub"
 fi
 
-## FOR TESTING!! ##
-GIT_SRC="davecrump"
 
 ## Download the latest_version file
 cd /home/pi/ryde-build
@@ -65,14 +63,14 @@ then
     read -n 1
     printf "\n"
     if [[ "$REPLY" = "y" || "$REPLY" = "Y" ]]; then  ## Force upgrade requested
-#        printf "\nUpgrading now...\n"
-#        cd /home/pi
-#        rm update.sh >/dev/null 2>/dev/null
-#        wget https://raw.githubusercontent.com/BritishAmateurTelevisionClub/ryde-build/master/update.sh
-#        chmod +x update.sh
-#        /home/pi/update.sh -p
-#        exit
-#    elif [[ "$REPLY" = "d" || "$REPLY" = "D" ]]; then  ## Development upgrade requested
+        printf "\nUpgrading now...\n"
+        cd /home/pi
+        rm update.sh >/dev/null 2>/dev/null
+        wget https://raw.githubusercontent.com/BritishAmateurTelevisionClub/ryde-build/master/update.sh
+        chmod +x update.sh
+        /home/pi/update.sh
+        exit
+    elif [[ "$REPLY" = "d" || "$REPLY" = "D" ]]; then  ## Development upgrade requested
         printf "\nUpgrading now to the Development Version...\n"
         cd /home/pi
         rm update.sh >/dev/null 2>/dev/null
@@ -98,10 +96,10 @@ then
         printf "\nUpgrading now...\n"
         cd /home/pi
         rm update.sh >/dev/null 2>/dev/null
-#        wget https://raw.githubusercontent.com/BritishAmateurTelevisionClub/ryde-build/master/update.sh
-        wget https://raw.githubusercontent.com/davecrump/ryde-build/master/update.sh
+        wget https://raw.githubusercontent.com/BritishAmateurTelevisionClub/ryde-build/master/update.sh
+#        wget https://raw.githubusercontent.com/davecrump/ryde-build/master/update.sh
         chmod +x update.sh
-        source /home/pi/update.sh -p
+        source /home/pi/update.sh
         exit
     else                                        ##  Upgrade available, but rejected
         printf "Not upgrading\n"
@@ -117,14 +115,14 @@ else                                            ## Version Error
     read -n 1
     printf "\n"
     if [[ "$REPLY" = "y" || "$REPLY" = "Y" ]]; then  ## Force upgrade requested
-#        printf "\nUpgrading now...\n"
-#        cd /home/pi
-#        rm update.sh >/dev/null 2>/dev/null
-#        wget https://raw.githubusercontent.com/BritishAmateurTelevisionClub/ryde-build/master/update.sh
-#        chmod +x update.sh -p
-#        /home/pi/update.sh
-#        exit
-#    elif [[ "$REPLY" = "d" || "$REPLY" = "D" ]]; then  ## Development upgrade requested
+        printf "\nUpgrading now...\n"
+        cd /home/pi
+        rm update.sh >/dev/null 2>/dev/null
+        wget https://raw.githubusercontent.com/BritishAmateurTelevisionClub/ryde-build/master/update.sh
+        chmod +x update.sh
+        /home/pi/update.sh
+        exit
+    elif [[ "$REPLY" = "d" || "$REPLY" = "D" ]]; then  ## Development upgrade requested
         printf "\nUpgrading now to the Development Version...\n"
         cd /home/pi
         rm update.sh >/dev/null 2>/dev/null

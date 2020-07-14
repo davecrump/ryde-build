@@ -27,12 +27,12 @@ The preferred installation method only needs a Windows PC connected to the same 
 - Log in (user: pi, password: raspberry) then cut and paste the following code in, one line at a time:
 
 ```sh
-wget https://raw.githubusercontent.com/davecrump/ryde-build/master/install_ryde.sh
+wget https://raw.githubusercontent.com/BritishAmateurTelevisionClub/ryde-build/master/install_ryde.sh
 chmod +x install_ryde.sh
 ./install_ryde.sh
 ```
 
-The initial build can take between 5 minutes and 10 minutes, however it does not need any user input, so go and make a cup of coffee and keep an eye on the screen.  When the build is finished the Pi will reboot and start-up with the Ryde software running
+The initial build can take between 10 and 15 minutes, however it does not need any user input, so go and make a cup of coffee and keep an eye on the screen.  When the build is finished the Pi will reboot and start-up with the Ryde software running
 
 - If your ISP is Virgin Media and you receive an error after entering the wget line: 'GnuTLS: A TLS fatal alert has been received.', it may be that your ISP is blocking access to GitHub.  If (only if) you get this error with Virgin Media, paste the following command in, and press return.
 ```sh
