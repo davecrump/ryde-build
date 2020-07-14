@@ -12,80 +12,49 @@ do_info()
   /home/pi/ryde-build/display_info.sh
 }
 
-do_Set_RC_Protocol()
-{  
-  menuchoice=$(whiptail --title "Set Remote Control Protocol" --menu "Select Choice" 20 78 12 \
-    "1 nec" "For most Japanese Remotes"  \
-    "2 rc-5" "For most European Remotes" \
-    "3 rc-6" "For newer European Remotes" \
-    "4 jvc" "For most JVC Remotes" \
-    "5 sony" "For most Sony Remotes" \
-    "6 sanyo" "For most European Remotes" \
-    "7 rc-5-sz" "Who knows?" \
-    "8 sharp" "For most Sharp Remotes" \
-    "9 mce-kbd" "Who knows?" \
-    "10 xmp" "Who knows?" \
-    "11 imon" "Who knows?" \
-    "12 Exit" "Exit without changing" \
-      3>&2 2>&1 1>&3)
-    case "$menuchoice" in
-        1\ *) PROTOCOL="nec" ;;
-        2\ *) PROTOCOL="rc-5" ;;
-        3\ *) PROTOCOL="rc-6" ;;
-        4\ *) PROTOCOL="jvc" ;;
-        5\ *) PROTOCOL="sony" ;;
-        6\ *) PROTOCOL="sanyo" ;;
-        7\ *) PROTOCOL="rc-5-sz" ;;
-        8\ *) PROTOCOL="sharp" ;;
-        9\ *) PROTOCOL="mce-kbd" ;;
-        10\ *) PROTOCOL="xmp" ;;
-        11\ *) PROTOCOL="rc-5" ;;
-        12\ *) PROTOCOL="exit" ;;
-    esac
-
-  if [ "$PROTOCOL" != "exit" ]; then
-    # Set the current setting
-    sudo ir-keytable -p $PROTOCOL >/dev/null 2>/dev/null
-
-    # And change it for the future
-    sed -i "/ir-keytable/c\sudo ir-keytable -p $PROTOCOL >/dev/null 2>/dev/null" /home/pi/ryde-build/rx.sh
-  fi
-}
 
 do_Set_RC_Type()
 {
-  menuchoice=$(whiptail --title "Set Remote Control Model" --menu "Select Choice" 20 78 12 \
-    "1 Default" "Simple NEC Remote"  \
+  RC_FILE="exit"
+
+  menuchoice=$(whiptail --title "Set Remote Control Model" --menu "Select Choice" 30 78 16 \
+    "1 Virgin" "Virgin Media"  \
     "2 Nebula" "Nebula DigiTV DVB-T USB Receiver" \
     "3 DVB-T2-S2" "eBay DVB-T2-S2 Combo with 12v in " \
-    "4  " " " \
-    "5  " " " \
-    "6  " " " \
-    "7  " " " \
-    "8  " " " \
-    "9  " " " \
-    "10  " " " \
-    "11  " " " \
-    "12 Exit" "Exit without changing remote control model" \
+    "4 LG TV " "LG 42 inch TV " \
+    "5 LG Blu-Ray" "LG Blu-Ray Disc Player " \
+    "6 Samsung TV" "Samsung 32 inch TV" \
+    "7 Elekta TV" "Elekta Bravo 19 inch TV" \
+    "8 WDTV Live" "WDTV Live Media Player" \
+    "9 Hauppauge" "Hauppauge MediaMVP Network Media Player" \
+    "10 TS-1 Sat" "Technosat TS-1 Satellite Receiver" \
+    "11 TS-3500" "Technosat TS-3500 Satellite Receiver" \
+    "12 F-2100 Uni" "Digi-Wav 2 Pound F2100 Universal Remote" \
+    "13 SF8008" "Octagon SF8008 Sat RX Remote" \
+    "14 RTL-SDR" "RTL-SDR Basic Remote" \
+    "15 Exit" "Exit without changing remote control model" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
-        1\ *) RC_FILE="config.sample.yaml"; PROTOCOL="nec" ;;
+        1\ *) RC_FILE="virgin.yaml"; PROTOCOL="rc-5" ;;
         2\ *) RC_FILE="nebula_usb.yaml"; PROTOCOL="rc-5" ;;
         3\ *) RC_FILE="hd-dvb-t2-s2-rx.yaml"; PROTOCOL="nec" ;;
-        4\ *) RC_FILE="config.sample.yaml" ;;
-        5\ *) RC_FILE="config.sample.yaml" ;;
-        6\ *) RC_FILE="config.sample.yaml" ;;
-        7\ *) RC_FILE="config.sample.yaml" ;;
-        8\ *) RC_FILE="config.sample.yaml" ;;
-        9\ *) RC_FILE="config.sample.yaml" ;;
-        10\ *) RC_FILE="config.sample.yaml" ;;
-        11\ *) RC_FILE="config.sample.yaml" ;;
-        12\ *) RC_FILE="exit" ;;
+        4\ *) RC_FILE="lg_tv_42.yaml"; PROTOCOL="nec" ;;
+        5\ *) RC_FILE="lg_bluray.yaml" PROTOCOL="nec necx" ;;
+        6\ *) RC_FILE="samsung_32.yaml"; PROTOCOL="necx" ;;
+        7\ *) RC_FILE="elekta_tv.yaml"; PROTOCOL="necx" ;;
+        8\ *) RC_FILE="wdtv_live.yaml"; PROTOCOL="necx" ;;
+        9\ *) RC_FILE="hauppauge_mvp.yaml"; PROTOCOL="rc-5" ;;
+        10\ *) RC_FILE="ts1_sat.yaml"; PROTOCOL="nec" ;;
+        11\ *) RC_FILE="ts3500_sat.yaml"; PROTOCOL="nec" ;;
+        12\ *) RC_FILE="f2100_uni.yaml"; PROTOCOL="rc-5" ;;
+        13\ *) RC_FILE="sf8008.yaml"; PROTOCOL="nec" ;;
+        14\ *) RC_FILE="rtl0.yaml"; PROTOCOL="nec" ;;
+        15\ *) RC_FILE="exit" ;;
     esac
 
   if [ "$RC_FILE" != "exit" ]; then
     # Load the requested file
-    cp /home/pi/ryde-build/rc_configs/"$RC_FILE" /home/pi/ryde/config.yaml
+    cp /home/pi/RydeHandsets/definitions/"$RC_FILE" /home/pi/ryde/handset.yaml
 
     # Set the requested protocol setting
     sudo ir-keytable -p $PROTOCOL >/dev/null 2>/dev/null
@@ -99,23 +68,11 @@ do_Check_RC_Codes()
 {
   sudo ir-keytable -p all >/dev/null 2>/dev/null
   reset
-  echo "After ctrl-c, type menu to get back to the Menu System"
+  echo "After CTRL-C, type menu to get back to the Menu System"
+  echo
   ir-keytable -t
 }
 
-do_remote_change()
-{
-  menuchoice=$(whiptail --title "Remote Control Configuration Menu" --menu "Select Choice" 16 78 10 \
-    "1 Set Protocol" "Do this first"  \
-    "2 Set RC Type" "Then set the RC Type here" \
-    "3 Check RC Codes" "For a new Remote Control" \
-      3>&2 2>&1 1>&3)
-    case "$menuchoice" in
-        1\ *) do_Set_RC_Protocol ;;
-        2\ *) do_Set_RC_Type ;;
-        3\ *) do_Check_RC_Codes ;;
-    esac
-}
 
 do_Reboot()
 {
@@ -377,7 +334,7 @@ do_stop()
 {
   sudo killall python3 >/dev/null 2>/dev/null
   
-  sleep 1
+  sleep 0.3
   if pgrep -x "python3" >/dev/null 2>/dev/null
   then
     sudo killall -9 python3 >/dev/null 2>/dev/null
@@ -411,22 +368,24 @@ while [ "$status" -eq 0 ]
 
     menuchoice=$(whiptail --title "Ryde Main Menu" --menu "INFO" 16 82 10 \
 	"0 Receive" "Start the Ryde Receiver" \
-        "1 Stop" "Start the Ryde Receiver" \
+        "1 Stop" "Stop the Ryde Receiver" \
 	"2 Video" "Select the Video Output Mode" \
-	"3 Remote" "Select the Remote Control Protocol and Type" \
-	"4 Info" "Display System Info" \
-	"5 Update" "Check for Update" \
-	"6 Shutdown" "Reboot or Shutdown" \
+	"3 Remote" "Select the Remote Control Type" \
+	"4 IR Check" "View the IR Codes From a new Remote" \
+	"5 Info" "Display System Info" \
+	"6 Update" "Check for Update" \
+	"7 Shutdown" "Reboot or Shutdown" \
  	3>&2 2>&1 1>&3)
 
         case "$menuchoice" in
 	    0\ *) do_receive   ;;
             1\ *) do_stop   ;;
 	    2\ *) do_video_change ;;
-   	    3\ *) do_remote_change ;;
-	    4\ *) do_info ;;
-	    5\ *) do_update ;;
-	    6\ *) do_shutdown_menu ;;
+   	    3\ *) do_Set_RC_Type ;;
+   	    4\ *) do_Check_RC_Codes ;;
+	    5\ *) do_info ;;
+	    6\ *) do_update ;;
+	    7\ *) do_shutdown_menu ;;
                *)
 
         # Display exit message if user jumps out of menu

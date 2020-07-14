@@ -1,0 +1,26 @@
+---
+configRev: 1
+longmynd:
+    binpath: /home/pi/longmynd/longmynd
+    mediapath: /home/pi/lmmedia
+    statuspath: /home/pi/lmstatus
+
+default:
+    freq: 741500
+    sr:   1500
+#    freq: 749250
+#    sr:   333
+    pol:  NONE
+    port: TOP
+
+ir:
+    repeatFirst: 200
+    repeatDelay: 100
+    repeatReset: 400
+    libraryPath: /home/pi/ryde
+    handsets:
+        - handset
+
+debug:
+    autoplay: True
+    disableHardwareCodec: True

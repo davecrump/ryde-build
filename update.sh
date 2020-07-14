@@ -1,12 +1,39 @@
 #!/bin/bash
 
-# Created by davecrump 20200708 for Ryde on Buster Raspios
+# Created by davecrump 20200714 for Ryde on Buster Raspios
 
 echo
 echo "------------------------------------------"
 echo "----- Updating Ryde Receiver Software-----"
 echo "------------------------------------------"
 echo
+
+## Check which update to load
+GIT_SRC_FILE=".ryde_gitsrc"
+if [ -e ${GIT_SRC_FILE} ]; then
+  GIT_SRC=$(</home/pi/${GIT_SRC_FILE})
+else
+  GIT_SRC="BritishAmateurTelevisionClub"
+fi
+
+## If previous version was Dev (davecrump), load production by default
+if [ "$GIT_SRC" == "davecrump" ]; then
+  GIT_SRC="BritishAmateurTelevisionClub"
+fi
+
+if [ "$1" == "-d" ]; then
+  echo "Overriding to update to latest development version"
+  GIT_SRC="davecrump"
+fi
+
+if [ "$GIT_SRC" == "BritishAmateurTelevisionClub" ]; then
+  echo "Updating to latest Production Portsdown build";
+elif [ "$GIT_SRC" == "davecrump" ]; then
+  echo "Updating to latest development Portsdown build";
+else
+  echo "Updating to latest ${GIT_SRC} development Portsdown build";
+fi
+
 
 cd /home/pi
 
@@ -19,6 +46,8 @@ cp -f -r /home/pi/ryde-build/installed_version.txt "$PATHUBACKUP"/prev_installed
 # Make a safe copy of the Config files in "$PATHUBACKUP" to restore at the end
 
 cp -f -r /home/pi/ryde/config.yaml "$PATHUBACKUP"/config.yaml
+
+cp -f -r /home/pi/ryde/handset.yaml "$PATHUBACKUP"/handset.yaml
 
 # And capture the RC protocol in the rx.sh file:
 cp -f -r /home/pi/ryde-build/rx.sh "$PATHUBACKUP"/rx.sh
@@ -94,8 +123,8 @@ echo "----- Updating Ryde -----"
 echo "-------------------------"
 echo
 rm -rf /home/pi/ryde
-wget https://github.com/davecrump/rydeplayer/archive/master.zip
-# wget https://github.com/${GIT_SRC}/rydeplayer/archive/master.zip
+# wget https://github.com/davecrump/rydeplayer/archive/master.zip
+wget https://github.com/${GIT_SRC}/rydeplayer/archive/master.zip
 unzip -o master.zip
 mv rydeplayer-master ryde
 rm master.zip
@@ -103,12 +132,33 @@ cd /home/pi/ryde
 
 cp /home/pi/pydispmanx/pydispmanx.cpython-37m-arm-linux-gnueabihf.so pydispmanx.cpython-37m-arm-linux-gnueabihf.so
 
+# Download and overwrite the latest remote control definitions and images
+echo
+echo "----------------------------------------------"
+echo "----- Downloading Remote Control Configs -----"
+echo "----------------------------------------------"
+echo
+
+rm -rf /home/pi/RydeHandsets/definitions
+rm -rf /home/pi/RydeHandsets/images
+
+git clone -b definitions https://github.com/${GIT_SRC}/RydeHandsets.git RydeHandsets/definitions
+git clone -b images https://github.com/${GIT_SRC}/RydeHandsets.git RydeHandsets/images
+
 cd /home/pi
 
 # Restore the user's original config files here
 
-# Restore the user's config
-cp -f -r "$PATHUBACKUP"/config.yaml /home/pi/ryde/config.yaml
+# Restore the user's config, or use new if handset.yaml does not exist
+
+if [[ -f "$PATHUBACKUP"/handset.yaml ]]; then
+  cp -f -r "$PATHUBACKUP"/config.yaml /home/pi/ryde/config.yaml
+  cp -f -r "$PATHUBACKUP"/handset.yaml /home/pi/ryde/handset.yaml
+else
+  cp /home/pi/ryde-build/config.yaml /home/pi/ryde/config.yaml
+  cp /home/pi/RydeHandsets/definitions/virgin.yaml /home/pi/ryde/handset.yaml
+fi
+
 
 # And restore the RC protocol in the rx.sh file:
 cp -f -r "$PATHUBACKUP"/rx.sh /home/pi/ryde-build/rx.sh 

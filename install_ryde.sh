@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Ryde installer by davecrump on 20200703
+# Ryde installer by davecrump on 20200714
 
 # Check current user
 whoami | grep -q pi
@@ -19,13 +19,6 @@ if [ "$1" == "-d" ]; then
   echo
   echo "-------------------------------------------------------------"
   echo "----- Installing Ryde development version from davecrump-----"
-  echo "-------------------------------------------------------------"
-  echo
-elif [ "$1" == "-t" ]; then
-  GIT_SRC="eclispe";
-  echo
-  echo "-------------------------------------------------------------"
-  echo "----- Installing Ryde development version from eclispe-----"
   echo "-------------------------------------------------------------"
   echo
 elif [ "$1" == "-u" -a ! -z "$2" ]; then
@@ -85,9 +78,7 @@ sudo apt-get -y install python3-pygame
 sudo apt-get -y install python3-vlc
 sudo apt-get -y install python3-evdev
 sudo apt-get -y install python3-pil
-#sudo pip3 install evdev
-#sudo pip3 install python-vlc
-#sudo pip3 install Pillow
+
 
 # Download the previously selected version of Ryde Build
 echo
@@ -96,8 +87,8 @@ echo "----- Installing Ryde Build Utilities-----"
 echo "------------------------------------------"
 echo
 
-wget https://github.com/davecrump/ryde-build/archive/master.zip
-# wget https://github.com/${GIT_SRC}/ryde-build/archive/master.zip
+# wget https://github.com/davecrump/ryde-build/archive/master.zip
+wget https://github.com/${GIT_SRC}/ryde-build/archive/master.zip
 unzip -o master.zip
 mv ryde-build-master ryde-build
 rm master.zip
@@ -144,8 +135,8 @@ echo "----- Installing Rydeplayer -----"
 echo "---------------------------------"
 echo
 
-wget https://github.com/davecrump/rydeplayer/archive/master.zip
-# wget https://github.com/${GIT_SRC}/rydeplayer/archive/master.zip
+# wget https://github.com/davecrump/rydeplayer/archive/master.zip
+wget https://github.com/${GIT_SRC}/rydeplayer/archive/master.zip
 unzip -o master.zip
 mv rydeplayer-master ryde
 rm master.zip
@@ -155,7 +146,23 @@ cp /home/pi/pydispmanx/pydispmanx.cpython-37m-arm-linux-gnueabihf.so \
 
 cd /home/pi
 
-# Set up the operating system for Ryde Ryde
+
+# Download the latest remote control definitions and images
+echo
+echo "----------------------------------------------"
+echo "----- Downloading Remote Control Configs -----"
+echo "----------------------------------------------"
+echo
+git clone -b definitions https://github.com/${GIT_SRC}/RydeHandsets.git RydeHandsets/definitions
+git clone -b images https://github.com/${GIT_SRC}/RydeHandsets.git RydeHandsets/images
+
+# Set up the Config for this build
+cp /home/pi/ryde-build/config.yaml /home/pi/ryde/config.yaml
+
+# Load a remote for it to start with
+cp /home/pi/RydeHandsets/definitions/virgin.yaml /home/pi/ryde/handset.yaml
+
+# Set up the operating system for Ryde
 echo
 echo "----------------------------------------------------"
 echo "----- Setting up the Operating System for Ryde -----"
@@ -167,11 +174,9 @@ sudo raspi-config nonint do_boot_behaviour B2
 
 # Enable IR Control
 # uncomment line 51 of /boot/config.txt dtoverlay=gpio-ir,gpio_pin=17
-
 sudo sed -i '/#dtoverlay=gpio-ir,gpio_pin=17/c\dtoverlay=gpio-ir,gpio_pin=17' /boot/config.txt  >/dev/null 2>/dev/null
 
 #Modify .bashrc for autostart
-
 echo  >> ~/.bashrc
 echo if test -z \"\$SSH_CLIENT\" >> ~/.bashrc 
 echo then >> ~/.bashrc
