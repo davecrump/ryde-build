@@ -97,7 +97,6 @@ then
         cd /home/pi
         rm update.sh >/dev/null 2>/dev/null
         wget https://raw.githubusercontent.com/BritishAmateurTelevisionClub/ryde-build/master/update.sh
-#        wget https://raw.githubusercontent.com/davecrump/ryde-build/master/update.sh
         chmod +x update.sh
         source /home/pi/update.sh
         exit
