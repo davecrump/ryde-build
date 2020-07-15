@@ -3,10 +3,18 @@
 # Created by davecrump 20200714 for Ryde on Buster Raspios
 
 echo
-echo "------------------------------------------"
-echo "----- Updating Ryde Receiver Software-----"
-echo "------------------------------------------"
+echo "----------------------------------------"
+echo "----- Updating Ryde Receiver System-----"
+echo "----------------------------------------"
 echo
+
+# Stop the receiver to allow the update
+sudo killall python3 >/dev/null 2>/dev/null
+sleep 0.3
+if pgrep -x "python3" >/dev/null
+then
+  sudo killall -9 python3 >/dev/null 2>/dev/null
+fi
 
 ## Check which update to load
 GIT_SRC_FILE=".ryde_gitsrc"
@@ -34,7 +42,6 @@ else
   echo "Updating to latest ${GIT_SRC} development Portsdown build";
 fi
 
-
 cd /home/pi
 
 PATHUBACKUP="/home/pi/user_backups"
@@ -45,17 +52,16 @@ cp -f -r /home/pi/ryde-build/installed_version.txt "$PATHUBACKUP"/prev_installed
 
 # Make a safe copy of the Config files in "$PATHUBACKUP" to restore at the end
 
-cp -f -r /home/pi/ryde/config.yaml "$PATHUBACKUP"/config.yaml
-
-cp -f -r /home/pi/ryde/handset.yaml "$PATHUBACKUP"/handset.yaml
+cp -f -r /home/pi/ryde/config.yaml "$PATHUBACKUP"/config.yaml >/dev/null 2>/dev/null
+cp -f -r /home/pi/ryde/handset.yaml "$PATHUBACKUP"/handset.yaml >/dev/null 2>/dev/null
 
 # And capture the RC protocol in the rx.sh file:
 cp -f -r /home/pi/ryde-build/rx.sh "$PATHUBACKUP"/rx.sh
 
 echo
-echo "------------------------------------------"
-echo "----- Updating the Software Packages -----"
-echo "------------------------------------------"
+echo "-------------------------------------------------"
+echo "----- Updating the System Software Packages -----"
+echo "-------------------------------------------------"
 echo
 
 sudo dpkg --configure -a     # Make sure that all the packages are properly configured
@@ -77,8 +83,8 @@ echo "----- Updating Ryde Build Utilities-----"
 echo "----------------------------------------"
 echo
 rm -rf /home/pi/ryde-build
-wget https://github.com/davecrump/ryde-build/archive/master.zip
-# wget https://github.com/${GIT_SRC}/ryde-build/archive/master.zip
+# wget https://github.com/davecrump/ryde-build/archive/master.zip
+wget https://github.com/${GIT_SRC}/ryde-build/archive/master.zip
 unzip -o master.zip
 mv ryde-build-master ryde-build
 rm master.zip
@@ -118,9 +124,9 @@ cd /home/pi
 
 # Download the previously selected version of Ryde
 echo
-echo "-------------------------"
-echo "----- Updating Ryde -----"
-echo "-------------------------"
+echo "--------------------------------"
+echo "----- Updating Ryde Player -----"
+echo "--------------------------------"
 echo
 rm -rf /home/pi/ryde
 # wget https://github.com/davecrump/rydeplayer/archive/master.zip
@@ -131,6 +137,8 @@ rm master.zip
 cd /home/pi/ryde
 
 cp /home/pi/pydispmanx/pydispmanx.cpython-37m-arm-linux-gnueabihf.so pydispmanx.cpython-37m-arm-linux-gnueabihf.so
+
+cd /home/pi
 
 # Download and overwrite the latest remote control definitions and images
 echo
@@ -144,10 +152,6 @@ rm -rf /home/pi/RydeHandsets/images
 
 git clone -b definitions https://github.com/${GIT_SRC}/RydeHandsets.git RydeHandsets/definitions
 git clone -b images https://github.com/${GIT_SRC}/RydeHandsets.git RydeHandsets/images
-
-cd /home/pi
-
-# Restore the user's original config files here
 
 # Restore the user's config, or use new if handset.yaml does not exist
 
