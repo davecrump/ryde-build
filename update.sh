@@ -35,11 +35,11 @@ if [ "$1" == "-d" ]; then
 fi
 
 if [ "$GIT_SRC" == "BritishAmateurTelevisionClub" ]; then
-  echo "Updating to latest Production Portsdown build";
+  echo "Updating to the latest Production Ryde build";
 elif [ "$GIT_SRC" == "davecrump" ]; then
-  echo "Updating to latest development Portsdown build";
+  echo "Updating to the latest development Ryde build";
 else
-  echo "Updating to latest ${GIT_SRC} development Portsdown build";
+  echo "Updating to the latest ${GIT_SRC} development Ryde build";
 fi
 
 cd /home/pi
