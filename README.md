@@ -1,9 +1,7 @@
 ![ryde banner](/docs/Ryde_With_Menu_Small.jpg)
-# Ryde DATV Receiver Build For RPi 4
+# The BATC Ryde DATV Receiver Build For the RPi 4
 
-**NOT YET COMPLETE - DO NOT TRY THIS AT HOME (or anywhere else!**
-
-**The Ryde** is a DVB-S and DVB-S2 digital television receiver based on the Raspberry Pi 4.  The core of the system was written by Heather M0MHO and the control software is written by Tim MW0RUD.  Significant contributions have also been made by Phil M0DNY and Dave G8GKQ.   The project uses a Raspberry Pi 4, and HDMI Display, an IR Remote Control and a BATC MiniTiouner (Mk 2 - with Serit Tuner).  The intention is that the design should be reproducible by someone who has never used Linux before.  Detailed instructions on loading the software are listed below, and further details of the complete system design and build are on the BATC Wiki at https://wiki.batc.org.uk/Ryde_Introduction.  There is a Forum for discussion of the project here: https://forum.batc.org.uk/viewforum.php?f=130
+**The Ryde** is a DVB-S and DVB-S2 digital television receiver based on the Raspberry Pi 4.  The core of the system was written by Heather M0HMO and the control software is written by Tim MW0RUD.  Significant contributions have also been made by Phil M0DNY and Dave G8GKQ.   The project uses a Raspberry Pi 4, an HDMI Display, an IR Remote Control and a BATC MiniTiouner (Mk 2 - with Serit Tuner).  The intention is that the design should be reproducible by someone who has never used Linux before.  Detailed instructions on loading the software are listed below, and further details of the complete system design and build are on the BATC Wiki at https://wiki.batc.org.uk/Ryde_Introduction.  There is a Forum for discussion of the project here: https://forum.batc.org.uk/viewforum.php?f=130
 This version is based on Raspbios Buster and is only compatible with the Raspberry Pi 4.  
 
 Our thanks to Heather, Tim, Phil and all the other contributors to this community project.  Where possible, the code within the project is GPL V3.
@@ -32,7 +30,13 @@ chmod +x install_ryde.sh
 ./install_ryde.sh
 ```
 
-The initial build can take between 10 and 15 minutes, however it does not need any user input, so go and make a cup of coffee and keep an eye on the screen.  When the build is finished the Pi will reboot and start-up with the Ryde software running
+The initial build can take between 10 and 15 minutes, however it does not need any user input, so go and make a cup of coffee and keep an eye on the screen.  When the build is finished the Pi will reboot and start-up with the Ryde software running.
+
+# Post-install Set-up
+
+After reboot, the Ryde software will start and attenpt to receive a signal on 741.5 MHz, 1500 kS.  It will be configured to use a Virgin Media type remote control, and to output video on the primary HDMI port of the RPi.  To change the model of remote, or to select comp video output, log in by ssh and type menu.  There is a text menu to enable selection of other options.
+
+# Advanced notes
 
 - If your ISP is Virgin Media and you receive an error after entering the wget line: 'GnuTLS: A TLS fatal alert has been received.', it may be that your ISP is blocking access to GitHub.  If (only if) you get this error with Virgin Media, paste the following command in, and press return.
 ```sh
@@ -45,7 +49,6 @@ Then reboot, and try again.  The command asks your RPi to use Google's DNS, not 
 
 - When it has finished, the installation will reboot.  Note that you do not need to load any drivers.
 
-# Advanced notes
 
 To load the development version, cut and paste in the following lines:
 
