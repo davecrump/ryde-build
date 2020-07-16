@@ -78,7 +78,7 @@ sudo apt-get -y install python3-pygame
 sudo apt-get -y install python3-vlc
 sudo apt-get -y install python3-evdev
 sudo apt-get -y install python3-pil
-
+sudo apt-get -y install python3-gpiozero
 
 # Download the previously selected version of Ryde Build
 echo
