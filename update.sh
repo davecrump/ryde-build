@@ -74,6 +74,8 @@ sudo apt-get -y dist-upgrade # Upgrade all the installed packages to their lates
 
 # --------- Install new packages as Required ---------
 
+sudo apt-get -y install python3-gpiozero  # for GPIOs
+
 # --------- Overwrite and compile all the software components -----
 
 # Download the previously selected version of Ryde Build
@@ -156,7 +158,8 @@ git clone -b images https://github.com/${GIT_SRC}/RydeHandsets.git RydeHandsets/
 # Restore the user's config, or use new if handset.yaml does not exist
 
 if [[ -f "$PATHUBACKUP"/handset.yaml ]]; then
-  cp -f -r "$PATHUBACKUP"/config.yaml /home/pi/ryde/config.yaml
+#  cp -f -r "$PATHUBACKUP"/config.yaml /home/pi/ryde/config.yaml
+  cp /home/pi/ryde-build/config.yaml /home/pi/ryde/config.yaml  # For new config file with GPIOs
   cp -f -r "$PATHUBACKUP"/handset.yaml /home/pi/ryde/handset.yaml
 else
   cp /home/pi/ryde-build/config.yaml /home/pi/ryde/config.yaml
