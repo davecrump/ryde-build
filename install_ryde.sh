@@ -227,7 +227,7 @@ echo "--------------------------------"
 echo "----- Complete.  Rebooting -----"
 echo "--------------------------------"
 echo
-echo "After reboot, log in again.
+echo "After reboot, log in again."
 echo "type menu, and then select your remote control type"
 echo
 sleep 1
