@@ -155,20 +155,44 @@ rm -rf /home/pi/RydeHandsets/images
 git clone -b definitions https://github.com/${GIT_SRC}/RydeHandsets.git RydeHandsets/definitions
 git clone -b images https://github.com/${GIT_SRC}/RydeHandsets.git RydeHandsets/images
 
-# Restore the user's config, or use new if handset.yaml does not exist
+# Check that Operating System Changes have been applied
+echo
+echo "--------------------------------------------"
+echo "----- Configuring the Operating System -----"
+echo "--------------------------------------------"
+echo
 
-if [[ -f "$PATHUBACKUP"/handset.yaml ]]; then
-#  cp -f -r "$PATHUBACKUP"/config.yaml /home/pi/ryde/config.yaml
-  cp /home/pi/ryde-build/config.yaml /home/pi/ryde/config.yaml  # For new config file with GPIOs
-  cp -f -r "$PATHUBACKUP"/handset.yaml /home/pi/ryde/handset.yaml
-else
-  cp /home/pi/ryde-build/config.yaml /home/pi/ryde/config.yaml
-  cp /home/pi/RydeHandsets/definitions/virgin.yaml /home/pi/ryde/handset.yaml
+# Check that the RPi Audio Jack volume is being set
+grep -q "amixer set Headphone" ~/.bashrc
+if [ $? -ne 0 ]; then  #  Not being set, so enter the code
+  echo  >> ~/.bashrc
+  echo "# Set RPi Audio Jack volume" >> ~/.bashrc
+  echo  "amixer set Headphone 0db >/dev/null 2>/dev/null" >> ~/.bashrc
 fi
 
+# If not already done, increase GPU memory so that it copes with 4k displays
+# First check if "#gpu_mem=128" is in  /boot/config.txt
+grep -q "#gpu_mem=128" /boot/config.txt
+if [ $? -ne 0 ]; then  #  "#gpu_mem=128" is not there, so check if "gpu_mem=128" is there
+  grep -q "gpu_mem=128" /boot/config.txt
+  if [ $? -ne 0 ]; then  # "gpu_mem=128" is not there, so append the commented statement
+    sudo bash -c 'echo " " >> /boot/config.txt '
+    sudo bash -c 'echo "# Increase GPU memory for 4k displays" >> /boot/config.txt '
+    sudo bash -c 'echo "gpu_mem=128" >> /boot/config.txt '
+    sudo bash -c 'echo " " >> /boot/config.txt '
+  fi
+fi
 
-# And restore the RC protocol in the rx.sh file:
-cp -f -r "$PATHUBACKUP"/rx.sh /home/pi/ryde-build/rx.sh 
+# Restore the user's config, or use new if handset.yaml does not exist
+#echo
+#echo "---------------------------------------------"
+#echo "----- Restoring the User's Config Files -----"
+#echo "---------------------------------------------"
+#echo
+
+# Not this time as new config file is required
+cp /home/pi/ryde-build/config.yaml /home/pi/ryde/config.yaml
+
 
 # Record the version numbers
 
@@ -184,6 +208,9 @@ echo "--------------------------"
 echo "----- Rebooting Ryde -----"
 echo "--------------------------"
 echo
+echo "After reboot you will need to re-enter the menu"
+echo "to reselect your remote control model"
+echo 
 
 sudo shutdown -r now
 

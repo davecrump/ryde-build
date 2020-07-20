@@ -159,9 +159,6 @@ git clone -b images https://github.com/${GIT_SRC}/RydeHandsets.git RydeHandsets/
 # Set up the Config for this build
 cp /home/pi/ryde-build/config.yaml /home/pi/ryde/config.yaml
 
-# Load a remote for it to start with
-cp /home/pi/RydeHandsets/definitions/virgin.yaml /home/pi/ryde/handset.yaml
-
 # Set up the operating system for Ryde
 echo
 echo "----------------------------------------------------"
@@ -176,10 +173,21 @@ sudo raspi-config nonint do_boot_behaviour B2
 # uncomment line 51 of /boot/config.txt dtoverlay=gpio-ir,gpio_pin=17
 sudo sed -i '/#dtoverlay=gpio-ir,gpio_pin=17/c\dtoverlay=gpio-ir,gpio_pin=17' /boot/config.txt  >/dev/null 2>/dev/null
 
-#Modify .bashrc for autostart
+# Increase GPU memory so that it copes with 4k displays
+sudo bash -c 'echo " " >> /boot/config.txt '
+sudo bash -c 'echo "# Increase GPU memory for 4k displays" >> /boot/config.txt '
+sudo bash -c 'echo "gpu_mem=128" >> /boot/config.txt '
+sudo bash -c 'echo " " >> /boot/config.txt '
+
+# Modify .bashrc for autostart and set RPi Jack audio volume
 echo  >> ~/.bashrc
+echo "# Autostart Ryde on Boot" >> ~/.bashrc
 echo if test -z \"\$SSH_CLIENT\" >> ~/.bashrc 
 echo then >> ~/.bashrc
+echo "  # Set RPi Audio Jack volume" >> ~/.bashrc
+echo "  amixer set Headphone 0db >/dev/null 2>/dev/null" >> ~/.bashrc
+echo  >> ~/.bashrc
+echo "  # Start Ryde"
 echo "  /home/pi/ryde-build/rx.sh" >> ~/.bashrc
 echo fi >> ~/.bashrc
 echo  >> ~/.bashrc
@@ -218,6 +226,9 @@ echo
 echo "--------------------------------"
 echo "----- Complete.  Rebooting -----"
 echo "--------------------------------"
+echo
+echo "After reboot, log in again.
+echo "enter 'menu', and then select your remote control type"
 echo
 sleep 1
 
