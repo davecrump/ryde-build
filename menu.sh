@@ -2,6 +2,35 @@
 
 # Ryde Menu Application
 
+##########################YAML PARSER ####################
+function parse_yaml {
+   local prefix=$2
+   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
+   sed -ne "s|,$s\]$s\$|]|" \
+        -e ":1;s|^\($s\)\($w\)$s:$s\[$s\(.*\)$s,$s\(.*\)$s\]|\1\2: [\3]\n\1  - \4|;t1" \
+        -e "s|^\($s\)\($w\)$s:$s\[$s\(.*\)$s\]|\1\2:\n\1  - \3|;p" $1 | \
+   sed -ne "s|,$s}$s\$|}|" \
+        -e ":1;s|^\($s\)-$s{$s\(.*\)$s,$s\($w\)$s:$s\(.*\)$s}|\1- {\2}\n\1  \3: \4|;t1" \
+        -e    "s|^\($s\)-$s{$s\(.*\)$s}|\1-\n\1  \2|;p" | \
+   sed -ne "s|^\($s\):|\1|" \
+        -e "s|^\($s\)-$s[\"']\(.*\)[\"']$s\$|\1$fs$fs\2|p" \
+        -e "s|^\($s\)-$s\(.*\)$s\$|\1$fs$fs\2|p" \
+        -e "s|^\($s\)\($w\)$s:$s[\"']\(.*\)[\"']$s\$|\1$fs\2$fs\3|p" \
+        -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p" | \
+   awk -F$fs '{
+      indent = length($1)/2;
+      vname[indent] = $2;
+      for (i in vname) {if (i > indent) {delete vname[i]; idx[i]=0}}
+      if(length($2)== 0){  vname[indent]= ++idx[indent] };
+      if (length($3) > 0) {
+         vn=""; for (i=0; i<indent; i++) { vn=(vn)(vname[i])("_")}
+         printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, vname[indent], $3);
+      }
+   }'
+}
+#########################################################
+
+
 do_update()
 {
   /home/pi/ryde-build/check_for_update.sh
@@ -15,7 +44,7 @@ do_info()
 
 do_Set_RC_Type()
 {
-  RC_FILE="exit"
+  RC_FILE=""
 
   menuchoice=$(whiptail --title "Set Remote Control Model" --menu "Select Choice" 30 78 16 \
     "1 Virgin" "Virgin Media"  \
@@ -35,34 +64,56 @@ do_Set_RC_Type()
     "15 Exit" "Exit without changing remote control model" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
-        1\ *) RC_FILE="virgin.yaml"; PROTOCOL="rc-5" ;;
-        2\ *) RC_FILE="nebula_usb.yaml"; PROTOCOL="rc-5" ;;
-        3\ *) RC_FILE="hd-dvb-t2-s2-rx.yaml"; PROTOCOL="nec" ;;
-        4\ *) RC_FILE="lg_tv_42.yaml"; PROTOCOL="nec" ;;
-        5\ *) RC_FILE="lg_bluray.yaml" PROTOCOL="nec necx" ;;
-        6\ *) RC_FILE="samsung_32.yaml"; PROTOCOL="necx" ;;
-        7\ *) RC_FILE="elekta_tv.yaml"; PROTOCOL="necx" ;;
-        8\ *) RC_FILE="wdtv_live.yaml"; PROTOCOL="necx" ;;
-        9\ *) RC_FILE="hauppauge_mvp.yaml"; PROTOCOL="rc-5" ;;
-        10\ *) RC_FILE="ts1_sat.yaml"; PROTOCOL="nec" ;;
-        11\ *) RC_FILE="ts3500_sat.yaml"; PROTOCOL="nec" ;;
-        12\ *) RC_FILE="f2100_uni.yaml"; PROTOCOL="rc-5" ;;
-        13\ *) RC_FILE="sf8008.yaml"; PROTOCOL="nec" ;;
-        14\ *) RC_FILE="rtl0.yaml"; PROTOCOL="nec" ;;
+        1\ *) RC_FILE="virgin" ;;
+        2\ *) RC_FILE="nebula_usb" ;;
+        3\ *) RC_FILE="hd-dvb-t2-s2-rx" ;;
+        4\ *) RC_FILE="lg_tv_42" ;;
+        5\ *) RC_FILE="lg_bluray" ;;
+        6\ *) RC_FILE="samsung_32" ;;
+        7\ *) RC_FILE="elekta_tv" ;;
+        8\ *) RC_FILE="wdtv_live" ;;
+        9\ *) RC_FILE="hauppauge_mvp" ;;
+        10\ *) RC_FILE="ts1_sat" ;;
+        11\ *) RC_FILE="ts3500_sat" ;;
+        12\ *) RC_FILE="f2100_uni" ;;
+        13\ *) RC_FILE="sf8008" ;;
+        14\ *) RC_FILE="rtl0" ;;
         15\ *) RC_FILE="exit" ;;
     esac
 
-  if [ "$RC_FILE" != "exit" ]; then
+  if [ "$RC_FILE" != "exit" ]; then # Amend the config file
+
+    RC_FILE="        - ${RC_FILE}"
+    sed -i "/handsets:/{n;s/.*/$RC_FILE/}" /home/pi/ryde/config.yaml
+
     # Load the requested file
-    cp /home/pi/RydeHandsets/definitions/"$RC_FILE" /home/pi/ryde/handset.yaml
+    #cp /home/pi/RydeHandsets/definitions/"$RC_FILE" /home/pi/ryde/handset.yaml
 
     # Set the requested protocol setting
-    sudo ir-keytable -p $PROTOCOL >/dev/null 2>/dev/null
+    #sudo ir-keytable -p $PROTOCOL >/dev/null 2>/dev/null
 
     # And change it for the future
-    sed -i "/ir-keytable/c\sudo ir-keytable -p $PROTOCOL >/dev/null 2>/dev/null" /home/pi/ryde-build/rx.sh
+    #sed -i "/ir-keytable/c\sudo ir-keytable -p $PROTOCOL >/dev/null 2>/dev/null" /home/pi/ryde-build/rx.sh
   fi
 }
+
+do_Set_Freq()
+{
+  DEFAULT_FREQ=$(whiptail --inputbox "Enter the new Start-up frequency in kHz" 8 78 $DEFAULT_FREQ --title "Frequency Entry Menu" 3>&1 1>&2 2>&3)
+  if [ $? -eq 0 ]; then
+    sed -i "/freq:/c\    freq: $DEFAULT_FREQ" /home/pi/ryde/config.yaml
+  fi
+}
+
+
+do_Set_SR()
+{
+  DEFAULT_SR=$(whiptail --inputbox "Enter the new Start-up SR in kS" 8 78 $DEFAULT_SR --title "Symbol Rate Entry Menu" 3>&1 1>&2 2>&3)
+  if [ $? -eq 0 ]; then
+    sed -i "/sr:/c\    sr:   $DEFAULT_SR" /home/pi/ryde/config.yaml
+  fi
+}
+
 
 do_Check_RC_Codes()
 {
@@ -346,19 +397,29 @@ do_receive()
   /home/pi/ryde-build/rx.sh &
 
   # Wait here receiving until user presses a key
-  whiptail --title "Receiving" --msgbox "Touch any key to stop receiving" 8 78
+  whiptail --title "Receiving on $DEFAULT_FREQ kHz at SR $DEFAULT_SR kS" --msgbox "Touch any key to stop receiving" 8 78
   do_stop
 }
 
-
-
+#on $DEFAULT_FREQ kHz at SR $DEFAULT_SR kS
 
 #********************************************* MAIN MENU *********************************
 #************************* Execution of Console Menu starts here *************************
 
 status=0
 
+# Stop the Receiver
 do_stop
+
+# Look up the default frequency and SR
+
+# Read and trim the default frequency
+DEFAULT_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__freq=')"
+DEFAULT_FREQ="$(echo "$DEFAULT_FREQ_LINE" | sed 's/default__freq=\"//' | sed 's/\"//')"
+
+# Read and trim the default SR
+DEFAULT_SR_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__sr=')"
+DEFAULT_SR="$(echo "$DEFAULT_SR_LINE" | sed 's/default__sr=\"//' | sed 's/\"//')"
 
 # Loop round main menu
 while [ "$status" -eq 0 ] 
@@ -367,29 +428,33 @@ while [ "$status" -eq 0 ]
     # Display main menu
 
     menuchoice=$(whiptail --title "Ryde Main Menu" --menu "INFO" 16 82 10 \
-	"0 Receive" "Start the Ryde Receiver" \
+	"0 Receive" "Start the Ryde Receiver on $DEFAULT_FREQ kHz at SR $DEFAULT_SR kS" \
         "1 Stop" "Stop the Ryde Receiver" \
-	"2 Video" "Select the Video Output Mode" \
-	"3 Remote" "Select the Remote Control Type" \
-	"4 IR Check" "View the IR Codes From a new Remote" \
-	"5 Info" "Display System Info" \
-	"6 Update" "Check for Update" \
-	"7 Shutdown" "Reboot or Shutdown" \
+	"2 Freq" "Set the start-up Receive Frequency" \
+	"3 SR" "Set start-up Receive Symbol Rate" \
+	"4 Video" "Select the Video Output Mode" \
+	"5 Remote" "Select the Remote Control Type" \
+	"6 IR Check" "View the IR Codes From a new Remote" \
+	"7 Info" "Display System Info" \
+	"8 Update" "Check for Update" \
+	"9 Shutdown" "Reboot or Shutdown" \
  	3>&2 2>&1 1>&3)
 
         case "$menuchoice" in
 	    0\ *) do_receive   ;;
             1\ *) do_stop   ;;
-	    2\ *) do_video_change ;;
-   	    3\ *) do_Set_RC_Type ;;
-   	    4\ *) do_Check_RC_Codes ;;
-	    5\ *) do_info ;;
-	    6\ *) do_update ;;
-	    7\ *) do_shutdown_menu ;;
+	    2\ *) do_Set_Freq ;;
+   	    3\ *) do_Set_SR ;;
+	    4\ *) do_video_change ;;
+   	    5\ *) do_Set_RC_Type ;;
+   	    6\ *) do_Check_RC_Codes ;;
+	    7\ *) do_info ;;
+	    8\ *) do_update ;;
+	    9\ *) do_shutdown_menu ;;
                *)
 
         # Display exit message if user jumps out of menu
-        whiptail --title "Exiting to Linux" --msgbox "Type menu to return to the menu system" 8 78
+        whiptail --title "Exiting to Linux Prompt" --msgbox "To return to the menu system, type menu" 8 78
 
         # Set status to exit
         status=1

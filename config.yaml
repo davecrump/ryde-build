@@ -8,8 +8,6 @@ longmynd:
 default:
     freq: 741500
     sr:   1500
-#    freq: 749250
-#    sr:   333
     pol:  NONE
     port: TOP
 
@@ -17,9 +15,9 @@ ir:
     repeatFirst: 200
     repeatDelay: 100
     repeatReset: 400
-    libraryPath: /home/pi/ryde
+    libraryPath: /home/pi/RydeHandsets/definitions
     handsets:
-        - handset
+        - virgin
 
 gpio:
     repeatFirst: 200
@@ -27,7 +25,7 @@ gpio:
     rxGood: 4
     buttons:
         POWER:  16
-        UP:     18
+        UP:     14
         DOWN:   27
         LEFT:   22
         RIGHT:  23
@@ -39,3 +37,4 @@ gpio:
 debug:
     autoplay: True
     disableHardwareCodec: True
+
