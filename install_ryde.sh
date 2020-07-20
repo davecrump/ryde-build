@@ -187,7 +187,7 @@ echo then >> ~/.bashrc
 echo "  # Set RPi Audio Jack volume" >> ~/.bashrc
 echo "  amixer set Headphone 0db >/dev/null 2>/dev/null" >> ~/.bashrc
 echo  >> ~/.bashrc
-echo "  # Start Ryde"
+echo "  # Start Ryde" >> ~/.bashrc
 echo "  /home/pi/ryde-build/rx.sh" >> ~/.bashrc
 echo fi >> ~/.bashrc
 echo  >> ~/.bashrc
@@ -228,7 +228,7 @@ echo "----- Complete.  Rebooting -----"
 echo "--------------------------------"
 echo
 echo "After reboot, log in again.
-echo "enter 'menu', and then select your remote control type"
+echo "type menu, and then select your remote control type"
 echo
 sleep 1
 
