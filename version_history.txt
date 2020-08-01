@@ -1,3 +1,9 @@
+202008020
+5 second timeout and reset for invalid TS in LongMynd
+LongMynd packaged with ryde-build
+Error-checked SR and Freq
+More remotes
+
 202007140
 Split files for remote control and config
 Change Logo
