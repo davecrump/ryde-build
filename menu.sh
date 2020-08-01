@@ -46,39 +46,47 @@ do_Set_RC_Type()
 {
   RC_FILE=""
 
-  menuchoice=$(whiptail --title "Set Remote Control Model" --menu "Select Choice" 30 78 16 \
+  menuchoice=$(whiptail --title "Set Remote Control Model" --menu "Select Choice" 30 78 20 \
     "1 Virgin" "Virgin Media"  \
     "2 Nebula" "Nebula DigiTV DVB-T USB Receiver" \
     "3 DVB-T2-S2" "eBay DVB-T2-S2 Combo with 12v in " \
     "4 LG TV " "LG 42 inch TV " \
-    "5 LG Blu-Ray" "LG Blu-Ray Disc Player " \
-    "6 Samsung TV" "Samsung 32 inch TV" \
-    "7 Elekta TV" "Elekta Bravo 19 inch TV" \
-    "8 WDTV Live" "WDTV Live Media Player" \
-    "9 Hauppauge" "Hauppauge MediaMVP Network Media Player" \
-    "10 TS-1 Sat" "Technosat TS-1 Satellite Receiver" \
-    "11 TS-3500" "Technosat TS-3500 Satellite Receiver" \
-    "12 F-2100 Uni" "Digi-Wav 2 Pound F2100 Universal Remote" \
-    "13 SF8008" "Octagon SF8008 Sat RX Remote" \
-    "14 RTL-SDR" "RTL-SDR Basic Remote" \
-    "15 Exit" "Exit without changing remote control model" \
+    "5 LG Blu-Ray 1" "LG Blu-Ray Disc Player BP-530R " \
+    "6 LG Blu-Ray 2" "LG Blu-Ray Disc Player BP-620R " \
+    "7 Samsung TV" "Samsung 32 inch TV" \
+    "8 Elekta TV" "Elekta Bravo 19 inch TV" \
+    "9 WDTV Live" "WDTV Live Media Player" \
+    "10 Hauppauge 1" "Hauppauge MediaMVP Network Media Player" \
+    "11 Hauppauge 2" "Hauppauge USB PVR Ex-digilite" \
+    "12 TS-1 Sat" "Technosat TS-1 Satellite Receiver" \
+    "13 TS-3500" "Technosat TS-3500 Satellite Receiver" \
+    "14 F-2100 Uni" "Digi-Wav 2 Pound F2100 Universal Remote" \
+    "15 SF8008" "Octagon SF8008 Sat RX Remote" \
+    "16 Freesat V7" "Freesat V7 Combo - Some keys changed" \
+    "17 RTL-SDR" "RTL-SDR Basic Remote" \
+    "18 Avermedia" "AverMedia PC Card Tuner" \
+    "19 Exit" "Exit without changing remote control model" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
         1\ *) RC_FILE="virgin" ;;
         2\ *) RC_FILE="nebula_usb" ;;
         3\ *) RC_FILE="hd-dvb-t2-s2-rx" ;;
         4\ *) RC_FILE="lg_tv_42" ;;
-        5\ *) RC_FILE="lg_bluray" ;;
-        6\ *) RC_FILE="samsung_32" ;;
-        7\ *) RC_FILE="elekta_tv" ;;
-        8\ *) RC_FILE="wdtv_live" ;;
-        9\ *) RC_FILE="hauppauge_mvp" ;;
-        10\ *) RC_FILE="ts1_sat" ;;
-        11\ *) RC_FILE="ts3500_sat" ;;
-        12\ *) RC_FILE="f2100_uni" ;;
-        13\ *) RC_FILE="sf8008" ;;
-        14\ *) RC_FILE="rtl0" ;;
-        15\ *) RC_FILE="exit" ;;
+        5\ *) RC_FILE="lg_bluray-BP530" ;;
+        6\ *) RC_FILE="lg_bluray-BP620" ;;
+        7\ *) RC_FILE="samsung_32" ;;
+        8\ *) RC_FILE="elekta_tv" ;;
+        9\ *) RC_FILE="wdtv_live" ;;
+        10\ *) RC_FILE="hauppauge_mvp" ;;
+        11\ *) RC_FILE="hauppauge_usb" ;;
+        12\ *) RC_FILE="ts1_sat" ;;
+        13\ *) RC_FILE="ts3500_sat" ;;
+        14\ *) RC_FILE="f2100_uni" ;;
+        15\ *) RC_FILE="sf8008" ;;
+        16\ *) RC_FILE="freesat_v7" ;;
+        17\ *) RC_FILE="rtl0" ;;
+        18\ *) RC_FILE="avermediacard" ;;
+        19\ *) RC_FILE="exit" ;;
     esac
 
   if [ "$RC_FILE" != "exit" ]; then # Amend the config file

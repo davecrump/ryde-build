@@ -87,28 +87,23 @@ echo "----- Installing Ryde Build Utilities-----"
 echo "------------------------------------------"
 echo
 
-# wget https://github.com/davecrump/ryde-build/archive/master.zip
 wget https://github.com/${GIT_SRC}/ryde-build/archive/master.zip
 unzip -o master.zip
 mv ryde-build-master ryde-build
 rm master.zip
 
 
-# Download the previously selected version of LongMynd
+# Build the LongMynd version packaged with ryde-build
 echo
 echo "--------------------------------------------"
 echo "----- Installing the LongMynd Receiver -----"
 echo "--------------------------------------------"
 echo
 
-wget https://github.com/eclispe/longmynd/archive/master.zip
-# wget https://github.com/${GIT_SRC}/longmynd/archive/master.zip
-unzip -o master.zip
-mv longmynd-master longmynd
-rm master.zip
+cd /home/pi
+cp -r ryde-build/longmynd/ longmynd/
 cd longmynd
 make
-
 cd /home/pi
 
 # Download the previously selected version of pyDispmanx
@@ -119,7 +114,6 @@ echo "---------------------------------"
 echo
 
 wget https://github.com/eclispe/pyDispmanx/archive/master.zip
-# wget https://github.com/${GIT_SRC}/pyDispmanx/archive/master.zip
 unzip -o master.zip
 mv pyDispmanx-master pydispmanx
 rm master.zip
@@ -135,7 +129,6 @@ echo "----- Installing Rydeplayer -----"
 echo "---------------------------------"
 echo
 
-# wget https://github.com/davecrump/rydeplayer/archive/master.zip
 wget https://github.com/${GIT_SRC}/rydeplayer/archive/master.zip
 unzip -o master.zip
 mv rydeplayer-master ryde
@@ -220,6 +213,9 @@ cd /home/pi
 
 # Save git source used
 echo "${GIT_SRC}" > /home/pi/${GIT_SRC_FILE}
+
+echo "SD Card Serial:"
+cat /sys/block/mmcblk0/device/cid
 
 # Reboot
 echo

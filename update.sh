@@ -50,10 +50,9 @@ mkdir "$PATHUBACKUP" >/dev/null 2>/dev/null
 # Note previous version number
 cp -f -r /home/pi/ryde-build/installed_version.txt "$PATHUBACKUP"/prev_installed_version.txt
 
-# Make a safe copy of the Config files in "$PATHUBACKUP" to restore at the end
+# Make a safe copy of the Config file in "$PATHUBACKUP" to restore at the end
 
 cp -f -r /home/pi/ryde/config.yaml "$PATHUBACKUP"/config.yaml >/dev/null 2>/dev/null
-cp -f -r /home/pi/ryde/handset.yaml "$PATHUBACKUP"/handset.yaml >/dev/null 2>/dev/null
 
 # And capture the RC protocol in the rx.sh file:
 cp -f -r /home/pi/ryde-build/rx.sh "$PATHUBACKUP"/rx.sh
@@ -85,37 +84,31 @@ echo "----- Updating Ryde Build Utilities-----"
 echo "----------------------------------------"
 echo
 rm -rf /home/pi/ryde-build
-# wget https://github.com/davecrump/ryde-build/archive/master.zip
 wget https://github.com/${GIT_SRC}/ryde-build/archive/master.zip
 unzip -o master.zip
 mv ryde-build-master ryde-build
 rm master.zip
 
 
-# Download the previously selected version of LongMynd
+# Build the LongMynd version packaged with ryde-build
 echo
 echo "------------------------------------------"
 echo "----- Updating the LongMynd Receiver -----"
 echo "------------------------------------------"
 echo
 rm -rf /home/pi/longmynd
-wget https://github.com/eclispe/longmynd/archive/master.zip
-# wget https://github.com/${GIT_SRC}/longmynd/archive/master.zip
-unzip -o master.zip
-mv longmynd-master longmynd
-rm master.zip
+cp -r ryde-build/longmynd/ longmynd/
 cd longmynd
 make
 cd /home/pi
 
-# Download the previously selected version of pyDispmanx
+# Download and compile pyDispmanx
 echo
 echo "--------------------------------"
 echo "----- Updating pyDispmanx -----"
 echo "--------------------------------"
 echo
 wget https://github.com/eclispe/pyDispmanx/archive/master.zip
-# wget https://github.com/${GIT_SRC}/pyDispmanx/archive/master.zip
 unzip -o master.zip
 mv pyDispmanx-master pydispmanx
 rm master.zip
@@ -124,14 +117,13 @@ python3 setup.py build_ext --inplace
 
 cd /home/pi
 
-# Download the previously selected version of Ryde
+# Download the previously selected version of Ryde Player
 echo
 echo "--------------------------------"
 echo "----- Updating Ryde Player -----"
 echo "--------------------------------"
 echo
 rm -rf /home/pi/ryde
-# wget https://github.com/davecrump/rydeplayer/archive/master.zip
 wget https://github.com/${GIT_SRC}/rydeplayer/archive/master.zip
 unzip -o master.zip
 mv rydeplayer-master ryde
@@ -183,16 +175,24 @@ if [ $? -ne 0 ]; then  #  "#gpu_mem=128" is not there, so check if "gpu_mem=128"
   fi
 fi
 
-# Restore the user's config, or use new if handset.yaml does not exist
+# Restore the user's config, or use new if user's config.yaml is outdated
 #echo
 #echo "---------------------------------------------"
 #echo "----- Restoring the User's Config Files -----"
 #echo "---------------------------------------------"
 #echo
 
-# Not this time as new config file is required
-cp /home/pi/ryde-build/config.yaml /home/pi/ryde/config.yaml
-
+grep -q "UP:     14" "$PATHUBACKUP"/config.yaml
+if  [ $? == 0 ]; then   ## Latest version, so restore from backup
+  cp "$PATHUBACKUP"/config.yaml /home/pi/ryde/config.yaml
+else                    ## Old version, so write new one and warn user
+  cp /home/pi/ryde-build/config.yaml /home/pi/ryde/config.yaml
+  echo
+  echo "Your old config file needed to be updated"
+  echo "Please use the console menu to reselect"
+  echo "your remote control after reboot"
+  echo
+fi
 
 # Record the version numbers
 
@@ -201,16 +201,13 @@ cp -f -r "$PATHUBACKUP"/prev_installed_version.txt /home/pi/ryde-build/prev_inst
 rm -rf "$PATHUBACKUP"
 
 # Save (overwrite) the git source used
-#echo "${GIT_SRC}" > /home/pi/${GIT_SRC_FILE}
+echo "${GIT_SRC}" > /home/pi/${GIT_SRC_FILE}
 
 echo
 echo "--------------------------"
 echo "----- Rebooting Ryde -----"
 echo "--------------------------"
 echo
-echo "After reboot you will need to re-enter the menu"
-echo "to reselect your remote control model"
-echo 
 
 sudo shutdown -r now
 

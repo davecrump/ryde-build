@@ -11,6 +11,9 @@ ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}
 printf "\nSD Card Type: "
 cat /sys/block/mmcblk0/device/name
 
+printf "\nSD Card Serial: "
+cat /sys/block/mmcblk0/device/cid
+
 printf "\nCurrent Installed Ryde Version: "
 cat /home/pi/ryde-build/installed_version.txt
 
