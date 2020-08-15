@@ -187,75 +187,75 @@ fi
 cp /home/pi/ryde-build/config.yaml /home/pi/ryde/config.yaml
 
 # Check for previous remote type
-grep -q "- virgin" "$PATHUBACKUP"/config.yaml
+grep -q "virgin" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "virgin" 1
   sed -i "/handsets:/{n;s/.*/        - virgin/}" /home/pi/ryde/config.yaml
 fi
-grep -q "- nebula_usb" "$PATHUBACKUP"/config.yaml
+grep -q "nebula_usb" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "nebula_usb" 2
   sed -i "/handsets:/{n;s/.*/        - nebula_usb/}" /home/pi/ryde/config.yaml
 fi
-grep -q "- hd-dvb-t2-s2-rx" "$PATHUBACKUP"/config.yaml
+grep -q "hd-dvb-t2-s2-rx" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "hd-dvb-t2-s2-rx" 3
   sed -i "/handsets:/{n;s/.*/        - hd-dvb-t2-s2-rx/}" /home/pi/ryde/config.yaml
 fi
-grep -q "- lg_tv_42" "$PATHUBACKUP"/config.yaml
+grep -q "lg_tv_42" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "lg_tv_42" 4
   sed -i "/handsets:/{n;s/.*/        - lg_tv_42/}" /home/pi/ryde/config.yaml
 fi
-grep -q "- lg_bluray-BP530" "$PATHUBACKUP"/config.yaml
+grep -q "lg_bluray-BP530" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "lg_bluray-BP530" 5
   sed -i "/handsets:/{n;s/.*/        - lg_bluray-BP530/}" /home/pi/ryde/config.yaml
 fi
-grep -q "- lg_bluray-BP620" "$PATHUBACKUP"/config.yaml
+grep -q "lg_bluray-BP620" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "lg_bluray-BP620" 6
   sed -i "/handsets:/{n;s/.*/        - lg_bluray-BP620/}" /home/pi/ryde/config.yaml
 fi
-grep -q "- samsung_32" "$PATHUBACKUP"/config.yaml
+grep -q "samsung_32" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "samsung_32" 7
   sed -i "/handsets:/{n;s/.*/        - samsung_32/}" /home/pi/ryde/config.yaml
 fi
-grep -q "- elekta_tv" "$PATHUBACKUP"/config.yaml
+grep -q "elekta_tv" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "elekta_tv" 8
   sed -i "/handsets:/{n;s/.*/        - elekta_tv/}" /home/pi/ryde/config.yaml
 fi
-grep -q "- wdtv_live" "$PATHUBACKUP"/config.yaml
+grep -q "wdtv_live" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "wdtv_live" 9
   sed -i "/handsets:/{n;s/.*/        - wdtv_live/}" /home/pi/ryde/config.yaml
 fi
-grep -q "- hauppauge_mvp" "$PATHUBACKUP"/config.yaml
+grep -q "hauppauge_mvp" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "hauppauge_mvp" 10
   sed -i "/handsets:/{n;s/.*/        - hauppauge_mvp/}" /home/pi/ryde/config.yaml
 fi
-grep -q "- hauppauge_usb" "$PATHUBACKUP"/config.yaml
+grep -q "hauppauge_usb" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "hauppauge_usb" 11
   sed -i "/handsets:/{n;s/.*/        - hauppauge_usb/}" /home/pi/ryde/config.yaml
 fi
-grep -q "- ts1_sat" "$PATHUBACKUP"/config.yaml
+grep -q "ts1_sat" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "ts1_sat" 12
   sed -i "/handsets:/{n;s/.*/        - ts1_sat/}" /home/pi/ryde/config.yaml
 fi
-grep -q "- ts3500_sat" "$PATHUBACKUP"/config.yaml
+grep -q "ts3500_sat" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "ts3500_sat" 13
   sed -i "/handsets:/{n;s/.*/        - ts3500_sat/}" /home/pi/ryde/config.yaml
 fi
-grep -q "- f2100_uni" "$PATHUBACKUP"/config.yaml
+grep -q "f2100_uni" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "f2100_uni" 14
   sed -i "/handsets:/{n;s/.*/        - f2100_uni/}" /home/pi/ryde/config.yaml
 fi
-grep -q "- sf8008" "$PATHUBACKUP"/config.yaml
+grep -q "sf8008" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "sf8008" 15
   sed -i "/handsets:/{n;s/.*/        - sf8008/}" /home/pi/ryde/config.yaml
 fi
-grep -q "- freesat_v7" "$PATHUBACKUP"/config.yaml
+grep -q "freesat_v7" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "freesat_v7" 16
   sed -i "/handsets:/{n;s/.*/        - freesat_v7/}" /home/pi/ryde/config.yaml
 fi
-grep -q "- rtl0" "$PATHUBACKUP"/config.yaml
+grep -q "rtl0" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "rtl0" 17
   sed -i "/handsets:/{n;s/.*/        - rtl0/}" /home/pi/ryde/config.yaml
 fi
-grep -q "- avermediacard" "$PATHUBACKUP"/config.yaml
+grep -q "avermediacard" "$PATHUBACKUP"/config.yaml
 if  [ $? == 0 ]; then   ## Amend new file for "avermediacard" 18
   sed -i "/handsets:/{n;s/.*/        - avermediacard/}" /home/pi/ryde/config.yaml
 fi
