@@ -1,3 +1,7 @@
+202008160
+Initial Band Functionality
+Console configuration of timeout period
+
 202008020
 5 second timeout and reset for invalid TS in LongMynd
 LongMynd packaged with ryde-build
