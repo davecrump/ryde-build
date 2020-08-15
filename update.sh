@@ -110,6 +110,7 @@ echo "--------------------------------"
 echo
 wget https://github.com/eclispe/pyDispmanx/archive/master.zip
 unzip -o master.zip
+rm -rf pydispmanx
 mv pyDispmanx-master pydispmanx
 rm master.zip
 cd pydispmanx
