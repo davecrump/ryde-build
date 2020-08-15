@@ -109,7 +109,7 @@ do_Set_Freq()
 {
   DEFAULT_FREQ=$(whiptail --inputbox "Enter the new Start-up frequency in kHz" 8 78 $DEFAULT_FREQ --title "Frequency Entry Menu" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
-    sed -i "/freq:/c\    freq: $DEFAULT_FREQ" /home/pi/ryde/config.yaml
+    sed -i "/    freq:/c\    freq: $DEFAULT_FREQ" /home/pi/ryde/config.yaml
   fi
 }
 
@@ -130,6 +130,273 @@ do_Check_RC_Codes()
   echo "After CTRL-C, type menu to get back to the Menu System"
   echo
   ir-keytable -t
+}
+
+do_Set_TSTimeout()
+{
+  # Read and trim the current TS Timeout
+  TS_TIMEOUT_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'longmynd__tstimeout=')"
+  TS_TIMEOUT="$(echo "$TS_TIMEOUT_LINE" | sed 's/longmynd__tstimeout=\"//' | sed 's/\"//')"
+
+  TS_TIMEOUT=$(whiptail --inputbox "Enter the new TS Timeout in mS (default 5000 - ie 5 seconds)" 8 78 $TS_TIMEOUT --title "TS TimeOut Entry Menu" 3>&1 1>&2 2>&3)
+  if [ $? -eq 0 ]; then
+    sed -i "/    tstimeout:/c\    tstimeout: $TS_TIMEOUT" /home/pi/ryde/config.yaml
+  fi
+}
+
+do_Restore_Factory()
+{
+  cp /home/pi/ryde-build/config.yaml /home/pi/ryde/config.yaml
+
+  # Wait here until user presses a key
+  whiptail --title "Factory Setting Restored" --msgbox "Touch any key to continue.  You will need to reselect your remote control type." 8 78
+}
+
+
+do_Settings()
+{
+  menuchoice=$(whiptail --title "Advanced Settings Menu" --menu "Select Choice" 16 78 10 \
+    "1 Tuner Timeout" "Adjust the Tuner Reset Time when no valid TS " \
+    "2 Restore Factory" "Reset all settings to default" \
+      3>&2 2>&1 1>&3)
+    case "$menuchoice" in
+      1\ *) do_Set_TSTimeout ;;
+      2\ *) do_Restore_Factory ;;
+    esac
+}
+
+
+do_Set_Bands()
+{
+  menuchoice=$(whiptail --title "Select band for Amendment" --menu "Select Choice" 16 78 10 \
+    "1 QO-100" "Set the LNB Offset frequency for QO-100" \
+    "2 Direct" "Add an LNB Offset for the Direct Band" \
+      3>&2 2>&1 1>&3)
+    case "$menuchoice" in
+      1\ *) AMEND_BAND="QO-100" ;;
+      2\ *) AMEND_BAND="Direct"  ;;
+    esac
+
+  case "$AMEND_BAND" in
+    "QO-100")
+      # Read and trim the current LO frequency
+      ## Note that band names with hyphens do not parse - so this is a bodge.
+      LO_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands____lofreq=')"
+      LO_FREQ="$(echo "$LO_FREQ_LINE" | sed 's/bands____lofreq=\"//' | sed 's/\"//')"
+
+      LO_FREQ=$(whiptail --inputbox "Enter the new QO-100 LO frequecy in kHz (for example 9750000)" 8 78 $LO_FREQ --title "LO Frequency Entry Menu" 3>&1 1>&2 2>&3)
+      if [ $? -eq 0 ]; then
+        sed -i "/    QO-100:/!b;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
+      fi
+
+      # Read and trim the current LO side
+      ## Note that band names with hyphens do not parse - so this is a bodge.
+      LO_SIDE_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands____loside=')"
+      LO_SIDE="$(echo "$LO_SIDE_LINE" | sed 's/bands____loside=\"//' | sed 's/\"//')"
+
+      if [ "$LO_FREQ" != "0" ]; then  # Set LO side
+
+        Radio1=OFF
+        Radio2=OFF
+
+        case "$LO_SIDE" in
+          "LOW")
+            Radio1=ON
+          ;;
+          "HIGH")
+            Radio2=ON
+          ;;
+          *)
+            Radio1=ON
+          ;;
+        esac
+  
+        LO_SIDE=$(whiptail --title "Select the LO Side for the QO-100 Band" --radiolist \
+          "Select Choice" 20 78 5 \
+          "LOW" "LO frequency below signal frequency (normal for QO-100)" $Radio1 \
+          "HIGH" "LO frequency below signal frequency" $Radio2 \
+          3>&2 2>&1 1>&3)
+        if [ $? -eq 0 ]; then
+        sed -i "/    QO-100:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
+        fi
+      fi
+    ;;
+
+    "Direct")
+      # Read and trim the current LO frequency
+      ## Note that band names with hyphens do not parse - so this is a bodge.
+      LO_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__Direct__lofreq=')"
+      LO_FREQ="$(echo "$LO_FREQ_LINE" | sed 's/bands__Direct__lofreq=\"//' | sed 's/\"//')"
+
+      LO_FREQ=$(whiptail --inputbox "Enter the new Direct LO frequecy in kHz (for example 0)" 8 78 $LO_FREQ --title "LO Frequency Entry Menu" 3>&1 1>&2 2>&3)
+      if [ $? -eq 0 ]; then
+        sed -i "/    Direct:/!b;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
+      fi
+
+      # Read and trim the current LO side
+      ## Note that band names with hyphens do not parse - so this is a bodge.
+      LO_SIDE_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__Direct__loside=')"
+      LO_SIDE="$(echo "$LO_SIDE_LINE" | sed 's/bands__Direct__loside=\"//' | sed 's/\"//')"
+
+      if [ "$LO_FREQ" != "0" ]; then  # Set LO side
+
+        Radio1=OFF
+        Radio2=OFF
+
+        case "$LO_SIDE" in
+          "LOW")
+            Radio1=ON
+          ;;
+          "HIGH")
+            Radio2=ON
+          ;;
+          *)
+            Radio1=ON
+          ;;
+        esac
+  
+        LO_SIDE=$(whiptail --title "Select the LO Side for the Direct Band" --radiolist \
+          "Select Choice" 20 78 5 \
+          "LOW" "LO frequency below signal frequency" $Radio1 \
+          "HIGH" "LO frequency below signal frequency" $Radio2 \
+          3>&2 2>&1 1>&3)
+        if [ $? -eq 0 ]; then
+        sed -i "/    Direct:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
+        fi
+      fi
+    ;;
+  esac
+}
+
+do_Set_Default_Band()
+{
+  # Read and trim the default port
+  DEFAULT_BAND_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__band=')"
+  DEFAULT_BAND="$(echo "$DEFAULT_BAND_LINE" | sed 's/default__band=\"//' | sed 's/\"//')"
+
+  Radio1=OFF
+  Radio2=OFF
+
+  case "$DEFAULT_BAND" in
+    "*bandqo100")
+      Radio1=ON
+      DEFAULT_BAND_LABEL="QO-100"
+    ;;
+    "*banddirect")
+      Radio2=ON
+      DEFAULT_BAND_LABEL="Direct"
+    ;;
+    *)
+      Radio1=ON
+      DEFAULT_BAND_LABEL="QO-100"
+    ;;
+  esac
+  
+  NEW_DEFAULT_BAND_LABEL=$(whiptail --title "Select the new Default Band" --radiolist \
+    "Select Choice" 20 78 5 \
+    "QO-100" "With LNB Offset" $Radio1 \
+    "Direct" "Frequency in range 144 - 2450 MHz" $Radio2 \
+    3>&2 2>&1 1>&3)
+  if [ $? -eq 0 ]; then
+    case "$NEW_DEFAULT_BAND_LABEL" in
+      "QO-100")
+        DEFAULT_BAND="*bandqo100"
+      ;;
+      "Direct")
+        DEFAULT_BAND="*banddirect"
+      ;;
+      *)
+        DEFAULT_BAND="*bandqo100"
+      ;;
+    esac
+    sed -i "/    band:/c\    band: $DEFAULT_BAND" /home/pi/ryde/config.yaml
+  fi
+}
+
+do_Set_Port()
+{
+  # Read and trim the default port
+  DEFAULT_PORT_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__port=')"
+  DEFAULT_PORT="$(echo "$DEFAULT_PORT_LINE" | sed 's/default__port=\"//' | sed 's/\"//')"
+
+  Radio1=OFF
+  Radio2=OFF
+
+  case "$DEFAULT_PORT" in
+    "TOP")
+      Radio1=ON
+    ;;
+    "BOTTOM")
+      Radio2=ON
+    ;;
+    *)
+      Radio1=ON
+    ;;
+  esac
+  
+  NEW_DEFAULT_PORT=$(whiptail --title "Select the new Default Port" --radiolist \
+    "Select Choice" 20 78 5 \
+    "TOP" "Top LNB Port    (Socket A)" $Radio1 \
+    "BOTTOM" "Bottom LNB Port (Socket B)" $Radio2 \
+    3>&2 2>&1 1>&3)
+  if [ $? -eq 0 ]; then
+    sed -i "/port:/c\    port: $NEW_DEFAULT_PORT" /home/pi/ryde/config.yaml
+  fi
+}
+
+do_Set_Polarity()
+{
+  # Read and trim the default polarity
+  DEFAULT_POL_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__pol=')"
+  DEFAULT_POL="$(echo "$DEFAULT_POL_LINE" | sed 's/default__pol=\"//' | sed 's/\"//')"
+
+  Radio1=OFF
+  Radio2=OFF
+  Radio3=OFF
+
+  case "$DEFAULT_POL" in
+    "NONE")
+      Radio1=ON
+    ;;
+    "VERTICAL")
+      Radio2=ON
+    ;;
+    "HORIZONTAL")
+      Radio3=ON
+    ;;
+    *)
+      Radio1=ON
+    ;;
+  esac
+  
+  NEW_DEFAULT_POL=$(whiptail --title "Select the new Default Polarity" --radiolist \
+    "Select Choice" 20 78 5 \
+    "NONE" "No LNB Voltage" $Radio1 \
+    "VERTICAL" "Vertical Polarity 13 Volts" $Radio2 \
+    "HORIZONTAL" "Horizontal Polarity 18 Volts (QO-100)" $Radio3 \
+    3>&2 2>&1 1>&3)
+  if [ $? -eq 0 ]; then
+    sed -i "/pol:/c\    pol:  $NEW_DEFAULT_POL" /home/pi/ryde/config.yaml
+  fi
+}
+
+
+do_Set_Defaults()
+{
+  menuchoice=$(whiptail --title "Start-up Settings Menu" --menu "Select Choice" 16 78 10 \
+    "1 Band" "Set the start-up Band" \
+    "2 Freq" "Set the start-up Receive Frequency" \
+    "3 SR" "Set start-up Receive Symbol Rate" \
+    "4 Port" "Set which tuner socket is used" \
+    "5 Polarity" "Switch LNB Bias Voltage" \
+      3>&2 2>&1 1>&3)
+    case "$menuchoice" in
+      1\ *) do_Set_Default_Band ;;
+      2\ *) do_Set_Freq ;;
+      3\ *) do_Set_SR ;;
+      4\ *) do_Set_Port ;;
+      5\ *) do_Set_Polarity ;;
+    esac
 }
 
 
@@ -435,30 +702,32 @@ while [ "$status" -eq 0 ]
 
     # Display main menu
 
-    menuchoice=$(whiptail --title "Ryde Main Menu" --menu "INFO" 16 82 10 \
+    menuchoice=$(whiptail --title "BATC Ryde Receiver Main Menu" --menu "INFO" 18 78 11 \
 	"0 Receive" "Start the Ryde Receiver on $DEFAULT_FREQ kHz at SR $DEFAULT_SR kS" \
         "1 Stop" "Stop the Ryde Receiver" \
-	"2 Freq" "Set the start-up Receive Frequency" \
-	"3 SR" "Set start-up Receive Symbol Rate" \
+        "2 Defaults" "Set the start-up frequency, SR etc" \
+        "3 Bands" "Set the band details such as LNB Offset" \
 	"4 Video" "Select the Video Output Mode" \
 	"5 Remote" "Select the Remote Control Type" \
 	"6 IR Check" "View the IR Codes From a new Remote" \
-	"7 Info" "Display System Info" \
-	"8 Update" "Check for Update" \
-	"9 Shutdown" "Reboot or Shutdown" \
+        "7 Settings" "Advanced Settings" \
+	"8 Info" "Display System Info" \
+	"9 Update" "Check for Update" \
+	"10 Shutdown" "Reboot or Shutdown" \
  	3>&2 2>&1 1>&3)
 
         case "$menuchoice" in
 	    0\ *) do_receive   ;;
             1\ *) do_stop   ;;
-	    2\ *) do_Set_Freq ;;
-   	    3\ *) do_Set_SR ;;
+            2\ *) do_Set_Defaults ;;
+            3\ *) do_Set_Bands ;;
 	    4\ *) do_video_change ;;
    	    5\ *) do_Set_RC_Type ;;
    	    6\ *) do_Check_RC_Codes ;;
-	    7\ *) do_info ;;
-	    8\ *) do_update ;;
-	    9\ *) do_shutdown_menu ;;
+	    7\ *) do_Settings ;;
+            8\ *) do_info ;;
+	    9\ *) do_update ;;
+	    10\ *) do_shutdown_menu ;;
                *)
 
         # Display exit message if user jumps out of menu

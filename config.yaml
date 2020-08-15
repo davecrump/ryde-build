@@ -4,10 +4,20 @@ longmynd:
     binpath: /home/pi/longmynd/longmynd
     mediapath: /home/pi/lmmedia
     statuspath: /home/pi/lmstatus
+    tstimeout: 5000
+
+bands:
+    QO-100: &bandqo100
+        lofreq: 9750000
+        loside: LOW
+    Direct: &banddirect
+        lofreq: 0
+        loside: HIGH
 
 default:
-    freq: 741500
+    freq: 10491500
     sr:   1500
+    band: *bandqo100
     pol:  NONE
     port: TOP
 
@@ -37,4 +47,3 @@ gpio:
 debug:
     autoplay: True
     disableHardwareCodec: True
-
