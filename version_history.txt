@@ -1,3 +1,6 @@
+202008230
+Add support for SR and Frequency scanning in GUI and console
+
 202008160
 Initial Band Functionality
 Console configuration of timeout period

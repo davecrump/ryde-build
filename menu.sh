@@ -107,18 +107,445 @@ do_Set_RC_Type()
 
 do_Set_Freq()
 {
+  DEFAULT_FREQ=0
+  SCAN_FREQ_1=0
+  SCAN_FREQ_2=0
+  SCAN_FREQ_3=0
+  SCAN_FREQ_4=0
+
+  # Read and trim the default FREQ Values
+  DEFAULT_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__freq=')"
+  if [ "$DEFAULT_FREQ_LINE" != "" ]; then
+    DEFAULT_FREQ="$(echo "$DEFAULT_FREQ_LINE" | sed 's/default__freq=\"//' | sed 's/\"//')"
+    SCAN_FREQ_VALUES=0
+  else
+    SCAN_FREQ_1_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__freq__1=')"
+    if [ "$SCAN_FREQ_1_LINE" != "" ]; then
+      SCAN_FREQ_1="$(echo "$SCAN_FREQ_1_LINE" | sed 's/default__freq__1=\"//' | sed 's/\"//')"
+      SCAN_FREQ_VALUES=1
+      SCAN_FREQ_2_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__freq__2=')"
+      if [ "$SCAN_FREQ_2_LINE" != "" ]; then
+        SCAN_FREQ_2="$(echo "$SCAN_FREQ_2_LINE" | sed 's/default__freq__2=\"//' | sed 's/\"//')"
+        SCAN_FREQ_VALUES=2
+        SCAN_FREQ_3_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__freq__3=')"
+        if [ "$SCAN_FREQ_3_LINE" != "" ]; then
+          SCAN_FREQ_3="$(echo "$SCAN_FREQ_3_LINE" | sed 's/default__freq__3=\"//' | sed 's/\"//')"
+          SCAN_FREQ_VALUES=3
+          SCAN_FREQ_4_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__freq__4=')"
+          if [ "$SCAN_FREQ_4_LINE" != "" ]; then
+            SCAN_FREQ_4="$(echo "$SCAN_FREQ_4_LINE" | sed 's/default__freq__4=\"//' | sed 's/\"//')"
+            SCAN_FREQ_VALUES=4
+          fi
+        fi
+      fi
+    fi
+  fi
+
+  if [ "$SCAN_FREQ_VALUES" != "0" ]; then  # In scanning FREQ mode, so convert back to single FREQ
+    
+    # Set the default FREQ to the first scanning FREQ
+    DEFAULT_FREQ=$SCAN_FREQ_1
+
+    # Delete the scanning FREQ lines
+    if [ "$SCAN_FREQ_VALUES" == "4" ]; then  # delete row 2
+      sed -i "/^    freq:/!b;n;d" /home/pi/ryde/config.yaml
+      SCAN_FREQ_VALUES=3  # and decrement the number of rows
+    fi
+    if [ "$SCAN_FREQ_VALUES" == "3" ]; then  # delete row 2
+      sed -i "/^    freq:/!b;n;d" /home/pi/ryde/config.yaml
+      SCAN_FREQ_VALUES=2  # and decrement the number of rows
+    fi
+    if [ "$SCAN_FREQ_VALUES" == "2" ]; then  # delete row 2
+      sed -i "/^    freq:/!b;n;d" /home/pi/ryde/config.yaml
+      SCAN_FREQ_VALUES=1  # and decrement the number of rows
+    fi
+    if [ "$SCAN_FREQ_VALUES" == "1" ]; then  # delete row 2
+      sed -i "/^    freq:/!b;n;d" /home/pi/ryde/config.yaml
+      SCAN_FREQ_VALUES=0  # and decrement the number of rows
+    fi
+
+    # Write the default FREQ to the FREQ line
+    sed -i "/^    freq:/c\    freq: $DEFAULT_FREQ"  /home/pi/ryde/config.yaml
+
+  fi
+
   DEFAULT_FREQ=$(whiptail --inputbox "Enter the new Start-up frequency in kHz" 8 78 $DEFAULT_FREQ --title "Frequency Entry Menu" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
     sed -i "/    freq:/c\    freq: $DEFAULT_FREQ" /home/pi/ryde/config.yaml
   fi
 }
 
+do_Set_Scan_Freq()
+{
+  DEFAULT_FREQ=0
+  SCAN_FREQ_1=0
+  SCAN_FREQ_2=0
+  SCAN_FREQ_3=0
+  SCAN_FREQ_4=0
+
+  # Read and trim the default FREQ Values
+  DEFAULT_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__freq=')"
+  if [ "$DEFAULT_FREQ_LINE" != "" ]; then
+    DEFAULT_FREQ="$(echo "$DEFAULT_FREQ_LINE" | sed 's/default__freq=\"//' | sed 's/\"//')"
+    SCAN_FREQ_VALUES=0
+  else
+    SCAN_FREQ_1_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__freq__1=')"
+    if [ "$SCAN_FREQ_1_LINE" != "" ]; then
+      SCAN_FREQ_1="$(echo "$SCAN_FREQ_1_LINE" | sed 's/default__freq__1=\"//' | sed 's/\"//')"
+      SCAN_FREQ_VALUES=1
+      SCAN_FREQ_2_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__freq__2=')"
+      if [ "$SCAN_FREQ_2_LINE" != "" ]; then
+        SCAN_FREQ_2="$(echo "$SCAN_FREQ_2_LINE" | sed 's/default__freq__2=\"//' | sed 's/\"//')"
+        SCAN_FREQ_VALUES=2
+        SCAN_FREQ_3_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__freq__3=')"
+        if [ "$SCAN_FREQ_3_LINE" != "" ]; then
+          SCAN_FREQ_3="$(echo "$SCAN_FREQ_3_LINE" | sed 's/default__freq__3=\"//' | sed 's/\"//')"
+          SCAN_FREQ_VALUES=3
+          SCAN_FREQ_4_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__freq__4=')"
+          if [ "$SCAN_FREQ_4_LINE" != "" ]; then
+            SCAN_FREQ_4="$(echo "$SCAN_FREQ_4_LINE" | sed 's/default__freq__4=\"//' | sed 's/\"//')"
+            SCAN_FREQ_VALUES=4
+          fi
+        fi
+      fi
+    fi
+  fi
+
+  # Convert to multi-FREQ format if in the old format
+  if [ "$SCAN_FREQ_VALUES" == 0 ]; then
+    # Clear FREQ value off of first line
+    sed -i "/^    freq:/c\    freq:"  /home/pi/ryde/config.yaml
+    # Create the blank second line
+    sed -i '/^    freq:/!{p;d;};a \        -' /home/pi/ryde/config.yaml
+    # Put it on the second line
+    sed -i "/^    freq:/!b;n;c\        - $DEFAULT_FREQ" /home/pi/ryde/config.yaml
+    # So now the file is as if it was set up for multiples, but with one value
+    SCAN_FREQ_VALUES=1
+    SCAN_FREQ_1=$DEFAULT_FREQ
+  fi
+
+  # Amend FREQ 1
+
+  SCAN_FREQ_1=$(whiptail --inputbox "Enter the first frequency in kHz" 8 78 $SCAN_FREQ_1 --title "Frequency 1 Entry Menu" 3>&1 1>&2 2>&3)
+  if [ $? -eq 0 ]; then
+    # Put it on the second line
+    sed -i "/^    freq:/!b;n;c\        - $SCAN_FREQ_1" /home/pi/ryde/config.yaml
+  fi
+
+  # At this stage FREQ1 has been entered, so ask for FREQ 2
+
+  SCAN_FREQ_2=$(whiptail --inputbox "Enter the second frequency in kHz (enter 0 for no more freqs)" 8 78 $SCAN_FREQ_2 --title "Frequency 2 Entry Menu" 3>&1 1>&2 2>&3)
+  if [ $? -eq 0 ]; then  # value has been changed
+    if [ "$SCAN_FREQ_VALUES" == "1" ] ; then  # Previously only a single FREQ
+      if [ "$SCAN_FREQ_2" != "0" ]; then      # new valid FREQ entered (else do nothing)
+        # row 3 does not exist, so create it
+        sed -i '/^    freq:/!{p;d;};n;a \        -' /home/pi/ryde/config.yaml
+        # replace new row 3 with $SCAN_FREQ_2
+        sed -i "/^    freq:/!b;n;n;c\        - $SCAN_FREQ_2" /home/pi/ryde/config.yaml
+        # and set the FREQ scan values to 2
+        SCAN_FREQ_VALUES=2
+      fi
+    else                                    # Previously multiple FREQs
+      if [ "$SCAN_FREQ_2" != "0" ]; then      # new valid FREQ entered
+        # so replace row 3 with new $SCAN_FREQ_2
+        sed -i "/^    freq:/!b;n;n;c\        - $SCAN_FREQ_2" /home/pi/ryde/config.yaml
+      else                                  # no more scanning FREQs, so delete lines
+        if [ "$SCAN_FREQ_VALUES" == "4" ]; then  # delete row 3
+          sed -i "/^    freq:/!b;n;n;d" /home/pi/ryde/config.yaml
+          SCAN_FREQ_VALUES=3  # and decrement the number of rows
+        fi
+        if [ "$SCAN_FREQ_VALUES" == "3" ]; then  # delete row 3
+          sed -i "/^    freq:/!b;n;n;d" /home/pi/ryde/config.yaml
+          SCAN_FREQ_VALUES=2  # and decrement the number of rows
+        fi
+        if [ "$SCAN_FREQ_VALUES" == "2" ]; then  # delete row 3
+          sed -i "/^    freq:/!b;n;n;d" /home/pi/ryde/config.yaml
+          SCAN_FREQ_VALUES=1  # and decrement the number of rows
+        fi
+      fi
+    fi
+  fi
+
+  # At this stage FREQ2 has been entered, or SCAN_FREQ_VALUES=1 and we will do nothing more
+
+  if [ "$SCAN_FREQ_VALUES" != "1" ]; then
+    SCAN_FREQ_3=$(whiptail --inputbox "Enter the third frequency in kHz (enter 0 for no more freqs)" 8 78 $SCAN_FREQ_3 --title "Frequency 3 Entry Menu" 3>&1 1>&2 2>&3)
+    if [ $? -eq 0 ]; then  # value has been changed
+      if [ "$SCAN_FREQ_VALUES" == "2" ] ; then  # Previously only 2 FREQs
+        if [ "$SCAN_FREQ_3" != "0" ]; then      # new valid FREQ entered (else do nothing)
+          # row 4 does not exist, so create it
+          sed -i '/^    freq:/!{p;d;};n;n;a \        -' /home/pi/ryde/config.yaml
+          # replace new row 4 with $SCAN_FREQ_3
+          sed -i "/^    freq:/!b;n;n;n;c\        - $SCAN_FREQ_3" /home/pi/ryde/config.yaml
+          # and set the FREQ scan values to 3
+          SCAN_FREQ_VALUES=3
+        fi
+      else                                    # Previously multiple FREQs
+        if [ "$SCAN_FREQ_3" != "0" ]; then      # new valid FREQ entered
+          # so replace row 4 with new $SCAN_FREQ_3
+          sed -i "/^    freq:/!b;n;n;n;c\        - $SCAN_FREQ_3" /home/pi/ryde/config.yaml
+        else                                  # no more scanning FREQs, so delete lines
+          if [ "$SCAN_FREQ_VALUES" == "4" ]; then  # delete row 4
+            sed -i "/^    freq:/!b;n;n;n;d" /home/pi/ryde/config.yaml
+            SCAN_FREQ_VALUES=3  # and decrement the number of rows
+          fi
+          if [ "$SCAN_FREQ_VALUES" == "3" ]; then  # delete row 4
+            sed -i "/^    freq:/!b;n;n;n;d" /home/pi/ryde/config.yaml
+            SCAN_FREQ_VALUES=2  # and decrement the number of rows
+          fi
+        fi
+      fi
+    fi
+    # At this stage FREQ3 has been entered, or SCAN_FREQ_VALUES=2 and we will do nothing more
+
+    if [ "$SCAN_FREQ_VALUES" != "2" ]; then
+      SCAN_FREQ_4=$(whiptail --inputbox "Enter the fourth frequency in kHz (enter 0 for no more freqs)" 8 78 $SCAN_FREQ_4 --title "Frequency 4 Entry Menu" 3>&1 1>&2 2>&3)
+      if [ $? -eq 0 ]; then  # value has been changed
+        if [ "$SCAN_FREQ_VALUES" == "3" ] ; then  # Previously only 3 FREQs
+          if [ "$SCAN_FREQ_4" != "0" ]; then      # new valid FREQ entered (else do nothing)
+            # row 5 does not exist, so create it
+            sed -i '/^    freq:/!{p;d;};n;n;n;a \        -' /home/pi/ryde/config.yaml
+            # replace new row 5 with $SCAN_FREQ_4
+            sed -i "/^    freq:/!b;n;n;n;n;c\        - $SCAN_FREQ_4" /home/pi/ryde/config.yaml
+            # and set the FREQ scan values to 4
+            SCAN_FREQ_VALUES=4
+          fi
+        else                                    # Previously 4 FREQs
+          if [ "$SCAN_FREQ_3" != "0" ]; then      # new valid FREQ entered
+            # so replace row 5 with new $SCAN_FREQ_4
+            sed -i "/^    freq:/!b;n;n;n;n;c\        - $SCAN_FREQ_4" /home/pi/ryde/config.yaml
+          else                                  # no more scanning FREQs, so delete lines
+            if [ "$SCAN_FREQ_VALUES" == "4" ]; then  # delete row 5
+              sed -i "/^    freq:/!b;n;n;n;n;d" /home/pi/ryde/config.yaml
+              SCAN_FREQ_VALUES=3  # and decrement the number of rows
+            fi
+          fi
+        fi
+      fi
+    fi
+  fi
+}
+
+
 
 do_Set_SR()
 {
-  DEFAULT_SR=$(whiptail --inputbox "Enter the new Start-up SR in kS" 8 78 $DEFAULT_SR --title "Symbol Rate Entry Menu" 3>&1 1>&2 2>&3)
+  DEFAULT_SR=0
+  SCAN_SR_1=0
+  SCAN_SR_2=0
+  SCAN_SR_3=0
+  SCAN_SR_4=0
+
+  # Read and trim the default SR Values
+  DEFAULT_SR_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__sr=')"
+  if [ "$DEFAULT_SR_LINE" != "" ]; then
+    DEFAULT_SR="$(echo "$DEFAULT_SR_LINE" | sed 's/default__sr=\"//' | sed 's/\"//')"
+    SCAN_SR_VALUES=0
+  else
+    SCAN_SR_1_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__sr__1=')"
+    if [ "$SCAN_SR_1_LINE" != "" ]; then
+      SCAN_SR_1="$(echo "$SCAN_SR_1_LINE" | sed 's/default__sr__1=\"//' | sed 's/\"//')"
+      SCAN_SR_VALUES=1
+      SCAN_SR_2_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__sr__2=')"
+      if [ "$SCAN_SR_2_LINE" != "" ]; then
+        SCAN_SR_2="$(echo "$SCAN_SR_2_LINE" | sed 's/default__sr__2=\"//' | sed 's/\"//')"
+        SCAN_SR_VALUES=2
+        SCAN_SR_3_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__sr__3=')"
+        if [ "$SCAN_SR_3_LINE" != "" ]; then
+          SCAN_SR_3="$(echo "$SCAN_SR_3_LINE" | sed 's/default__sr__3=\"//' | sed 's/\"//')"
+          SCAN_SR_VALUES=3
+          SCAN_SR_4_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__sr__4=')"
+          if [ "$SCAN_SR_4_LINE" != "" ]; then
+            SCAN_SR_4="$(echo "$SCAN_SR_4_LINE" | sed 's/default__sr__4=\"//' | sed 's/\"//')"
+            SCAN_SR_VALUES=4
+          fi
+        fi
+      fi
+    fi
+  fi
+
+  if [ "$SCAN_SR_VALUES" != "0" ]; then  # In scanning SR mode, so convert back to single SR
+    
+    # Set the default SR to the first scanning SR
+    DEFAULT_SR=$SCAN_SR_1
+
+    # Delete the scanning SR lines
+    if [ "$SCAN_SR_VALUES" == "4" ]; then  # delete row 2
+      sed -i "/^    sr:/!b;n;d" /home/pi/ryde/config.yaml
+      SCAN_SR_VALUES=3  # and decrement the number of rows
+    fi
+    if [ "$SCAN_SR_VALUES" == "3" ]; then  # delete row 2
+      sed -i "/^    sr:/!b;n;d" /home/pi/ryde/config.yaml
+      SCAN_SR_VALUES=2  # and decrement the number of rows
+    fi
+    if [ "$SCAN_SR_VALUES" == "2" ]; then  # delete row 2
+      sed -i "/^    sr:/!b;n;d" /home/pi/ryde/config.yaml
+      SCAN_SR_VALUES=1  # and decrement the number of rows
+    fi
+    if [ "$SCAN_SR_VALUES" == "1" ]; then  # delete row 2
+      sed -i "/^    sr:/!b;n;d" /home/pi/ryde/config.yaml
+      SCAN_SR_VALUES=0  # and decrement the number of rows
+    fi
+
+    # Write the default SR to the SR line
+    sed -i "/^    sr:/c\    sr:   $DEFAULT_SR"  /home/pi/ryde/config.yaml
+
+  fi
+
+  DEFAULT_SR=$(whiptail --inputbox "Enter the SR in kS" 8 78 $DEFAULT_SR --title "Symbol Rate Entry Menu" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
-    sed -i "/sr:/c\    sr:   $DEFAULT_SR" /home/pi/ryde/config.yaml
+    sed -i "/^    sr:/c\    sr:   $DEFAULT_SR"  /home/pi/ryde/config.yaml
+  fi
+}
+
+do_Set_Scan_SR()
+{
+  DEFAULT_SR=0
+  SCAN_SR_1=0
+  SCAN_SR_2=0
+  SCAN_SR_3=0
+  SCAN_SR_4=0
+
+  # Read and trim the default SR Values
+  DEFAULT_SR_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__sr=')"
+  if [ "$DEFAULT_SR_LINE" != "" ]; then
+    DEFAULT_SR="$(echo "$DEFAULT_SR_LINE" | sed 's/default__sr=\"//' | sed 's/\"//')"
+    SCAN_SR_VALUES=0
+  else
+    SCAN_SR_1_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__sr__1=')"
+    if [ "$SCAN_SR_1_LINE" != "" ]; then
+      SCAN_SR_1="$(echo "$SCAN_SR_1_LINE" | sed 's/default__sr__1=\"//' | sed 's/\"//')"
+      SCAN_SR_VALUES=1
+      SCAN_SR_2_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__sr__2=')"
+      if [ "$SCAN_SR_2_LINE" != "" ]; then
+        SCAN_SR_2="$(echo "$SCAN_SR_2_LINE" | sed 's/default__sr__2=\"//' | sed 's/\"//')"
+        SCAN_SR_VALUES=2
+        SCAN_SR_3_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__sr__3=')"
+        if [ "$SCAN_SR_3_LINE" != "" ]; then
+          SCAN_SR_3="$(echo "$SCAN_SR_3_LINE" | sed 's/default__sr__3=\"//' | sed 's/\"//')"
+          SCAN_SR_VALUES=3
+          SCAN_SR_4_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__sr__4=')"
+          if [ "$SCAN_SR_4_LINE" != "" ]; then
+            SCAN_SR_4="$(echo "$SCAN_SR_4_LINE" | sed 's/default__sr__4=\"//' | sed 's/\"//')"
+            SCAN_SR_VALUES=4
+          fi
+        fi
+      fi
+    fi
+  fi
+
+  # Convert to multi-SR format if in the old format
+  if [ "$SCAN_SR_VALUES" == 0 ]; then
+    # Clear SR value off of first line
+    sed -i "/^    sr:/c\    sr:"  /home/pi/ryde/config.yaml
+    # Create the blank second line
+    sed -i '/^    sr:/!{p;d;};a \        -' /home/pi/ryde/config.yaml
+    # Put it on the second line
+    sed -i "/^    sr:/!b;n;c\        - $DEFAULT_SR" /home/pi/ryde/config.yaml
+    # So now the file is as if it was set up for multiples, but with one value
+    SCAN_SR_VALUES=1
+    SCAN_SR_1=$DEFAULT_SR
+  fi
+
+  # Amend SR 1
+
+  SCAN_SR_1=$(whiptail --inputbox "Enter the first SR in kS" 8 78 $SCAN_SR_1 --title "Symbol Rate 1 Entry Menu" 3>&1 1>&2 2>&3)
+  if [ $? -eq 0 ]; then
+    # Put it on the second line
+    sed -i "/^    sr:/!b;n;c\        - $SCAN_SR_1" /home/pi/ryde/config.yaml
+  fi
+
+  # At this stage SR1 has been entered, so ask for SR 2
+
+  SCAN_SR_2=$(whiptail --inputbox "Enter the second SR in kS (enter 0 for no more SRs)" 8 78 $SCAN_SR_2 --title "Symbol Rate 2 Entry Menu" 3>&1 1>&2 2>&3)
+  if [ $? -eq 0 ]; then  # value has been changed
+    if [ "$SCAN_SR_VALUES" == "1" ] ; then  # Previously only a single SR
+      if [ "$SCAN_SR_2" != "0" ]; then      # new valid SR entered (else do nothing)
+        # row 3 does not exist, so create it
+        sed -i '/^    sr:/!{p;d;};n;a \        -' /home/pi/ryde/config.yaml
+        # replace new row 3 with $SCAN_SR_2
+        sed -i "/^    sr:/!b;n;n;c\        - $SCAN_SR_2" /home/pi/ryde/config.yaml
+        # and set the SR scan values to 2
+        SCAN_SR_VALUES=2
+      fi
+    else                                    # Previously multiple SRs
+      if [ "$SCAN_SR_2" != "0" ]; then      # new valid SR entered
+        # so replace row 3 with new $SCAN_SR_2
+        sed -i "/^    sr:/!b;n;n;c\        - $SCAN_SR_2" /home/pi/ryde/config.yaml
+      else                                  # no more scanning SRs, so delete lines
+        if [ "$SCAN_SR_VALUES" == "4" ]; then  # delete row 3
+          sed -i "/^    sr:/!b;n;n;d" /home/pi/ryde/config.yaml
+          SCAN_SR_VALUES=3  # and decrement the number of rows
+        fi
+        if [ "$SCAN_SR_VALUES" == "3" ]; then  # delete row 3
+          sed -i "/^    sr:/!b;n;n;d" /home/pi/ryde/config.yaml
+          SCAN_SR_VALUES=2  # and decrement the number of rows
+        fi
+        if [ "$SCAN_SR_VALUES" == "2" ]; then  # delete row 3
+          sed -i "/^    sr:/!b;n;n;d" /home/pi/ryde/config.yaml
+          SCAN_SR_VALUES=1  # and decrement the number of rows
+        fi
+      fi
+    fi
+  fi
+
+  # At this stage SR2 has been entered, or SCAN_SR_VALUES=1 and we will do nothing more
+
+  if [ "$SCAN_SR_VALUES" != "1" ]; then
+    SCAN_SR_3=$(whiptail --inputbox "Enter the third SR in kS (enter 0 for no more SRs)" 8 78 $SCAN_SR_3 --title "Symbol Rate 3 Entry Menu" 3>&1 1>&2 2>&3)
+    if [ $? -eq 0 ]; then  # value has been changed
+      if [ "$SCAN_SR_VALUES" == "2" ] ; then  # Previously only 2 SRs
+        if [ "$SCAN_SR_3" != "0" ]; then      # new valid SR entered (else do nothing)
+          # row 4 does not exist, so create it
+          sed -i '/^    sr:/!{p;d;};n;n;a \        -' /home/pi/ryde/config.yaml
+          # replace new row 4 with $SCAN_SR_3
+          sed -i "/^    sr:/!b;n;n;n;c\        - $SCAN_SR_3" /home/pi/ryde/config.yaml
+          # and set the SR scan values to 3
+          SCAN_SR_VALUES=3
+        fi
+      else                                    # Previously multiple SRs
+        if [ "$SCAN_SR_3" != "0" ]; then      # new valid SR entered
+          # so replace row 4 with new $SCAN_SR_3
+          sed -i "/^    sr:/!b;n;n;n;c\        - $SCAN_SR_3" /home/pi/ryde/config.yaml
+        else                                  # no more scanning SRs, so delete lines
+          if [ "$SCAN_SR_VALUES" == "4" ]; then  # delete row 4
+            sed -i "/^    sr:/!b;n;n;n;d" /home/pi/ryde/config.yaml
+            SCAN_SR_VALUES=3  # and decrement the number of rows
+          fi
+          if [ "$SCAN_SR_VALUES" == "3" ]; then  # delete row 4
+            sed -i "/^    sr:/!b;n;n;n;d" /home/pi/ryde/config.yaml
+            SCAN_SR_VALUES=2  # and decrement the number of rows
+          fi
+        fi
+      fi
+    fi
+    # At this stage SR3 has been entered, or SCAN_SR_VALUES=2 and we will do nothing more
+
+    if [ "$SCAN_SR_VALUES" != "2" ]; then
+      SCAN_SR_4=$(whiptail --inputbox "Enter the fourth SR in kS (enter 0 for no more SRs)" 8 78 $SCAN_SR_4 --title "Symbol Rate 4 Entry Menu" 3>&1 1>&2 2>&3)
+      if [ $? -eq 0 ]; then  # value has been changed
+        if [ "$SCAN_SR_VALUES" == "3" ] ; then  # Previously only 3 SRs
+          if [ "$SCAN_SR_4" != "0" ]; then      # new valid SR entered (else do nothing)
+            # row 5 does not exist, so create it
+            sed -i '/^    sr:/!{p;d;};n;n;n;a \        -' /home/pi/ryde/config.yaml
+            # replace new row 5 with $SCAN_SR_4
+            sed -i "/^    sr:/!b;n;n;n;n;c\        - $SCAN_SR_4" /home/pi/ryde/config.yaml
+            # and set the SR scan values to 4
+            SCAN_SR_VALUES=4
+          fi
+        else                                    # Previously 4 SRs
+          if [ "$SCAN_SR_3" != "0" ]; then      # new valid SR entered
+            # so replace row 5 with new $SCAN_SR_4
+            sed -i "/^    sr:/!b;n;n;n;n;c\        - $SCAN_SR_4" /home/pi/ryde/config.yaml
+          else                                  # no more scanning SRs, so delete lines
+            if [ "$SCAN_SR_VALUES" == "4" ]; then  # delete row 5
+              sed -i "/^    sr:/!b;n;n;n;n;d" /home/pi/ryde/config.yaml
+              SCAN_SR_VALUES=3  # and decrement the number of rows
+            fi
+          fi
+        fi
+      fi
+    fi
   fi
 }
 
@@ -385,17 +812,21 @@ do_Set_Defaults()
 {
   menuchoice=$(whiptail --title "Start-up Settings Menu" --menu "Select Choice" 16 78 10 \
     "1 Band" "Set the start-up Band" \
-    "2 Freq" "Set the start-up Receive Frequency" \
-    "3 SR" "Set start-up Receive Symbol Rate" \
-    "4 Port" "Set which tuner socket is used" \
-    "5 Polarity" "Switch LNB Bias Voltage" \
+    "2 Freq" "Set a Single Start-up Receive Frequency" \
+    "3 Scan Freqs" "Set Multiple Receive Frequencies for Scanning" \
+    "4 SR" "Set a Single Start-up Receive Symbol Rate" \
+    "5 Scan SRs" "Set Multiple Receive Symbol Rates for Scanning" \
+    "6 Port" "Set which tuner socket is used" \
+    "7 Polarity" "Switch LNB Bias Voltage" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
       1\ *) do_Set_Default_Band ;;
       2\ *) do_Set_Freq ;;
-      3\ *) do_Set_SR ;;
-      4\ *) do_Set_Port ;;
-      5\ *) do_Set_Polarity ;;
+      3\ *) do_Set_Scan_Freq ;;
+      4\ *) do_Set_SR ;;
+      5\ *) do_Set_Scan_SR ;;
+      6\ *) do_Set_Port ;;
+      7\ *) do_Set_Polarity ;;
     esac
 }
 
@@ -672,11 +1103,10 @@ do_receive()
   /home/pi/ryde-build/rx.sh &
 
   # Wait here receiving until user presses a key
-  whiptail --title "Receiving on $DEFAULT_FREQ kHz at SR $DEFAULT_SR kS" --msgbox "Touch any key to stop receiving" 8 78
+  whiptail --title "Receiving on on $FREQ_TEXT kHz at SR $SR_TEXT kS" --msgbox "Touch any key to stop receiving" 8 78
   do_stop
 }
 
-#on $DEFAULT_FREQ kHz at SR $DEFAULT_SR kS
 
 #********************************************* MAIN MENU *********************************
 #************************* Execution of Console Menu starts here *************************
@@ -686,24 +1116,38 @@ status=0
 # Stop the Receiver
 do_stop
 
-# Look up the default frequency and SR
-
-# Read and trim the default frequency
-DEFAULT_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__freq=')"
-DEFAULT_FREQ="$(echo "$DEFAULT_FREQ_LINE" | sed 's/default__freq=\"//' | sed 's/\"//')"
-
-# Read and trim the default SR
-DEFAULT_SR_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__sr=')"
-DEFAULT_SR="$(echo "$DEFAULT_SR_LINE" | sed 's/default__sr=\"//' | sed 's/\"//')"
 
 # Loop round main menu
 while [ "$status" -eq 0 ] 
   do
 
+    # Look up the default frequency and SR
+
+    # Read and trim the default frequency
+    DEFAULT_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__freq=')"
+    DEFAULT_FREQ="$(echo "$DEFAULT_FREQ_LINE" | sed 's/default__freq=\"//' | sed 's/\"//')"
+
+    # Read and trim the default SR
+    DEFAULT_SR_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'default__sr=')"
+    DEFAULT_SR="$(echo "$DEFAULT_SR_LINE" | sed 's/default__sr=\"//' | sed 's/\"//')"
+
+    if [ "$DEFAULT_FREQ" == "" ]; then
+      FREQ_TEXT="Scanning"
+    else
+      FREQ_TEXT=$DEFAULT_FREQ
+    fi
+
+
+    if [ "$DEFAULT_SR" == "" ]; then
+      SR_TEXT="Scanning"
+    else
+      SR_TEXT=$DEFAULT_SR
+    fi
+
     # Display main menu
 
     menuchoice=$(whiptail --title "BATC Ryde Receiver Main Menu" --menu "INFO" 18 78 11 \
-	"0 Receive" "Start the Ryde Receiver on $DEFAULT_FREQ kHz at SR $DEFAULT_SR kS" \
+	"0 Receive" "Start the Ryde Receiver on $FREQ_TEXT kHz at SR $SR_TEXT kS" \
         "1 Stop" "Stop the Ryde Receiver" \
         "2 Defaults" "Set the start-up frequency, SR etc" \
         "3 Bands" "Set the band details such as LNB Offset" \
