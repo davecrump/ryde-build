@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Created by davecrump 20200714 for Ryde on Buster Raspios
+# Updated for version 202009070
 
 echo
 echo "----------------------------------------"
@@ -184,7 +185,7 @@ fi
 #echo "---------------------------------------------"
 #echo
 
-grep -q "bands" "$PATHUBACKUP"/config.yaml
+grep -q "presets" "$PATHUBACKUP"/config.yaml
 if [ $? == 0 ]; then # User's config file is latest version, so simply copy back
   cp -f -r "$PATHUBACKUP"/config.yaml /home/pi/ryde/config.yaml >/dev/null 2>/dev/null
 else # User's config file needs updating, so copy master and reset remote control
@@ -263,6 +264,10 @@ else # User's config file needs updating, so copy master and reset remote contro
   grep -q "avermediacard" "$PATHUBACKUP"/config.yaml
   if  [ $? == 0 ]; then   ## Amend new file for "avermediacard" 18
     sed -i "/handsets:/{n;s/.*/        - avermediacard/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "aeg_dvd" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "aeg_dvd" 19
+    sed -i "/handsets:/{n;s/.*/        - aeg_dvd/}" /home/pi/ryde/config.yaml
   fi
 fi
 

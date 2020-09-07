@@ -1,5 +1,5 @@
 ---
-configRev: 1
+configRev: 2
 longmynd:
     binpath: /home/pi/longmynd/longmynd
     mediapath: /home/pi/lmmedia
@@ -7,19 +7,104 @@ longmynd:
     tstimeout: 5000
 
 bands:
-    QO-100: &bandqo100
+    QO-100: &bandlnblow
         lofreq: 9750000
         loside: LOW
-    Direct: &banddirect
+        pol: NONE
+        port: TOP
+        gpioid: 7
+    146: &band146
         lofreq: 0
         loside: HIGH
+        pol: NONE
+        port: BOTTOM
+        gpioid: 1
+    437: &band437
+        lofreq: 0
+        loside: HIGH
+        pol:  NONE
+        port: BOTTOM
+        gpioid: 2
+    1255: &band1255
+        lofreq: 0
+        loside: HIGH
+        pol:  NONE
+        port: BOTTOM
+        gpioid: 3
+    2400: &band2400
+        lofreq: 0
+        loside: HIGH
+        pol:  NONE
+        port: BOTTOM
+        gpioid: 4
+    3400: &band3400
+        lofreq: 5150000
+        loside: HIGH
+        pol: NONE
+        port: BOTTOM
+        gpioid: 5
+    5760: &band5760
+        lofreq: 5328000
+        loside: LOW
+        pol: NONE
+        port: BOTTOM
+        gpioid: 6
+    10368: &band10368
+        lofreq: 9750000
+        loside: LOW
+        pol: NONE
+        port: BOTTOM
+        gpioid: 7
+presets:
+    QO-100_Beacon: &preset01
+        freq: 10491500
+        sr:   1500
+        band: *bandlnblow
+    QO-100_9.25_333: &preset02
+        freq: 10499250
+        sr:   333
+        band: *bandlnblow
+    QO-100_Custom: &preset03
+        freq: 10498750
+        sr:   333
+        band: *bandlnblow
+    QO-100_Scan: &preset04
+        freq:
+          - 10497750
+          - 10498250
+          - 10498750
+          - 10499250
+        sr:
+          - 250
+          - 333
+          - 500
+        band: *bandlnblow
+    146.5_MHz_125: &preset05
+        freq: 146500
+        sr:   125
+        band: *band146
+    146.5_MHz_333: &preset06
+        freq: 146500
+        sr:   333
+        band: *band146
+    437.0_MHz_333: &preset07
+        freq: 437000
+        sr:   333
+        band: *band437
+    437.0_MHz_1000: &preset08
+        freq: 437000
+        sr:   1000
+        band: *band437
+    1255_MHz_333: &preset09
+        freq: 437000
+        sr:   333
+        band: *band1255
+    1255_MHz_Custom: &preset10
+        freq: 437000
+        sr:   1000
+        band: *band1255
 
-default:
-    freq: 10491500
-    sr:   1500
-    band: *bandqo100
-    pol:  NONE
-    port: TOP
+default: *preset01
 
 ir:
     repeatFirst: 200
