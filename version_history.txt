@@ -1,5 +1,6 @@
 202009070
 Add support for Preset Channels
+Add support for App and Power restart and shutdown
 
 202008230
 Add support for SR and Frequency scanning in GUI and console
