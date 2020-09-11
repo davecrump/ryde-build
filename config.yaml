@@ -132,5 +132,6 @@ gpio:
 shutdownBehavior: APPSTOP
 
 debug:
+    enableMenu: False
     autoplay: True
     disableHardwareCodec: True
