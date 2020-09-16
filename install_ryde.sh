@@ -80,6 +80,17 @@ sudo apt-get -y install python3-evdev
 sudo apt-get -y install python3-pil
 sudo apt-get -y install python3-gpiozero
 
+# Install WiringPi for the hardware shutdown button
+echo
+echo "------------------------------"
+echo "----- Installing WiringPi-----"
+echo "------------------------------"
+echo
+cd /tmp
+wget https://project-downloads.drogon.net/wiringpi-latest.deb
+sudo dpkg -i wiringpi-latest.deb
+cd /home/pi
+
 # Download the previously selected version of Ryde Build
 echo
 echo "------------------------------------------"
@@ -172,27 +183,42 @@ sudo bash -c 'echo "# Increase GPU memory for 4k displays" >> /boot/config.txt '
 sudo bash -c 'echo "gpu_mem=128" >> /boot/config.txt '
 sudo bash -c 'echo " " >> /boot/config.txt '
 
-# Modify .bashrc for autostart and set RPi Jack audio volume
+# Modify .bashrc for hardware shutdown, set RPi Jack audio volume and autostart
 echo  >> ~/.bashrc
 echo "# Autostart Ryde on Boot" >> ~/.bashrc
 echo if test -z \"\$SSH_CLIENT\" >> ~/.bashrc 
 echo then >> ~/.bashrc
+
+echo "  # If pi-sdn is not running, check if it is required to run" >> ~/.bashrc
+echo "  ps -cax | grep 'pi-sdn' >/dev/null 2>/dev/null" >> ~/.bashrc
+echo "  RESULT=\"\$?\"" >> ~/.bashrc
+echo "  if [ \"\$RESULT\" -ne 0 ]; then" >> ~/.bashrc
+echo "    if [ -f /home/pi/.pi-sdn ]; then" >> ~/.bashrc
+echo "      . /home/pi/.pi-sdn" >> ~/.bashrc
+echo "    fi" >> ~/.bashrc
+echo "  fi" >> ~/.bashrc
+
 echo "  # Set RPi Audio Jack volume" >> ~/.bashrc
 echo "  amixer set Headphone 0db >/dev/null 2>/dev/null" >> ~/.bashrc
 echo  >> ~/.bashrc
+
 echo "  # Start Ryde" >> ~/.bashrc
 echo "  /home/pi/ryde-build/rx.sh" >> ~/.bashrc
 echo fi >> ~/.bashrc
 echo  >> ~/.bashrc
 
 
-#echo
-#echo "-----------------------------------------"
-#echo "----- Compiling Ancilliary programs -----"
-#echo "-----------------------------------------"
-#echo
+echo
+echo "-----------------------------------------"
+echo "----- Compiling Ancilliary programs -----"
+echo "-----------------------------------------"
+echo
 
-# None yet!
+# Compile the hardware shutdown button
+cd /home/pi/ryde-build/pi-sdn-build
+make
+mv pi-sdn /home/pi/
+cd /home/pi
 
 echo
 echo "--------------------------------------"
