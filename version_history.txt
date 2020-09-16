@@ -1,3 +1,7 @@
+202009160
+Add hardware-triggered shutdown
+Menu configuration of debug and power behaviour
+
 202009070
 Add support for Preset Channels
 Add support for App and Power restart and shutdown

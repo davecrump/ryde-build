@@ -269,6 +269,10 @@ else # User's config file needs updating, so copy master and reset remote contro
   if  [ $? == 0 ]; then   ## Amend new file for "aeg_dvd" 19
     sed -i "/handsets:/{n;s/.*/        - aeg_dvd/}" /home/pi/ryde/config.yaml
   fi
+  grep -q "g_rcu_023" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "g_rcu_023" 20
+    sed -i "/handsets:/{n;s/.*/        - g_rcu_023/}" /home/pi/ryde/config.yaml
+  fi
 fi
 
 # Record the version numbers

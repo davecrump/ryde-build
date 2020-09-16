@@ -66,7 +66,8 @@ do_Set_RC_Type()
     "17 RTL-SDR" "RTL-SDR Basic Remote" \
     "18 Avermedia" "AverMedia PC Card Tuner" \
     "19 AEG DVD" "German AEG DVD Remote" \
-    "20 Exit" "Exit without changing remote control model" \
+    "20 G-RCU-023" "German Remote from an Opticum HD AX150, labelled G-RCU-023" \
+    "21 Exit" "Exit without changing remote control model" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
         1\ *) RC_FILE="virgin" ;;
@@ -88,7 +89,8 @@ do_Set_RC_Type()
         17\ *) RC_FILE="rtl0" ;;
         18\ *) RC_FILE="avermediacard" ;;
         19\ *) RC_FILE="aeg_dvd" ;;
-        20\ *) RC_FILE="exit" ;;
+        20\ *) RC_FILE="g_rcu_023" ;;
+        21\ *) RC_FILE="exit" ;;
     esac
 
   if [ "$RC_FILE" != "exit" ]; then # Amend the config file
@@ -866,16 +868,110 @@ do_Restore_Factory()
   whiptail --title "Factory Setting Restored" --msgbox "Touch any key to continue.  You will need to reselect your remote control type." 8 78
 }
 
+do_Debug_Menu()
+{
+  # Read and trim the current Debug Menu Setting
+  DEBUG_MENU_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'debug__enableMenu=')"
+  DEBUG_MENU="$(echo "$DEBUG_MENU_LINE" | sed 's/debug__enableMenu=\"//' | sed 's/\"//')"
+
+  Radio1=OFF
+  Radio2=OFF
+  case "$DEBUG_MENU" in
+    "False")
+      Radio1=ON
+    ;;
+    "True")
+      Radio2=ON
+    ;;
+    *)
+      Radio1=ON
+    ;;
+  esac
+  DEBUG_MENU=$(whiptail --title "Select Whether the Debug Menu is Displayed" --radiolist \
+    "Select Choice" 20 78 5 \
+    "False" "Debug Menu Not Displayed" $Radio1 \
+    "True" "Debug Menu Displayed" $Radio2 \
+    3>&2 2>&1 1>&3)
+  if [ $? -eq 0 ]; then
+    sed -i "/    enableMenu:/c\    enableMenu: $DEBUG_MENU" /home/pi/ryde/config.yaml
+  fi
+}
+
+
+do_Power_Button()
+{
+  # Read and trim the current Power Button Setting
+  POWER_BUTTON_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'shutdownBehavior=')"
+  POWER_BUTTON="$(echo "$POWER_BUTTON_LINE" | sed 's/shutdownBehavior=\"//' | sed 's/\"//')"
+
+  Radio1=OFF
+  Radio2=OFF
+  case "$POWER_BUTTON" in
+    "APPSTOP")
+      Radio1=ON
+    ;;
+    "APPREST")
+      Radio2=ON
+    ;;
+    *)
+      Radio1=ON
+    ;;
+  esac
+  POWER_BUTTON=$(whiptail --title "Select Action on Power Button Double Press" --radiolist \
+    "Select Choice" 20 78 5 \
+    "APPSTOP" "Ryde Application Stops, RPi keeps Running" $Radio1 \
+    "APPREST" "Ryde Application Restarts" $Radio2 \
+    3>&2 2>&1 1>&3)
+  if [ $? -eq 0 ]; then
+    sed -i "/shutdownBehavior:/c\shutdownBehavior: $POWER_BUTTON" /home/pi/ryde/config.yaml
+  fi
+}
+
+do_SD_Button()
+{
+  Radio1=OFF
+  Radio2=OFF
+
+  # Check current status
+  # If /home/pi/.pi-sdn exists then it is loaded
+
+  if test -f "/home/pi/.pi-sdn"; then
+    Radio1=ON
+  else
+    Radio2=ON
+  fi
+  SD_BUTTON=$(whiptail --title "Select Hardware Shutdown Function" --radiolist \
+    "Select Choice" 20 78 5 \
+    "SHUTDOWN" "RPi Immediately Shuts Down" $Radio1 \
+    "DO NOTHING" "Nothing happens" $Radio2 \
+    3>&2 2>&1 1>&3)
+  if [ $? -eq 0 ]; then
+    if [ "$SD_BUTTON" == "SHUTDOWN" ]; then
+      cp /home/pi/ryde-build/text.pi-sdn /home/pi/.pi-sdn  ## Load it at logon
+      /home/pi/.pi-sdn                                     ## Load it now
+    else
+      rm /home/pi/.pi-sdn >/dev/null 2>/dev/null           ## Stop it being loaded at log-on
+      sudo pkill -x pi-sdn                                 ## kill the current process
+    fi
+  fi
+}
+
 
 do_Settings()
 {
   menuchoice=$(whiptail --title "Advanced Settings Menu" --menu "Select Choice" 16 78 10 \
     "1 Tuner Timeout" "Adjust the Tuner Reset Time when no valid TS " \
     "2 Restore Factory" "Reset all settings to default" \
+    "3 Debug Menu" "Enable or Disable the Debug Menu" \
+    "4 Power Button" "Set behaviour on double press of power button" \
+    "5 Hardware Shutdown" "Enable or disable hardware shudown function" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
       1\ *) do_Set_TSTimeout ;;
       2\ *) do_Restore_Factory ;;
+      3\ *) do_Debug_Menu ;;
+      4\ *) do_Power_Button ;;
+      5\ *) do_SD_Button ;;
     esac
 }
 
