@@ -1,3 +1,7 @@
+202009240
+Reduce dhcp timout for new builds
+Use Raspios Buster Lite 2020-08-20 for new builds
+
 202009160
 Add hardware-triggered shutdown
 Menu configuration of debug and power behaviour
