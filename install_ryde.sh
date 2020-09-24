@@ -183,6 +183,10 @@ sudo bash -c 'echo "# Increase GPU memory for 4k displays" >> /boot/config.txt '
 sudo bash -c 'echo "gpu_mem=128" >> /boot/config.txt '
 sudo bash -c 'echo " " >> /boot/config.txt '
 
+# Reduce the dhcp client timeout to speed off-network startup
+sudo bash -c 'echo -e "\n# Shorten dhcpcd timeout from 30 to 5 secs" >> /etc/dhcpcd.conf'
+sudo bash -c 'echo -e "timeout 5\n" >> /etc/dhcpcd.conf'
+
 # Modify .bashrc for hardware shutdown, set RPi Jack audio volume and autostart
 echo  >> ~/.bashrc
 echo "# Autostart Ryde on Boot" >> ~/.bashrc
@@ -207,7 +211,6 @@ echo "  /home/pi/ryde-build/rx.sh" >> ~/.bashrc
 echo fi >> ~/.bashrc
 echo  >> ~/.bashrc
 
-
 echo
 echo "-----------------------------------------"
 echo "----- Compiling Ancilliary programs -----"
@@ -230,7 +233,6 @@ echo
 echo "alias ryde='/home/pi/ryde-build/rx.sh'" >> /home/pi/.bash_aliases
 echo "alias menu='/home/pi/ryde-build/menu.sh'"  >> /home/pi/.bash_aliases
 echo "alias stop='/home/pi/ryde-build/stop.sh'"  >> /home/pi/.bash_aliases
-
 
 # Record Version Number
 cd /home/pi/ryde-build/

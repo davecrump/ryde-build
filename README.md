@@ -2,7 +2,7 @@
 # The BATC Ryde DATV Receiver Build For the RPi 4
 
 **The Ryde** is a DVB-S and DVB-S2 digital television receiver based on the Raspberry Pi 4.  The core of the system was written by Heather M0HMO and the control software is written by Tim MW0RUD.  Significant contributions have also been made by Phil M0DNY and Dave G8GKQ.   The project uses a Raspberry Pi 4, an HDMI Display, an IR Remote Control and a BATC MiniTiouner (Mk 2 - with Serit Tuner).  The intention is that the design should be reproducible by someone who has never used Linux before.  Detailed instructions on loading the software are listed below, and further details of the complete system design and build are on the BATC Wiki at https://wiki.batc.org.uk/Ryde_Introduction.  There is a Forum for discussion of the project here: https://forum.batc.org.uk/viewforum.php?f=130
-This version is based on Raspbios Buster and is only compatible with the Raspberry Pi 4.  
+This version is based on Raspios Buster and is only compatible with the Raspberry Pi 4.  
 
 Our thanks to Heather, Tim, Phil and all the other contributors to this community project.  Where possible, the code within the project is GPL V3.
 
@@ -10,7 +10,7 @@ Our thanks to Heather, Tim, Phil and all the other contributors to this communit
 
 The preferred installation method only needs a Windows PC connected to the same (internet-connected) network as your Raspberry Pi 4.  Do not connect a keyboard or mouse directly to your Raspberry Pi; you can connect the HDMI display.
 
-- First download the 2020-05-27 release of Raspbios Buster Lite on to your Windows PC from here http://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2020-05-28/2020-05-27-raspios-buster-lite-armhf.zip 
+- First download the 2020-08-20 release of Raspios Buster Lite on to your Windows PC from here https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2020-08-24/2020-08-20-raspios-buster-armhf-lite.zip 
 
 - Unzip the image and then transfer it to a Micro-SD Card using Win32diskimager https://sourceforge.net/projects/win32diskimager/
 
@@ -34,7 +34,7 @@ The initial build can take between 10 and 15 minutes, however it does not need a
 
 # Post-install Set-up
 
-After reboot, the Ryde software will start and attenpt to receive a signal on 741.5 MHz, 1500 kS.  It will be configured to use a Virgin Media type remote control, and to output video on the primary HDMI port of the RPi.  To change the model of remote, or to select comp video output, log in by ssh and type menu.  There is a text menu to enable selection of other options.
+After reboot, the Ryde software will start and attempt to receive a signal on 741.5 MHz, 1500 kS.  It will be configured to use a Virgin Media type remote control, and to output video on the primary HDMI port of the RPi.  To change the model of remote, or to select comp video output, log in by ssh and type menu.  There is a text menu to enable selection of other options.
 
 # Advanced notes
 
