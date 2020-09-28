@@ -89,7 +89,7 @@ wget https://github.com/${GIT_SRC}/ryde-build/archive/master.zip
 unzip -o master.zip
 mv ryde-build-master ryde-build
 rm master.zip
-
+cd /home/pi
 
 # Build the LongMynd version packaged with ryde-build
 echo
