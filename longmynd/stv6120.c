@@ -35,6 +35,8 @@
 #include "stv6120_utils.h"
 #include "errors.h"
 
+extern uint64_t monotonic_ms(void);
+
 /* -------------------------------------------------------------------------------------------------- */
 /* ----------------- GLOBALS ------------------------------------------------------------------------ */
 /* -------------------------------------------------------------------------------------------------- */
@@ -78,7 +80,7 @@ uint8_t stv6120_cal_lowpass(uint8_t tuner) {
 /* -------------------------------------------------------------------------------------------------- */
     uint8_t err=ERROR_NONE;
     uint8_t val;
-    uint16_t timeout;
+    uint64_t timeout;
 
     printf("Flow: Tuner cal lowpass\n");
 
@@ -90,16 +92,17 @@ uint8_t stv6120_cal_lowpass(uint8_t tuner) {
                                          (STV6120_STAT1_CALRCSTRT_START << STV6120_STAT1_CALRCSTRT_SHIFT));
     /* wait for the bit to be cleared  to say cal has finished*/
     if (err==ERROR_NONE) {
-        timeout=0;
+        timeout=monotonic_ms()+STV6120_LPFCAL_TIMEOUT_MS;
         do {
             err=stv6120_read_reg(STV6120_STAT1, &val); 
-            timeout++;
-            if (timeout==STV6120_CAL_TIMEOUT) {
+            if (monotonic_ms()>=timeout) {
                 err=ERROR_TUNER_CAL_LOWPASS_TIMEOUT;
                 printf("ERROR: tuner wait on CAL_lowpass timed out\n");
             }
         } while ((err==ERROR_NONE) && ((val & (1<<STV6120_STAT1_CALRCSTRT_SHIFT)) == (1<<STV6120_STAT1_CALRCSTRT_SHIFT)));
+        printf("Debug: LPF Cal took: %llu ms\n", (monotonic_ms() - (timeout - STV6120_LPFCAL_TIMEOUT_MS)));
     }
+
     /* turn off the low pass filter clock (=1) */
     if (err==ERROR_NONE) err=stv6120_write_reg(tuner==TUNER_1 ? STV6120_CTRL7 : STV6120_CTRL16,
                                               (tuner==TUNER_1 ? ctrl7 : ctrl16));
@@ -127,7 +130,7 @@ uint8_t stv6120_set_freq(uint8_t tuner, uint32_t freq) {
     uint8_t p;
     uint8_t icp;
     uint32_t f_vco;
-    uint16_t timeout;
+    uint64_t timeout;
     uint8_t cfhf;
 
     printf("Flow: Tuner set freq\n");
@@ -204,31 +207,37 @@ uint8_t stv6120_set_freq(uint8_t tuner, uint32_t freq) {
 
     /* wait for CALVCOSTRT bit to go low to say VCO cal is finished */
     if (err==ERROR_NONE) {
-        timeout=0;
+        timeout=monotonic_ms()+STV6120_CAL_TIMEOUT_MS;
         do {
             err=stv6120_read_reg(tuner==TUNER_1 ? STV6120_STAT1 : STV6120_STAT2, &val);
-            timeout++;
         } while ((err==ERROR_NONE) &&
-                 (timeout<STV6120_CAL_TIMEOUT) && 
+                 (monotonic_ms()<timeout) &&
                  ((val & (1<<STV6120_STAT1_CALVCOSTRT_SHIFT))!=(STV6120_STAT1_CALVCOSTRT_FINISHED << STV6120_STAT1_CALVCOSTRT_SHIFT)));
-        if ((err==ERROR_NONE) && (timeout==STV6120_CAL_TIMEOUT)) {
+        if ((err==ERROR_NONE) && (monotonic_ms()>=timeout)) {
             printf("ERROR: tuner wait on CAL timed out\n");
             err=ERROR_TUNER_CAL_TIMEOUT;
+        }
+        else
+        {
+            printf("Debug: VCO Cal took: %llu ms\n", (monotonic_ms() - (timeout - STV6120_CAL_TIMEOUT_MS)));
         }
     }
 
     /* wait for LOCK bit to go high to say PLL is locked */
     if (err==ERROR_NONE) {
-        timeout=0;
+        timeout=monotonic_ms()+STV6120_PLL_TIMEOUT_MS;
         do {
             err=stv6120_read_reg(tuner==TUNER_1 ? STV6120_STAT1 : STV6120_STAT2, &val);
-            timeout++;
         } while ((err==ERROR_NONE) &&
-                 (timeout<STV6120_CAL_TIMEOUT) &&
+                 (monotonic_ms()<timeout) &&
                  ((val & (1<<STV6120_STAT1_LOCK_SHIFT)) != (STV6120_STAT1_LOCK_LOCKED << STV6120_STAT1_LOCK_SHIFT)));
-        if ((err==ERROR_NONE) && (timeout==STV6120_CAL_TIMEOUT)) {
+        if ((err==ERROR_NONE) && (monotonic_ms()>=timeout)) {
             printf("ERROR: tuner wait on lock timed out\n");
             err=ERROR_TUNER_LOCK_TIMEOUT;
+        }
+        else
+        {
+            printf("Debug: PLL Lock took: %llu ms\n", (monotonic_ms() - (timeout - STV6120_PLL_TIMEOUT_MS)));
         }
     }
 

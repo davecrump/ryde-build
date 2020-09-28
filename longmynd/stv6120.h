@@ -35,7 +35,9 @@
 #define STV6120_P_THRESHOLD_2  596000
 #define STV6120_P_THRESHOLD_3 1191000
 
-#define STV6120_CAL_TIMEOUT 200
+#define STV6120_CAL_TIMEOUT_MS 100
+#define STV6120_PLL_TIMEOUT_MS 100
+#define STV6120_LPFCAL_TIMEOUT_MS 100
 
 uint8_t stv6120_init(uint32_t, uint32_t, bool);
 uint8_t stv6120_set_freq(uint8_t, uint32_t);
