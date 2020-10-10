@@ -32,6 +32,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <pthread.h>
+#include <signal.h>
 #include "main.h"
 #include "ftdi.h"
 #include "stv0910.h"
@@ -496,8 +497,8 @@ uint8_t do_report(longmynd_status_t *status) {
 
     /* constellations */
     if (err==ERROR_NONE) {
-        for (uint8_t count=0; count<NUM_CONSTELLATIONS; count++) {
-            stv0910_read_constellation(STV0910_DEMOD_TOP, &status->constellation[count][0], &status->constellation[count][1]);
+        for (uint8_t count=0; (err==ERROR_NONE && count<NUM_CONSTELLATIONS); count++) {
+            err=stv0910_read_constellation(STV0910_DEMOD_TOP, &status->constellation[count][0], &status->constellation[count][1]);
         }
     }
     
@@ -587,12 +588,31 @@ void *loop_i2c(void *arg) {
             status_cpy.frequency_requested = config_cpy.freq_requested[config_cpy.freq_index];
             status_cpy.symbolrate_requested = config_cpy.sr_requested[config_cpy.sr_index];
 
-            /* init all the modules */
-            if (*err==ERROR_NONE) *err=nim_init();
-            /* we are only using the one demodulator so set the other to 0 to turn it off */
-            if (*err==ERROR_NONE) *err=stv0910_init(config_cpy.sr_requested[config_cpy.sr_index],0);
-            /* we only use one of the tuners in STV6120 so freq for tuner 2=0 to turn it off */
-            if (*err==ERROR_NONE) *err=stv6120_init(config_cpy.freq_requested[config_cpy.freq_index],0,config_cpy.port_swap);
+            uint8_t tuner_err = ERROR_NONE; // Seperate to avoid triggering main() abort on handled tuner error.
+            int32_t tuner_lock_attempts = STV6120_PLL_ATTEMPTS;
+            do
+            {
+                /* init all the modules */
+                if (*err==ERROR_NONE) *err=nim_init();
+                /* we are only using the one demodulator so set the other to 0 to turn it off */
+                if (*err==ERROR_NONE) *err=stv0910_init(config_cpy.sr_requested[config_cpy.sr_index],0);
+                /* we only use one of the tuners in STV6120 so freq for tuner 2=0 to turn it off */
+                if (*err==ERROR_NONE) tuner_err=stv6120_init(config_cpy.freq_requested[config_cpy.freq_index],0,config_cpy.port_swap);
+                
+                /* Tuner Lock timeout on some NIMs - Print message and pause, do..while() handles the retry logic */
+                if (*err==ERROR_NONE && tuner_err==ERROR_TUNER_LOCK_TIMEOUT)
+                {
+                    printf("Flow: Caught tuner lock timeout, %"PRIu32" attempts at stv6120_init() remaining.\n", tuner_lock_attempts);
+                    usleep(100*1000);
+                }
+            } while (*thread_vars->main_err_ptr==ERROR_NONE
+                    && *err==ERROR_NONE
+                    && tuner_err==ERROR_TUNER_LOCK_TIMEOUT
+                    && tuner_lock_attempts-- > 0);
+
+            /* Propagate up tuner error from stv6120_init() */
+            if (*err==ERROR_NONE) *err = tuner_err;
+
             /* we turn on the LNA we want and turn the other off (if they exist) */
             if (*err==ERROR_NONE) *err=stvvglna_init(NIM_INPUT_TOP,    (config_cpy.port_swap) ? STVVGLNA_OFF : STVVGLNA_ON,  &status_cpy.lna_ok);
             if (*err==ERROR_NONE) *err=stvvglna_init(NIM_INPUT_BOTTOM, (config_cpy.port_swap) ? STVVGLNA_ON  : STVVGLNA_OFF, &status_cpy.lna_ok);
@@ -817,19 +837,36 @@ uint8_t status_all_write(longmynd_status_t *status, uint8_t (*status_write)(uint
 }
 
 /* -------------------------------------------------------------------------------------------------- */
+static uint8_t *sigterm_handler_err_ptr;
+void sigterm_handler(int sig) {
+/* -------------------------------------------------------------------------------------------------- */
+/*    Runs on SIGTERM or SIGINT (Ctrl+C).                                                             */
+/*    Sets main error variable to cause all threads to cleanly exit                                   */
+/* -------------------------------------------------------------------------------------------------- */
+    (void)sig;
+    /* There are some internally handled errors, so we blindly set here to ensure we exit */
+    *sigterm_handler_err_ptr = ERROR_SIGNAL_TERMINATE;
+}
+
+
+/* -------------------------------------------------------------------------------------------------- */
 int main(int argc, char *argv[]) {
 /* -------------------------------------------------------------------------------------------------- */
 /*    command line processing                                                                         */
 /*    module initialisation                                                                           */
 /*    Print out of status information to requested interface, triggered by pthread condition variable */
 /* -------------------------------------------------------------------------------------------------- */
-    uint8_t err;
+    uint8_t err = ERROR_NONE;
     uint8_t (*status_write)(uint8_t,uint32_t);
     uint8_t (*status_string_write)(uint8_t,char*);
 
+    sigterm_handler_err_ptr = &err;
+    signal(SIGTERM, sigterm_handler);
+    signal(SIGINT, sigterm_handler);
+
     printf("Flow: main\n");
 
-    err=process_command_line(argc, argv, &longmynd_config);
+    if (err==ERROR_NONE) err=process_command_line(argc, argv, &longmynd_config);
 
     /* first setup the fifos, udp socket, ftdi and usb */
     if(longmynd_config.status_use_ip) {
@@ -851,13 +888,17 @@ int main(int argc, char *argv[]) {
         .status = &longmynd_status
     };
 
-    if(0 != pthread_create(&thread_ts, NULL, loop_ts, (void *)&thread_vars_ts))
+    if(err==ERROR_NONE)
     {
-        fprintf(stderr, "Error creating loop_ts pthread\n");
-    }
-    else
-    {
-        pthread_setname_np(thread_ts, "TS Transport");
+        if(0 == pthread_create(&thread_ts, NULL, loop_ts, (void *)&thread_vars_ts))
+        {
+            pthread_setname_np(thread_ts, "TS Transport");
+        }
+        else
+        {
+            fprintf(stderr, "Error creating loop_ts pthread\n");
+            err = ERROR_THREAD_ERROR;
+        }
     }
 
     thread_vars_t thread_vars_ts_parse = {
@@ -867,13 +908,17 @@ int main(int argc, char *argv[]) {
         .status = &longmynd_status
     };
 
-    if(0 != pthread_create(&thread_ts_parse, NULL, loop_ts_parse, (void *)&thread_vars_ts_parse))
+    if(err==ERROR_NONE)
     {
-        fprintf(stderr, "Error creating loop_ts_parse pthread\n");
-    }
-    else
-    {
-        pthread_setname_np(thread_ts_parse, "TS Parse");
+        if(0 == pthread_create(&thread_ts_parse, NULL, loop_ts_parse, (void *)&thread_vars_ts_parse))
+        {
+            pthread_setname_np(thread_ts_parse, "TS Parse");
+        }
+        else
+        {
+            fprintf(stderr, "Error creating loop_ts_parse pthread\n");
+            err = ERROR_THREAD_ERROR;
+        }
     }
 
     thread_vars_t thread_vars_i2c = {
@@ -883,13 +928,17 @@ int main(int argc, char *argv[]) {
         .status = &longmynd_status
     };
 
-    if(0 != pthread_create(&thread_i2c, NULL, loop_i2c, (void *)&thread_vars_i2c))
+    if(err==ERROR_NONE)
     {
-        fprintf(stderr, "Error creating loop_i2c pthread\n");
-    }
-    else
-    {
-        pthread_setname_np(thread_i2c, "Receiver");
+        if(0 == pthread_create(&thread_i2c, NULL, loop_i2c, (void *)&thread_vars_i2c))
+        {
+            pthread_setname_np(thread_i2c, "Receiver");
+        }
+        else
+        {
+            fprintf(stderr, "Error creating loop_i2c pthread\n");
+            err = ERROR_THREAD_ERROR;
+        }
     }
 
     thread_vars_t thread_vars_beep = {
@@ -899,23 +948,29 @@ int main(int argc, char *argv[]) {
         .status = &longmynd_status
     };
 
-    if(0 != pthread_create(&thread_beep, NULL, loop_beep, (void *)&thread_vars_beep))
+    if(err==ERROR_NONE)
     {
-        fprintf(stderr, "Error creating loop_beep pthread\n");
-    }
-    else
-    {
-        pthread_setname_np(thread_beep, "Beep Audio");
+        if(0 == pthread_create(&thread_beep, NULL, loop_beep, (void *)&thread_vars_beep))
+        {
+            pthread_setname_np(thread_beep, "Beep Audio");
+        }
+        else
+        {
+            fprintf(stderr, "Error creating loop_beep pthread\n");
+            err = ERROR_THREAD_ERROR;
+        }
     }
 
     uint64_t last_status_sent_monotonic = 0;
     longmynd_status_t longmynd_status_cpy;
 
-    /* Initialise TS data re-init timer to prevent immediate reset */
-    pthread_mutex_lock(&longmynd_status.mutex);
-    longmynd_status.last_ts_or_reinit_monotonic = monotonic_ms();
-    pthread_mutex_unlock(&longmynd_status.mutex);
-
+    if(err==ERROR_NONE)
+    {
+        /* Initialise TS data re-init timer to prevent immediate reset */
+        pthread_mutex_lock(&longmynd_status.mutex);
+        longmynd_status.last_ts_or_reinit_monotonic = monotonic_ms();
+        pthread_mutex_unlock(&longmynd_status.mutex);
+    }
     while (err==ERROR_NONE) {
         /* Test if new status data is available */
         if(longmynd_status.last_updated_monotonic != last_status_sent_monotonic) {
@@ -958,11 +1013,15 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    /* Exited, wait for child threads to exit */
+    printf("Flow: Main loop aborted, waiting for threads.\n");
+
+    /* No fatal errors are currently possible here, so don't currently check return values */
     pthread_join(thread_ts_parse, NULL);
     pthread_join(thread_ts, NULL);
     pthread_join(thread_i2c, NULL);
     pthread_join(thread_beep, NULL);
+
+    printf("Flow: All threads accounted for. Exiting cleanly.\n");
 
     return err;
 }
