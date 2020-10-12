@@ -37,13 +37,14 @@
 
 #define STV6120_CAL_TIMEOUT_MS 50 // Nominally 1-2ms
 #define STV6120_PLL_TIMEOUT_MS 50 // Nominally 0-2ms
-#define STV6120_PLL_ATTEMPTS 5
+#define STV6120_PLL_ATTEMPTS 10
 #define STV6120_LPFCAL_TIMEOUT_MS 50 // Nominally 2-4ms
 
 uint8_t stv6120_init(uint32_t, uint32_t, bool);
 uint8_t stv6120_set_freq(uint8_t, uint32_t);
 uint8_t stv6120_cal_lowpass(uint8_t);
 void stv6120_print_settings();
+uint8_t stv6120_powerdown_both_paths(void);
 
 #endif
 

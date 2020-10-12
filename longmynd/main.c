@@ -603,7 +603,10 @@ void *loop_i2c(void *arg) {
                 if (*err==ERROR_NONE && tuner_err==ERROR_TUNER_LOCK_TIMEOUT)
                 {
                     printf("Flow: Caught tuner lock timeout, %"PRIu32" attempts at stv6120_init() remaining.\n", tuner_lock_attempts);
-                    usleep(100*1000);
+                    /* Power down the synthesizers to potentially improve success on retry. */
+                    /* - Everything else gets powered down as well to stay within datasheet-defined states */
+                    *err=stv6120_powerdown_both_paths();
+                    if (*err==ERROR_NONE) usleep(200*1000);
                 }
             } while (*thread_vars->main_err_ptr==ERROR_NONE
                     && *err==ERROR_NONE
