@@ -448,3 +448,32 @@ void stv6120_print_settings() {
     }
 }
 
+/* -------------------------------------------------------------------------------------------------- */
+uint8_t stv6120_powerdown_both_paths(void) {
+/* -------------------------------------------------------------------------------------------------- */
+/* Powers down tuner1 and tuner2 signal path (synthesizer, mixer, gain amplifier)                                     */
+/*   tuner: TUNER_1  |  TUNER_2 : which tuner we are going to work on                                 */
+/*  return: error code                                                                                */
+/* -------------------------------------------------------------------------------------------------- */
+    uint8_t err;
+
+    printf("Flow: Powering down both stv6120 signal paths\n");
+
+    /* Path 1 */
+    err=stv6120_write_reg(STV6120_CTRL2,
+        (STV6120_CTRL2_DCLOOPOFF_DISABLE << STV6120_CTRL2_DCLOOPOFF_SHIFT) |
+        (STV6120_CTRL2_SDOFF_ON          << STV6120_CTRL2_SDOFF_SHIFT)     |
+        (STV6120_CTRL2_SYN_OFF           << STV6120_CTRL2_SYN_SHIFT)       |
+        (STV6120_CTRL2_REFOUTSEL_1_25V   << STV6120_CTRL2_REFOUTSEL_SHIFT) |
+        (STV6120_CTRL2_BBGAIN_0DB        << STV6120_CTRL2_BBGAIN_SHIFT)    );
+    
+    /* Path 2 */
+    if (err==ERROR_NONE) err=stv6120_write_reg(STV6120_CTRL11,
+        (STV6120_CTRL2_DCLOOPOFF_DISABLE << STV6120_CTRL2_DCLOOPOFF_SHIFT) |
+        (STV6120_CTRL2_SDOFF_ON          << STV6120_CTRL2_SDOFF_SHIFT)     |
+        (STV6120_CTRL2_SYN_OFF           << STV6120_CTRL2_SYN_SHIFT)       |
+        (STV6120_CTRL2_REFOUTSEL_1_25V   << STV6120_CTRL2_REFOUTSEL_SHIFT) |
+        (STV6120_CTRL2_BBGAIN_0DB        << STV6120_CTRL2_BBGAIN_SHIFT)    );
+
+    return err;
+}
