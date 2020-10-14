@@ -96,11 +96,11 @@ presets:
         sr:   1000
         band: *band437
     1255_MHz_333: &preset09
-        freq: 437000
+        freq: 1255000
         sr:   333
         band: *band1255
     1255_MHz_Custom: &preset10
-        freq: 437000
+        freq: 1255000
         sr:   1000
         band: *band1255
 
