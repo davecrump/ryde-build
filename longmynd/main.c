@@ -777,6 +777,7 @@ uint8_t status_all_write(longmynd_status_t *status, uint8_t (*status_write)(uint
 /*  Returns: error code                                                                               */
 /* -------------------------------------------------------------------------------------------------- */
     uint8_t err=ERROR_NONE;
+    char mer_string[7];
 
     /* Main status */
     if (err==ERROR_NONE) err=status_write(STATUS_STATE,status->state);
@@ -807,8 +808,16 @@ uint8_t status_all_write(longmynd_status_t *status, uint8_t (*status_write)(uint
     if (err==ERROR_NONE) err=status_write(STATUS_VITERBI_ERROR_RATE, status->viterbi_error_rate);
     /* BER */
     if (err==ERROR_NONE) err=status_write(STATUS_BER, status->bit_error_rate);
-    /* MER */
-    if (err==ERROR_NONE) err=status_write(STATUS_MER, status->modulation_error_rate);
+    /* MER With correction for 2s complement */
+    if (status->modulation_error_rate < 512 )
+    {
+      if (err==ERROR_NONE) err=status_write(STATUS_MER, status->modulation_error_rate);
+    }
+    else
+    {
+      snprintf(mer_string, 6, "%d", status->modulation_error_rate - 1024);
+      if (err==ERROR_NONE) err=status_string_write(STATUS_MER, mer_string);
+    }
     /* BCH Uncorrected Errors Flag */
     if (err==ERROR_NONE) err=status_write(STATUS_ERRORS_BCH_UNCORRECTED, status->errors_bch_uncorrected);
     /* BCH Corrected Errors Count */

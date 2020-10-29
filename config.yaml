@@ -129,6 +129,24 @@ gpio:
         MENU:   5
         MUTE:   6
 
+    switches:
+        highgoing:
+            OSDON: 26
+        lowgoing:
+            OSDOFF: 26
+
+osd:
+    timers:
+        USERTRIGGER: 10
+        PROGRAMTRIGGER: 10
+    active:
+        MUTE: null
+        MER: null
+        REPORT: null
+        PROGRAM: null
+    inactive:
+        MUTE: null
+
 shutdownBehavior: APPSTOP
 
 debug:
