@@ -1,3 +1,7 @@
+202010290
+Add OSD
+Bugfix -ve MERs in LongMynd
+
 202010100
 Further Bugfixes for Tuner VCO Timeout
 

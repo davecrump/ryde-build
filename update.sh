@@ -185,7 +185,7 @@ fi
 #echo "---------------------------------------------"
 #echo
 
-grep -q "presets" "$PATHUBACKUP"/config.yaml
+grep -q "REPORT" "$PATHUBACKUP"/config.yaml
 if [ $? == 0 ]; then # User's config file is latest version, so simply copy back
   cp -f -r "$PATHUBACKUP"/config.yaml /home/pi/ryde/config.yaml >/dev/null 2>/dev/null
 else # User's config file needs updating, so copy master and reset remote control
