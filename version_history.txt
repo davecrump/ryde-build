@@ -1,3 +1,6 @@
+202011020
+Bugfix to restart VLC on Signal Change without loss of lock
+
 202010290
 Add OSD
 Bugfix -ve MERs in LongMynd
