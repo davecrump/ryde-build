@@ -44,7 +44,7 @@ do_info()
 
 do_Set_RC_Type()
 {
-  RC_FILE=""
+  RC_FILE="exit"
 
   menuchoice=$(whiptail --title "Set Remote Control Model" --menu "Select Choice" 30 78 20 \
     "1 Virgin" "Virgin Media"  \
@@ -67,7 +67,9 @@ do_Set_RC_Type()
     "18 Avermedia" "AverMedia PC Card Tuner" \
     "19 AEG DVD" "German AEG DVD Remote" \
     "20 G-RCU-023" "German Remote from an Opticum HD AX150, labelled G-RCU-023" \
-    "21 Exit" "Exit without changing remote control model" \
+    "21 Pheonix" "Pheonix Satellite RX Remote" \
+    "22 Classic" "Classic remote marked IRC83079" \
+    "23 Exit" "Exit without changing remote control model" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
         1\ *) RC_FILE="virgin" ;;
@@ -90,7 +92,9 @@ do_Set_RC_Type()
         18\ *) RC_FILE="avermediacard" ;;
         19\ *) RC_FILE="aeg_dvd" ;;
         20\ *) RC_FILE="g_rcu_023" ;;
-        21\ *) RC_FILE="exit" ;;
+        21\ *) RC_FILE="pheonix" ;;
+        22\ *) RC_FILE="classic" ;;
+        23\ *) RC_FILE="exit" ;;
     esac
 
   if [ "$RC_FILE" != "exit" ]; then # Amend the config file
@@ -98,14 +102,6 @@ do_Set_RC_Type()
     RC_FILE="        - ${RC_FILE}"
     sed -i "/handsets:/{n;s/.*/$RC_FILE/}" /home/pi/ryde/config.yaml
 
-    # Load the requested file
-    #cp /home/pi/RydeHandsets/definitions/"$RC_FILE" /home/pi/ryde/handset.yaml
-
-    # Set the requested protocol setting
-    #sudo ir-keytable -p $PROTOCOL >/dev/null 2>/dev/null
-
-    # And change it for the future
-    #sed -i "/ir-keytable/c\sudo ir-keytable -p $PROTOCOL >/dev/null 2>/dev/null" /home/pi/ryde-build/rx.sh
   fi
 }
 
@@ -1015,6 +1011,7 @@ do_Set_Bands()
       if [ "$LO_FREQ" != "0" ]; then  # Set LO side
         Radio1=OFF
         Radio2=OFF
+        Radio3=OFF
         case "$LO_SIDE" in
           "LOW")
             Radio1=ON
@@ -1022,14 +1019,18 @@ do_Set_Bands()
           "HIGH")
             Radio2=ON
           ;;
+          "SUM")
+            Radio3=ON
+          ;;
           *)
             Radio1=ON
           ;;
         esac
-        LO_SIDE=$(whiptail --title "Select the LO Side for the QO-100 Band" --radiolist \
+        LO_SIDE=$(whiptail --title "Select the LO Configuration for the QO-100 Band" --radiolist \
           "Select Choice" 20 78 5 \
-          "LOW" "LO frequency below signal frequency (normal for QO-100)" $Radio1 \
-          "HIGH" "LO frequency above signal frequency" $Radio2 \
+          "LOW" "Tuner Frequency = Signal Frequency - LO Frequency (normal)" $Radio1 \
+          "HIGH" "Tuner Frequency = LO Frequency - Signal Frequency" $Radio2 \
+          "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
           3>&2 2>&1 1>&3)
         if [ $? -eq 0 ]; then
           sed -i "/    QO-100:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
@@ -1115,6 +1116,7 @@ do_Set_Bands()
       if [ "$LO_FREQ" != "0" ]; then  # Set LO side
         Radio1=OFF
         Radio2=OFF
+        Radio3=OFF
         case "$LO_SIDE" in
           "LOW")
             Radio1=ON
@@ -1122,14 +1124,18 @@ do_Set_Bands()
           "HIGH")
             Radio2=ON
           ;;
+          "SUM")
+            Radio3=ON
+          ;;
           *)
             Radio1=ON
           ;;
         esac
-        LO_SIDE=$(whiptail --title "Select the LO Side for the 146 MHz Band" --radiolist \
+        LO_SIDE=$(whiptail --title "Select the LO Configuration for the 146 MHz Band" --radiolist \
           "Select Choice" 20 78 5 \
-          "LOW" "LO frequency below signal frequency (normal for 146)" $Radio1 \
-          "HIGH" "LO frequency above signal frequency" $Radio2 \
+          "LOW" "Tuner Frequency = Signal Frequency - LO Frequency" $Radio1 \
+          "HIGH" "Tuner Frequency = LO Frequency - Signal Frequency" $Radio2 \
+          "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
           3>&2 2>&1 1>&3)
         if [ $? -eq 0 ]; then
           sed -i "/    146:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
@@ -1215,6 +1221,7 @@ do_Set_Bands()
       if [ "$LO_FREQ" != "0" ]; then  # Set LO side
         Radio1=OFF
         Radio2=OFF
+        Radio3=OFF
         case "$LO_SIDE" in
           "LOW")
             Radio1=ON
@@ -1222,14 +1229,18 @@ do_Set_Bands()
           "HIGH")
             Radio2=ON
           ;;
+          "SUM")
+            Radio3=ON
+          ;;
           *)
             Radio1=ON
           ;;
         esac
-        LO_SIDE=$(whiptail --title "Select the LO Side for the 437 MHz Band" --radiolist \
+        LO_SIDE=$(whiptail --title "Select the LO Configuration for the 437 MHz Band" --radiolist \
           "Select Choice" 20 78 5 \
-          "LOW" "LO frequency below signal frequency (normal for 437)" $Radio1 \
-          "HIGH" "LO frequency above signal frequency" $Radio2 \
+          "LOW" "Tuner Frequency = Signal Frequency - LO Frequency" $Radio1 \
+          "HIGH" "Tuner Frequency = LO Frequency - Signal Frequency" $Radio2 \
+          "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
           3>&2 2>&1 1>&3)
         if [ $? -eq 0 ]; then
           sed -i "/    437:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
@@ -1315,6 +1326,7 @@ do_Set_Bands()
       if [ "$LO_FREQ" != "0" ]; then  # Set LO side
         Radio1=OFF
         Radio2=OFF
+        Radio3=OFF
         case "$LO_SIDE" in
           "LOW")
             Radio1=ON
@@ -1322,14 +1334,18 @@ do_Set_Bands()
           "HIGH")
             Radio2=ON
           ;;
+          "SUM")
+            Radio3=ON
+          ;;
           *)
             Radio1=ON
           ;;
         esac
-        LO_SIDE=$(whiptail --title "Select the LO Side for the 1255 MHz Band" --radiolist \
+        LO_SIDE=$(whiptail --title "Select the LO Configuration for the 1255 MHz Band" --radiolist \
           "Select Choice" 20 78 5 \
-          "LOW" "LO frequency below signal frequency (normal for 1255)" $Radio1 \
-          "HIGH" "LO frequency above signal frequency" $Radio2 \
+          "LOW" "Tuner Frequency = Signal Frequency - LO Frequency" $Radio1 \
+          "HIGH" "Tuner Frequency = LO Frequency - Signal Frequency" $Radio2 \
+          "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
           3>&2 2>&1 1>&3)
         if [ $? -eq 0 ]; then
           sed -i "/    1255:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
@@ -1415,6 +1431,7 @@ do_Set_Bands()
       if [ "$LO_FREQ" != "0" ]; then  # Set LO side
         Radio1=OFF
         Radio2=OFF
+        Radio3=OFF
         case "$LO_SIDE" in
           "LOW")
             Radio1=ON
@@ -1422,14 +1439,18 @@ do_Set_Bands()
           "HIGH")
             Radio2=ON
           ;;
+          "SUM")
+            Radio3=ON
+          ;;
           *)
             Radio1=ON
           ;;
         esac
-        LO_SIDE=$(whiptail --title "Select the LO Side for the 2400 MHz Band" --radiolist \
+        LO_SIDE=$(whiptail --title "Select the LO Configuration for the 2400 MHz Band" --radiolist \
           "Select Choice" 20 78 5 \
-          "LOW" "LO frequency below signal frequency (normal for 2400)" $Radio1 \
-          "HIGH" "LO frequency above signal frequency" $Radio2 \
+          "LOW" "Tuner Frequency = Signal Frequency - LO Frequency" $Radio1 \
+          "HIGH" "Tuner Frequency = LO Frequency - Signal Frequency" $Radio2 \
+          "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
           3>&2 2>&1 1>&3)
         if [ $? -eq 0 ]; then
           sed -i "/    2400:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
@@ -1515,6 +1536,7 @@ do_Set_Bands()
       if [ "$LO_FREQ" != "0" ]; then  # Set LO side
         Radio1=OFF
         Radio2=OFF
+        Radio3=OFF
         case "$LO_SIDE" in
           "LOW")
             Radio1=ON
@@ -1522,14 +1544,18 @@ do_Set_Bands()
           "HIGH")
             Radio2=ON
           ;;
+          "SUM")
+            Radio3=ON
+          ;;
           *)
             Radio1=ON
           ;;
         esac
-        LO_SIDE=$(whiptail --title "Select the LO Side for the 3400 MHz Band" --radiolist \
+        LO_SIDE=$(whiptail --title "Select the LO Configuration for the 3400 MHz Band" --radiolist \
           "Select Choice" 20 78 5 \
-          "LOW" "LO frequency below signal frequency (normal for 3400)" $Radio1 \
-          "HIGH" "LO frequency above signal frequency" $Radio2 \
+          "LOW" "Tuner Frequency = Signal Frequency - LO Frequency" $Radio1 \
+          "HIGH" "Tuner Frequency = LO Frequency - Signal Frequency (normal)" $Radio2 \
+          "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
           3>&2 2>&1 1>&3)
         if [ $? -eq 0 ]; then
           sed -i "/    3400:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
@@ -1615,6 +1641,7 @@ do_Set_Bands()
       if [ "$LO_FREQ" != "0" ]; then  # Set LO side
         Radio1=OFF
         Radio2=OFF
+        Radio3=OFF
         case "$LO_SIDE" in
           "LOW")
             Radio1=ON
@@ -1622,14 +1649,18 @@ do_Set_Bands()
           "HIGH")
             Radio2=ON
           ;;
+          "SUM")
+            Radio3=ON
+          ;;
           *)
             Radio1=ON
           ;;
         esac
-        LO_SIDE=$(whiptail --title "Select the LO Side for the 5760 MHz Band" --radiolist \
+        LO_SIDE=$(whiptail --title "Select the LO Configuration for the 5760 MHz Band" --radiolist \
           "Select Choice" 20 78 5 \
-          "LOW" "LO frequency below signal frequency (normal for 5760)" $Radio1 \
-          "HIGH" "LO frequency above signal frequency" $Radio2 \
+          "LOW" "Tuner Frequency = Signal Frequency - LO Frequency (normal)" $Radio1 \
+          "HIGH" "Tuner Frequency = LO Frequency - Signal Frequency" $Radio2 \
+          "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
           3>&2 2>&1 1>&3)
         if [ $? -eq 0 ]; then
           sed -i "/    5760:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
@@ -1715,6 +1746,7 @@ do_Set_Bands()
       if [ "$LO_FREQ" != "0" ]; then  # Set LO side
         Radio1=OFF
         Radio2=OFF
+        Radio3=OFF
         case "$LO_SIDE" in
           "LOW")
             Radio1=ON
@@ -1722,14 +1754,18 @@ do_Set_Bands()
           "HIGH")
             Radio2=ON
           ;;
+          "SUM")
+            Radio3=ON
+          ;;
           *)
             Radio1=ON
           ;;
         esac
-        LO_SIDE=$(whiptail --title "Select the LO Side for the 10368 MHz Band" --radiolist \
+        LO_SIDE=$(whiptail --title "Select the LO Configuration for the 10368 MHz Band" --radiolist \
           "Select Choice" 20 78 5 \
-          "LOW" "LO frequency below signal frequency (normal for 10368)" $Radio1 \
-          "HIGH" "LO frequency above signal frequency" $Radio2 \
+          "LOW" "Tuner Frequency = Signal Frequency - LO Frequency (normal)" $Radio1 \
+          "HIGH" "Tuner Frequency = LO Frequency - Signal Frequency" $Radio2 \
+          "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
           3>&2 2>&1 1>&3)
         if [ $? -eq 0 ]; then
           sed -i "/    10368:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml

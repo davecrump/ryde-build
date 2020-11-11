@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Created by davecrump 20200714 for Ryde on Buster Raspios
-# Updated for version 202009070
+# Updated for version 202011110
 
 echo
 echo "----------------------------------------"
@@ -272,6 +272,14 @@ else # User's config file needs updating, so copy master and reset remote contro
   grep -q "g_rcu_023" "$PATHUBACKUP"/config.yaml
   if  [ $? == 0 ]; then   ## Amend new file for "g_rcu_023" 20
     sed -i "/handsets:/{n;s/.*/        - g_rcu_023/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "pheonix" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "pheonix" 21
+    sed -i "/handsets:/{n;s/.*/        - pheonix/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "classic" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "classic" 22
+    sed -i "/handsets:/{n;s/.*/        - classic/}" /home/pi/ryde/config.yaml
   fi
 fi
 
