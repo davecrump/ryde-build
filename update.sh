@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Created by davecrump 20200714 for Ryde on Buster Raspios
-# Updated for version 202011110
+# Updated for version 202011160
 
 echo
 echo "----------------------------------------"
@@ -280,6 +280,14 @@ else # User's config file needs updating, so copy master and reset remote contro
   grep -q "classic" "$PATHUBACKUP"/config.yaml
   if  [ $? == 0 ]; then   ## Amend new file for "classic" 22
     sed -i "/handsets:/{n;s/.*/        - classic/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "tesco_tv" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "tesco_tv" 23
+    sed -i "/handsets:/{n;s/.*/        - tesco_tv/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "led_tv" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "led_tv" 24
+    sed -i "/handsets:/{n;s/.*/        - led_tv/}" /home/pi/ryde/config.yaml
   fi
 fi
 
