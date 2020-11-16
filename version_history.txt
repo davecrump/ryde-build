@@ -1,6 +1,7 @@
-202011110
+202011160
 Correction of LNB LO Calculations
-Added Pheonix and Classic remote controls
+Change direct reception to SUM in config file
+Added 4 remote controls
 
 202011020
 Bugfix to restart VLC on Signal Change without loss of lock

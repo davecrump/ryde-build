@@ -15,25 +15,25 @@ bands:
         gpioid: 7
     146: &band146
         lofreq: 0
-        loside: HIGH
+        loside: SUM
         pol: NONE
         port: BOTTOM
         gpioid: 1
     437: &band437
         lofreq: 0
-        loside: HIGH
+        loside: SUM
         pol:  NONE
         port: BOTTOM
         gpioid: 2
     1255: &band1255
         lofreq: 0
-        loside: HIGH
+        loside: SUM
         pol:  NONE
         port: BOTTOM
         gpioid: 3
     2400: &band2400
         lofreq: 0
-        loside: HIGH
+        loside: SUM
         pol:  NONE
         port: BOTTOM
         gpioid: 4
