@@ -300,7 +300,7 @@ do_Set_Scan_Freq()
   PRESET_SCAN_FREQ_2=$(whiptail --inputbox "Enter the second frequency in kHz (enter 0 for no more freqs)" 8 78 $PRESET_SCAN_FREQ_2 --title "Frequency 2 Entry Menu" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then  # value has been changed
     if [ "$SCAN_FREQ_VALUES" == "1" ] ; then  # Previously only a single FREQ
-      if [ "$PRESET_SCAN_FREQ_2" != "0" ]; then      # new valid FREQ entered (else do nothing)
+      if [ "$PRESET_SCAN_FREQ_2" != "0" ] && [[ ! -z "$PRESET_SCAN_FREQ_2" ]]; then      # new valid FREQ entered (else do nothing)
         # row 3 does not exist, so create it
         sed -i "/^    "$AMEND_PRESET":/!{p;d;};n;n;a \          -" /home/pi/ryde/config.yaml
         # Put FREQ 2 on the third line
@@ -308,7 +308,7 @@ do_Set_Scan_Freq()
         SCAN_FREQ_VALUES=2
       fi
     else                                    # Previously multiple FREQs
-      if [ "$PRESET_SCAN_FREQ_2" != "0" ]; then      # new valid FREQ entered, so now at least 2 freqs
+      if [ "$PRESET_SCAN_FREQ_2" != "0" ] && [[ ! -z "$PRESET_SCAN_FREQ_2" ]]; then      # new valid FREQ entered, so now at least 2 freqs
         # so replace row 3 with new $PRESET_SCAN_FREQ_2
         sed -i "/^    "$AMEND_PRESET":/!b;n;n;n;c\          - $PRESET_SCAN_FREQ_2" /home/pi/ryde/config.yaml
       else                                  # no more scanning FREQs, so delete 2nd 3rd and 4th freqs
@@ -333,7 +333,7 @@ do_Set_Scan_Freq()
     PRESET_SCAN_FREQ_3=$(whiptail --inputbox "Enter the third frequency in kHz (enter 0 for no more freqs)" 8 78 $PRESET_SCAN_FREQ_3 --title "Frequency 3 Entry Menu" 3>&1 1>&2 2>&3)
     if [ $? -eq 0 ]; then  # value has been changed
       if [ "$SCAN_FREQ_VALUES" == "2" ] ; then  # Previously only 2 FREQs
-        if [ "$PRESET_SCAN_FREQ_3" != "0" ]; then      # new valid FREQ entered (else do nothing)
+        if [ "$PRESET_SCAN_FREQ_3" != "0" ] && [[ ! -z "$PRESET_SCAN_FREQ_3" ]]; then      # new valid FREQ entered (else do nothing)
           # row 4 does not exist, so create it
           sed -i "/^    "$AMEND_PRESET":/!{p;d;};n;n;n;a \          -" /home/pi/ryde/config.yaml
           # Put FREQ 3 on the 4th line
@@ -342,7 +342,7 @@ do_Set_Scan_Freq()
           SCAN_FREQ_VALUES=3
         fi
       else                                    # Previously multiple FREQs
-        if [ "$PRESET_SCAN_FREQ_3" != "0" ]; then      # new valid FREQ entered
+        if [ "$PRESET_SCAN_FREQ_3" != "0" ] && [[ ! -z "$PRESET_SCAN_FREQ_3" ]]; then      # new valid FREQ entered
           # so replace row 4 with new $SCAN_FREQ_3
           sed -i "/^    "$AMEND_PRESET":/!b;n;n;n;n;c\          - $PRESET_SCAN_FREQ_3" /home/pi/ryde/config.yaml
         else                                  # no more scanning FREQs, so delete lines
@@ -363,7 +363,7 @@ do_Set_Scan_Freq()
       PRESET_SCAN_FREQ_4=$(whiptail --inputbox "Enter the fourth frequency in kHz (enter 0 for no more freqs)" 8 78 $PRESET_SCAN_FREQ_4 --title "Frequency 4 Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then  # value has been changed
         if [ "$SCAN_FREQ_VALUES" == "3" ] ; then  # Previously only 3 FREQs
-          if [ "$PRESET_SCAN_FREQ_4" != "0" ]; then      # new valid FREQ entered (else do nothing)
+          if [ "$PRESET_SCAN_FREQ_4" != "0" ] && [[ ! -z "$PRESET_SCAN_FREQ_4" ]]; then      # new valid FREQ entered (else do nothing)
             # row 5 does not exist, so create it
             sed -i "/^    "$AMEND_PRESET":/!{p;d;};n;n;n;n;a \          -" /home/pi/ryde/config.yaml
             # Put FREQ 4 on the 5th line
@@ -372,7 +372,7 @@ do_Set_Scan_Freq()
             SCAN_FREQ_VALUES=4
           fi
         else                                    # Previously 4 FREQs
-          if [ "$PRESET_SCAN_FREQ_4" != "0" ]; then      # new valid FREQ entered
+          if [ "$PRESET_SCAN_FREQ_4" != "0" ] && [[ ! -z "$PRESET_SCAN_FREQ_4" ]]; then      # new valid FREQ entered
             # so replace row 5 with new $SCAN_FREQ_4
             sed -i "/^    "$AMEND_PRESET":/!b;n;n;n;n;n;c\          - $PRESET_SCAN_FREQ_4" /home/pi/ryde/config.yaml
           else                                  # no more scanning FREQs, so delete lines
@@ -425,11 +425,11 @@ do_Set_SR()
     "4") PAD=";n;n;n;n;n" ;;
   esac
 
-  DEFAULT_SR=0
-  SCAN_SR_1=0
-  SCAN_SR_2=0
-  SCAN_SR_3=0
-  SCAN_SR_4=0
+  PRESET_SR=0
+  PRESET_SCAN_SR_1=0
+  PRESET_SCAN_SR_2=0
+  PRESET_SCAN_SR_3=0
+  PRESET_SCAN_SR_4=0
 
   # Read and trim the preset SR Values
   PRESET_SR_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep presets__"$AMEND_PRESET"__sr=)"
@@ -534,11 +534,10 @@ do_Set_Scan_SR()
     "4") PAD=";n;n;n;n;n" ;;
   esac
 
-  DEFAULT_SR=0
-  SCAN_SR_1=0
-  SCAN_SR_2=0
-  SCAN_SR_3=0
-  SCAN_SR_4=0
+  PRESET_SCAN_SR_1=0
+  PRESET_SCAN_SR_2=0
+  PRESET_SCAN_SR_3=0
+  PRESET_SCAN_SR_4=0
 
   # Read and trim the preset SR Values
   PRESET_SR_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep presets__"$AMEND_PRESET"__sr=)"
@@ -596,7 +595,7 @@ do_Set_Scan_SR()
   PRESET_SCAN_SR_2=$(whiptail --inputbox "Enter the second SR in kS (enter 0 for no more SRs)" 8 78 $PRESET_SCAN_SR_2 --title "Symbol Rate 2 Entry Menu" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then  # value has been changed
     if [ "$SCAN_SR_VALUES" == "1" ] ; then  # Previously only a single SR
-      if [ "$PRESET_SCAN_SR_2" != "0" ]; then      # new valid SR entered (else do nothing)
+      if [ "$PRESET_SCAN_SR_2" != "0" ] && [[ ! -z "$PRESET_SCAN_SR_2" ]]; then      # new valid SR entered (else do nothing)
         # row 3 does not exist, so create it
         sed -i "/^    "$AMEND_PRESET":/!{p;d;}"$PAD";n;n;a \          -" /home/pi/ryde/config.yaml
         # Put SR 2 on the third line
@@ -604,7 +603,7 @@ do_Set_Scan_SR()
         SCAN_SR_VALUES=2
       fi
     else                                    # Previously multiple SRs
-      if [ "$PRESET_SCAN_SR_2" != "0" ]; then      # new valid SR entered, so now at least 2 srs
+      if [ "$PRESET_SCAN_SR_2" != "0" ] && [[ ! -z "$PRESET_SCAN_SR_2" ]]; then      # new valid SR entered, so now at least 2 srs
         # so replace row 3 with new $PRESET_SCAN_SR_2
         sed -i "/^    "$AMEND_PRESET":/!b"$PAD";n;n;n;c\          - $PRESET_SCAN_SR_2" /home/pi/ryde/config.yaml
       else                                  # no more scanning SRs, so delete 2nd 3rd and 4th SRs
@@ -629,7 +628,7 @@ do_Set_Scan_SR()
     PRESET_SCAN_SR_3=$(whiptail --inputbox "Enter the third SR in kS (enter 0 for no more SRs)" 8 78 $PRESET_SCAN_SR_3 --title "Symbol Rate 3 Entry Menu" 3>&1 1>&2 2>&3)
     if [ $? -eq 0 ]; then  # value has been changed
       if [ "$SCAN_SR_VALUES" == "2" ] ; then  # Previously only 2 SRs
-        if [ "$PRESET_SCAN_SR_3" != "0" ]; then      # new valid SR entered (else do nothing)
+        if [ "$PRESET_SCAN_SR_3" != "0" ] && [[ ! -z "$PRESET_SCAN_SR_3" ]]; then      # new valid SR entered (else do nothing)
           # row 4 does not exist, so create it
           sed -i "/^    "$AMEND_PRESET":/!{p;d;}"$PAD";n;n;n;a \          -" /home/pi/ryde/config.yaml
           # Put SR 3 on the 4th line
@@ -638,7 +637,7 @@ do_Set_Scan_SR()
           SCAN_SR_VALUES=3
         fi
       else                                    # Previously multiple SRs
-        if [ "$PRESET_SCAN_SR_3" != "0" ]; then      # new valid SR entered
+        if [ "$PRESET_SCAN_SR_3" != "0" ] && [[ ! -z "$PRESET_SCAN_SR_3" ]]; then      # new valid SR entered
           # so replace row 4 with new $SCAN_SR_3
           sed -i "/^    "$AMEND_PRESET":/!b"$PAD";n;n;n;n;c\          - $PRESET_SCAN_SR_3" /home/pi/ryde/config.yaml
         else                                  # no more scanning SRs, so delete lines
@@ -659,7 +658,7 @@ do_Set_Scan_SR()
       PRESET_SCAN_SR_4=$(whiptail --inputbox "Enter the fourth SR in kS (enter 0 for no more SRs)" 8 78 $PRESET_SCAN_SR_4 --title "Symbol Rate 4 Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then  # value has been changed
         if [ "$SCAN_SR_VALUES" == "3" ] ; then  # Previously only 3 SRs
-          if [ "$PRESET_SCAN_SR_4" != "0" ]; then      # new valid SR entered (else do nothing)
+          if [ "$PRESET_SCAN_SR_4" != "0" ] && [[ ! -z "$PRESET_SCAN_SR_4" ]]; then      # new valid SR entered (else do nothing)
             # row 5 does not exist, so create it
             sed -i "/^    "$AMEND_PRESET":/!{p;d;}"$PAD";n;n;n;n;a \          -" /home/pi/ryde/config.yaml
             # Put SR 4 on the 5th line
@@ -668,7 +667,7 @@ do_Set_Scan_SR()
             SCAN_SR_VALUES=4
           fi
         else                                    # Previously 4 SRs
-          if [ "$PRESET_SCAN_SR_4" != "0" ]; then      # new valid SR entered
+          if [ "$PRESET_SCAN_SR_4" != "0" ] && [[ ! -z "$PRESET_SCAN_SR_4" ]]; then      # new valid SR entered
             # so replace row 5 with new $SCAN_SR_4
             sed -i "/^    "$AMEND_PRESET":/!b"$PAD";n;n;n;n;n;c\          - $PRESET_SCAN_SR_4" /home/pi/ryde/config.yaml
           else                                  # no more scanning SRs, so delete lines
@@ -1143,10 +1142,10 @@ do_Set_Bands()
           Radio1=ON
         ;;
       esac
-      NEW_PORT=$(whiptail --title "Select the new QO-100 Port" --radiolist \
+      NEW_PORT=$(whiptail --title "Select the new QO-100 Tuner Port" --radiolist \
         "Highlight choice, select with space bar and then press enter" 20 78 5 \
-        "TOP" "Top LNB Port    (Socket A)" $Radio1 \
-        "BOTTOM" "Bottom LNB Port (Socket B)" $Radio2 \
+        "TOP" "Top Tuner Port    (Socket A)" $Radio1 \
+        "BOTTOM" "Bottom Tuner Port (Socket B)" $Radio2 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
         sed -i "/    QO-100:/!b;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
@@ -1251,10 +1250,10 @@ do_Set_Bands()
           Radio1=ON
         ;;
       esac
-      NEW_PORT=$(whiptail --title "Select the new 146 MHz Band Port" --radiolist \
+      NEW_PORT=$(whiptail --title "Select the new 146 MHz Band Tuner Port" --radiolist \
         "Highlight choice, select with space bar and then press enter" 20 78 5 \
-        "TOP" "Top LNB Port    (Socket A)" $Radio1 \
-        "BOTTOM" "Bottom LNB Port (Socket B)" $Radio2 \
+        "TOP" "Top Tuner Port    (Socket A)" $Radio1 \
+        "BOTTOM" "Bottom Tuner Port (Socket B)" $Radio2 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
         sed -i "/    146:/!b;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
@@ -1359,10 +1358,10 @@ do_Set_Bands()
           Radio1=ON
         ;;
       esac
-      NEW_PORT=$(whiptail --title "Select the new 437 MHz Band Port" --radiolist \
+      NEW_PORT=$(whiptail --title "Select the new 437 MHz Band Tuner Port" --radiolist \
         "Highlight choice, select with space bar and then press enter" 20 78 5 \
-        "TOP" "Top LNB Port    (Socket A)" $Radio1 \
-        "BOTTOM" "Bottom LNB Port (Socket B)" $Radio2 \
+        "TOP" "Top Tuner Port    (Socket A)" $Radio1 \
+        "BOTTOM" "Bottom Tuner Port (Socket B)" $Radio2 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
         sed -i "/    437:/!b;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
@@ -1467,10 +1466,10 @@ do_Set_Bands()
           Radio1=ON
         ;;
       esac
-      NEW_PORT=$(whiptail --title "Select the new 1255 MHz Band Port" --radiolist \
+      NEW_PORT=$(whiptail --title "Select the new 1255 MHz Band Tuner Port" --radiolist \
         "Highlight choice, select with space bar and then press enter" 20 78 5 \
-        "TOP" "Top LNB Port    (Socket A)" $Radio1 \
-        "BOTTOM" "Bottom LNB Port (Socket B)" $Radio2 \
+        "TOP" "Top Tuner Port    (Socket A)" $Radio1 \
+        "BOTTOM" "Bottom Tuner Port (Socket B)" $Radio2 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
         sed -i "/    1255:/!b;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
@@ -1575,10 +1574,10 @@ do_Set_Bands()
           Radio1=ON
         ;;
       esac
-      NEW_PORT=$(whiptail --title "Select the new 2400 MHz Band Port" --radiolist \
+      NEW_PORT=$(whiptail --title "Select the new 2400 MHz Band Tuner Port" --radiolist \
         "Highlight choice, select with space bar and then press enter" 20 78 5 \
-        "TOP" "Top LNB Port    (Socket A)" $Radio1 \
-        "BOTTOM" "Bottom LNB Port (Socket B)" $Radio2 \
+        "TOP" "Top Tuner Port    (Socket A)" $Radio1 \
+        "BOTTOM" "Bottom Tuner Port (Socket B)" $Radio2 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
         sed -i "/    2400:/!b;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
@@ -1683,10 +1682,10 @@ do_Set_Bands()
           Radio1=ON
         ;;
       esac
-      NEW_PORT=$(whiptail --title "Select the new 3400 MHz Band Port" --radiolist \
+      NEW_PORT=$(whiptail --title "Select the new 3400 MHz Band Tuner Port" --radiolist \
         "Highlight choice, select with space bar and then press enter" 20 78 5 \
-        "TOP" "Top LNB Port    (Socket A)" $Radio1 \
-        "BOTTOM" "Bottom LNB Port (Socket B)" $Radio2 \
+        "TOP" "Top Tuner Port    (Socket A)" $Radio1 \
+        "BOTTOM" "Bottom Tuner Port (Socket B)" $Radio2 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
         sed -i "/    3400:/!b;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
@@ -1791,10 +1790,10 @@ do_Set_Bands()
           Radio1=ON
         ;;
       esac
-      NEW_PORT=$(whiptail --title "Select the new 5760 MHz Band Port" --radiolist \
+      NEW_PORT=$(whiptail --title "Select the new 5760 MHz Band Tuner Port" --radiolist \
         "Highlight choice, select with space bar and then press enter" 20 78 5 \
-        "TOP" "Top LNB Port    (Socket A)" $Radio1 \
-        "BOTTOM" "Bottom LNB Port (Socket B)" $Radio2 \
+        "TOP" "Top Tuner Port    (Socket A)" $Radio1 \
+        "BOTTOM" "Bottom Tuner Port (Socket B)" $Radio2 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
         sed -i "/    5760:/!b;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
@@ -1899,10 +1898,10 @@ do_Set_Bands()
           Radio1=ON
         ;;
       esac
-      NEW_PORT=$(whiptail --title "Select the new 10368 MHz Band Port" --radiolist \
+      NEW_PORT=$(whiptail --title "Select the new 10368 MHz Band Tuner Port" --radiolist \
         "Highlight choice, select with space bar and then press enter" 20 78 5 \
-        "TOP" "Top LNB Port    (Socket A)" $Radio1 \
-        "BOTTOM" "Bottom LNB Port (Socket B)" $Radio2 \
+        "TOP" "Top Tuner Port    (Socket A)" $Radio1 \
+        "BOTTOM" "Bottom Tuner Port (Socket B)" $Radio2 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
         sed -i "/    10368:/!b;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
