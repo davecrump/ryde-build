@@ -1,3 +1,7 @@
+202011200
+Console Menu Robustness Improvements
+Correct Samsung Remote
+
 202011160
 Correction of LNB LO Calculations
 Change direct reception to SUM in config file
