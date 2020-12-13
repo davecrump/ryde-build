@@ -1,3 +1,7 @@
+202012150
+Add Display of Received Freq and SR
+Multi-thread RydePlayer
+
 202011200
 Console Menu Robustness Improvements
 Correct Samsung Remote
