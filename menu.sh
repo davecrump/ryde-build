@@ -129,6 +129,9 @@ do_Set_RC_Type_3()
     "22 Classic" "Classic remote marked IRC83079" \
     "23 Tesco TV" "Tesco 18.5 inch TV Model LCD 19-229" \
     "24 LED TV" "Anonymous LED TV" \
+    "25 Fortec" "Fortech Star Sat RX" \
+    "26 CMtronic" "CMtronic" \
+    "27 Technotrend" "Technotrend TT Connect" \
     "99 Exit" "Exit without changing remote control model" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
@@ -136,6 +139,9 @@ do_Set_RC_Type_3()
         22\ *) RC_FILE="classic" ;;
         23\ *) RC_FILE="tesco_tv" ;;
         24\ *) RC_FILE="led_tv" ;;
+        25\ *) RC_FILE="fortecstar" ;;
+        26\ *) RC_FILE="cmtronic" ;;
+        27\ *) RC_FILE="technotrendttc" ;;
         99\ *) RC_FILE="exit" ;;
     esac
 
@@ -1011,19 +1017,23 @@ do_SD_Button()
 
 do_Settings()
 {
-  menuchoice=$(whiptail --title "Advanced Settings Menu" --menu "Select Choice and press enter" 16 78 6 \
+  menuchoice=$(whiptail --title "Advanced Settings Menu" --menu "Select Choice and press enter" 16 78 8 \
     "1 Tuner Timeout" "Adjust the Tuner Reset Time when no valid TS " \
     "2 Restore Factory" "Reset all settings to default" \
     "3 Debug Menu" "Enable or Disable the Debug Menu" \
     "4 Power Button" "Set behaviour on double press of power button" \
-    "5 Hardware Shutdown" "Enable or disable hardware shutdown function" \
+    "5 Daily Reboot" "Enable 12-hourly reboot for Repeater Operation" \
+    "6 Stop Reboot" "Disable 12-hourly reboot for Repeater Operation" \
+    "7 Hardware Shutdown" "Enable or disable hardware shutdown function" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
       1\ *) do_Set_TSTimeout ;;
       2\ *) do_Restore_Factory ;;
       3\ *) do_Debug_Menu ;;
       4\ *) do_Power_Button ;;
-      5\ *) do_SD_Button ;;
+      5\ *) sudo crontab /home/pi/ryde-build/configs/rptrcron ;;
+      6\ *) sudo crontab /home/pi/ryde-build/configs/blankcron ;;
+      7\ *) do_SD_Button ;;
     esac
 }
 

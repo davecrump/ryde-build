@@ -1,3 +1,10 @@
+202012250
+Correct OSD for 4:3 displays
+Round displayed SR to nearest kS
+Implement channel up and down buttons on remote control
+Add optional 12-hourly reboot for repeater receivers
+Add 3 new remote controls
+
 202012150
 Add Display of Received Freq and SR
 Multi-thread RydePlayer
