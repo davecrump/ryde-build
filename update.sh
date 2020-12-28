@@ -301,6 +301,26 @@ else # User's config file needs updating, so copy master and reset remote contro
   if  [ $? == 0 ]; then   ## Amend new file for "technotrendttc" 27
     sed -i "/handsets:/{n;s/.*/        - technotrendttc/}" /home/pi/ryde/config.yaml
   fi
+  grep -q "philipsrc4492" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "philipsrc4492" 28
+    sed -i "/handsets:/{n;s/.*/        - philipsrc4492/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "mp3_player" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "mp3_player" 29
+    sed -i "/handsets:/{n;s/.*/        - mp3_player/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "dreamboxurc39931" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "dreamboxurc39931" 30
+    sed -i "/handsets:/{n;s/.*/        - dreamboxurc39931/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "humaxrmf04" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "humaxrmf04" 31
+    sed -i "/handsets:/{n;s/.*/        - humaxrmf04/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "xtrendkt1252" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "xtrendkt1252" 32
+    sed -i "/handsets:/{n;s/.*/        - xtrendkt1252/}" /home/pi/ryde/config.yaml
+  fi
 fi
 
 # Record the version numbers
