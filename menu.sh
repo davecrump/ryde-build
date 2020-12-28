@@ -46,7 +46,7 @@ do_Set_RC_Type_1()
 {
   RC_FILE="exit"
 
-  menuchoice=$(whiptail --title "Set Remote Control Model" --menu "Select Choice and press enter" 20 78 11 \
+  menuchoice=$(whiptail --title "Set Remote Control Model (1)" --menu "Select Choice and press enter" 20 78 11 \
     "1 Virgin" "Virgin Media"  \
     "2 Nebula" "Nebula DigiTV DVB-T USB Receiver" \
     "3 DVB-T2-S2" "eBay DVB-T2-S2 Combo with 12v in " \
@@ -74,10 +74,8 @@ do_Set_RC_Type_1()
     esac
 
   if [ "$RC_FILE" != "exit" ]; then # Amend the config file
-
     RC_FILE="        - ${RC_FILE}"
     sed -i "/handsets:/{n;s/.*/$RC_FILE/}" /home/pi/ryde/config.yaml
-
   fi
 }
 
@@ -85,7 +83,7 @@ do_Set_RC_Type_2()
 {
   RC_FILE="exit"
 
-  menuchoice=$(whiptail --title "Set Remote Control Model" --menu "Select Choice and press enter" 20 78 11 \
+  menuchoice=$(whiptail --title "Set Remote Control Model (2)" --menu "Select Choice and press enter" 20 78 11 \
     "11 Hauppauge 2" "Hauppauge USB PVR Ex-digilite" \
     "12 TS-1 Sat" "Technosat TS-1 Satellite Receiver" \
     "13 TS-3500" "Technosat TS-3500 Satellite Receiver" \
@@ -113,10 +111,8 @@ do_Set_RC_Type_2()
     esac
 
   if [ "$RC_FILE" != "exit" ]; then # Amend the config file
-
     RC_FILE="        - ${RC_FILE}"
     sed -i "/handsets:/{n;s/.*/$RC_FILE/}" /home/pi/ryde/config.yaml
-
   fi
 }
 
@@ -124,7 +120,7 @@ do_Set_RC_Type_3()
 {
   RC_FILE="exit"
 
-  menuchoice=$(whiptail --title "Set Remote Control Model" --menu "Select Choice and press enter" 20 78 11 \
+  menuchoice=$(whiptail --title "Set Remote Control Model (3)" --menu "Select Choice and press enter" 20 78 11 \
     "21 Pheonix" "Pheonix Satellite RX Remote" \
     "22 Classic" "Classic remote marked IRC83079" \
     "23 Tesco TV" "Tesco 18.5 inch TV Model LCD 19-229" \
@@ -132,6 +128,9 @@ do_Set_RC_Type_3()
     "25 Fortec" "Fortech Star Sat RX" \
     "26 CMtronic" "CMtronic" \
     "27 Technotrend" "Technotrend TT Connect" \
+    "28 Philips TV" "Philips RC 4492/01B TV" \
+    "29 MP3 Player" "MP3 Player" \
+    "30 Dreambox TV" "Dreambox URC39931RJ0-06 TV" \
     "99 Exit" "Exit without changing remote control model" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
@@ -142,14 +141,37 @@ do_Set_RC_Type_3()
         25\ *) RC_FILE="fortecstar" ;;
         26\ *) RC_FILE="cmtronic" ;;
         27\ *) RC_FILE="technotrendttc" ;;
+        28\ *) RC_FILE="philipsrc4492" ;;
+        29\ *) RC_FILE="mp3_player" ;;
+        30\ *) RC_FILE="dreamboxurc39931" ;;
         99\ *) RC_FILE="exit" ;;
     esac
 
   if [ "$RC_FILE" != "exit" ]; then # Amend the config file
-
     RC_FILE="        - ${RC_FILE}"
     sed -i "/handsets:/{n;s/.*/$RC_FILE/}" /home/pi/ryde/config.yaml
+  fi
+}
 
+
+do_Set_RC_Type_4()
+{
+  RC_FILE="exit"
+
+  menuchoice=$(whiptail --title "Set Remote Control Model (4)" --menu "Select Choice and press enter" 20 78 11 \
+    "31 Humax PVR" "Humax RM-F04 PVR" \
+    "32 Xtrend TV" "Xtrend KT1252-XHY TV" \
+    "99 Exit" "Exit without changing remote control model" \
+      3>&2 2>&1 1>&3)
+    case "$menuchoice" in
+        31\ *) RC_FILE="humaxrmf04" ;;
+        32\ *) RC_FILE="xtrendkt1252" ;;
+        99\ *) RC_FILE="exit" ;;
+    esac
+
+  if [ "$RC_FILE" != "exit" ]; then # Amend the config file
+    RC_FILE="        - ${RC_FILE}"
+    sed -i "/handsets:/{n;s/.*/$RC_FILE/}" /home/pi/ryde/config.yaml
   fi
 }
 
@@ -160,11 +182,13 @@ do_Set_RC_Type()
     "1  1 - 10" "Virgin, Nebula, LG, Samsung"  \
     "2 11 - 20" "Various Sat Receivers" \
     "3 21 - 30" "Odds and Ends" \
+    "4 31 - 40" "More Odds and Ends" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
       1\ *) do_Set_RC_Type_1 ;;
       2\ *) do_Set_RC_Type_2 ;;
       3\ *) do_Set_RC_Type_3 ;;
+      4\ *) do_Set_RC_Type_4 ;;
     esac
 }
 
