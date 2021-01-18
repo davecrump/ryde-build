@@ -58,6 +58,9 @@ cp -f -r /home/pi/ryde/config.yaml "$PATHUBACKUP"/config.yaml >/dev/null 2>/dev/
 # And capture the RC protocol in the rx.sh file:
 cp -f -r /home/pi/ryde-build/rx.sh "$PATHUBACKUP"/rx.sh
 
+# And the dvb-t config
+cp -f -r /home/pi/dvbt/dvb-t_config.txt "$PATHUBACKUP"/dvb-t_config.txt >/dev/null 2>/dev/null
+
 echo
 echo "-------------------------------------------------"
 echo "----- Updating the System Software Packages -----"
@@ -179,11 +182,22 @@ else  ## "#gpu_mem=128" is there, so amend it to read "gpu_mem=128"
   sudo sed -i 's/^#gpu_mem=128/gpu_mem=128/' /boot/config.txt 
 fi
 
-#echo
-#echo "---------------------------------------------"
-#echo "----- Restoring the User's Config Files -----"
-#echo "---------------------------------------------"
-#echo
+echo
+echo "-------------------------------------------"
+echo "----- Rebuilding the Interim DVB-T RX -----"
+echo "-------------------------------------------"
+
+sudo rm -rf /home/pi/dvbt/ >/dev/null 2>/dev/null
+cp /home/pi/ryde-build/configs/dvbt /home/pi/dvbt
+cd /home/pi/dvbt
+make
+cd /home/pi
+
+echo
+echo "---------------------------------------------"
+echo "----- Restoring the User's Config Files -----"
+echo "---------------------------------------------"
+
 
 grep -q "FREQ: null" "$PATHUBACKUP"/config.yaml
 if [ $? == 0 ]; then # User's config file is latest version, so simply copy back
@@ -322,6 +336,9 @@ else # User's config file needs updating, so copy master and reset remote contro
     sed -i "/handsets:/{n;s/.*/        - xtrendkt1252/}" /home/pi/ryde/config.yaml
   fi
 fi
+
+cp -f -r "$PATHUBACKUP"/dvb-t_config.txt /home/pi/dvbt/dvb-t_config.txt >/dev/null 2>/dev/null
+
 
 # Record the version numbers
 

@@ -28,8 +28,170 @@ function parse_yaml {
       }
    }'
 }
+
+############ Function to Write to DVB-T Config File ###############
+
+set_config_var() {
+lua - "$1" "$2" "$3" <<EOF > "$3.bak"
+local key=assert(arg[1])
+local value=assert(arg[2])
+local fn=assert(arg[3])
+local file=assert(io.open(fn))
+local made_change=false
+for line in file:lines() do
+if line:match("^#?%s*"..key.."=.*$") then
+line=key.."="..value
+made_change=true
+end
+print(line)
+end
+if not made_change then
+print(key.."="..value)
+end
+EOF
+mv "$3.bak" "$3"
+}
+
+
+
+############ Function to Read from DVB-T Config File ###############
+
+get_config_var() {
+lua - "$1" "$2" <<EOF
+local key=assert(arg[1])
+local fn=assert(arg[2])
+local file=assert(io.open(fn))
+for line in file:lines() do
+local val = line:match("^#?%s*"..key.."=(.*)$")
+if (val ~= nil) then
+print(val)
+break
+end
+end
+EOF
+}
+
+############ Function to Read value with - from Config File ###############
+
+get-config_var() {
+lua - "$1" "$2" <<EOF
+local key=assert(arg[1])
+local fn=assert(arg[2])
+local file=assert(io.open(fn))
+for line in file:lines() do
+local val = line:match("^#?%s*"..key.."=[+-]?(.*)$")
+if (val ~= nil) then
+print(val)
+break
+end
+end
+EOF
+}
+
 #########################################################
 
+CONFIGDVBT="/home/pi/dvbt/dvb-t_config.txt"
+
+
+do_dvbt_stop()
+{
+  echo shutdown | nc 127.0.0.1 1111 >/dev/null 2>/dev/null
+  sleep 1
+
+  sudo killall play_dvbt >/dev/null 2>/dev/null
+}
+
+do_dvbt_rx()
+{
+  /home/pi/dvbt/play_dvbt >/dev/null 2>/dev/null &
+
+  # Wait here receiving until user presses a key
+  whiptail --title "Receiving DVB-T Frequency: "$DVBT_FREQ" kHz BW: "$DVBT_BW" kHz" --msgbox "Touch any key to stop receiving" 8 78
+  do_dvbt_stop
+}
+
+do_Set_dvbt_frequency()
+{
+  DVBT_FREQ=$(get_config_var freq $CONFIGDVBT)
+  DVBT_FREQ=$(whiptail --inputbox "Set DVB-T Receive freq in kHz" 8 78 $DVBT_FREQ --title "DVB-T Receive Frequency" 3>&1 1>&2 2>&3)
+  if [ $? -eq 0 ]; then
+    set_config_var freq "$DVBT_FREQ" $CONFIGDVBT
+  fi
+}
+
+do_Set_dvbt_bandwidth()
+{
+  DVBT_BW=$(get_config_var bw $CONFIGDVBT)
+  DVBT_BW=$(whiptail --inputbox "Set DVB-T Receive bandwidth in kHz" 8 78 $DVBT_BW --title "DVB-T Receive Bandwidth" 3>&1 1>&2 2>&3)
+  if [ $? -eq 0 ]; then
+    set_config_var bw "$DVBT_BW" $CONFIGDVBT
+  fi
+}
+
+do_Set_dvbt_channel()
+{
+  DVBT_CHAN=$(get_config_var chan $CONFIGDVBT)
+  DVBT_CHAN=$(whiptail --inputbox "Set Stream Channel (0 for default)" 8 78 $DVBT_CHAN --title "DVB-T Display Channel" 3>&1 1>&2 2>&3)
+  if [ $? -eq 0 ]; then
+    set_config_var chan "$DVBT_CHAN" $CONFIGDVBT
+  fi
+}
+
+do_Set_dvbt_audio()
+{
+  DVBT_AUDIO=$(get_config_var audio $CONFIGDVBT)
+  case "$DVBT_AUDIO" in
+  hdmi)
+    Radio1=ON
+    Radio2=OFF
+  ;;
+  rpi)
+    Radio1=OFF
+    Radio2=ON
+  esac
+
+  DVBT_AUDIO=$(whiptail --title "Seect DVB-T Audio to HDMI or RPi Jack" --radiolist \
+    "Select one using arrow keys and space bar" 20 78 8 \
+    "hdmi" "Audio to the HDMI Output" $Radio1 \
+    "rpi" "Audio to the RPi Audio Jack " $Radio2 \
+    3>&2 2>&1 1>&3)
+
+  if [ $? -eq 0 ]; then                     ## If the selection has changed
+    set_config_var audio "$DVBT_AUDIO" $CONFIGDVBT
+  fi
+}
+
+do_dvbt()
+{
+  DVBT_FREQ=$(get_config_var freq $CONFIGDVBT)
+  DVBT_BW=$(get_config_var bw $CONFIGDVBT)
+  DVBT_CHAN=$(get_config_var chan $CONFIGDVBT)
+  DVBT_AUDIO=$(get_config_var audio $CONFIGDVBT)
+  status=0
+  while [ "$status" -eq 0 ] 
+  do
+    menuchoice=$(whiptail --title "Ryde DVB-T Receiver Menu" --menu "Select Choice and press enter:" 20 78 13 \
+	"0 Receive" "Start the DVB-T Receiver" \
+    "1 Stop" "Stop the DVB-T Receiver" \
+    "2 Frequency" "Set the Receive Frequency "$DVBT_FREQ" kHz" \
+    "3 Bandwidth" "Set the Receive Bandwidth "$DVBT_BW" kHz" \
+    "4 Channel" "Set the Channel from the video stream ("$DVBT_CHAN")" \
+    "5 Audio" "Set Audio Output, currently "$DVBT_AUDIO" " \
+	"6 Main Menu" "Go back to the Main Menu" \
+ 	3>&2 2>&1 1>&3)
+
+    case "$menuchoice" in
+	  0\ *) do_dvbt_rx   ;;
+      1\ *) do_dvbt_stop   ;;
+      2\ *) do_Set_dvbt_frequency ;;
+      3\ *) do_Set_dvbt_bandwidth ;;
+      4\ *) do_Set_dvbt_channel ;;
+      5\ *) do_Set_dvbt_audio ;;
+	  6\ *) status=1 ;;
+    esac
+  done
+  status=0
+}
 
 do_update()
 {
@@ -945,7 +1107,7 @@ do_Set_TSTimeout()
 do_Restore_Factory()
 {
   cp /home/pi/ryde-build/config.yaml /home/pi/ryde/config.yaml
-
+  cp /home/pi/ryde-build/configs/dvbt/dvb-t_config.txt /home/pi/dvbt/dvb-t_config.txt
   # Wait here until user presses a key
   whiptail --title "Factory Setting Restored" --msgbox "Touch any key to continue.  You will need to reselect your remote control type." 8 78
 }
@@ -1038,26 +1200,38 @@ do_SD_Button()
   fi
 }
 
+do_Check_HDMI()
+{
+  reset
+  tvservice -n
+  tvservice -s
+  cd /home/pi/pydispmanx && python3 demo.py
+  cd /home/pi
+  read -p "Press enter to continue"
+}
+
 
 do_Settings()
 {
   menuchoice=$(whiptail --title "Advanced Settings Menu" --menu "Select Choice and press enter" 16 78 8 \
     "1 Tuner Timeout" "Adjust the Tuner Reset Time when no valid TS " \
     "2 Restore Factory" "Reset all settings to default" \
-    "3 Debug Menu" "Enable or Disable the Debug Menu" \
-    "4 Power Button" "Set behaviour on double press of power button" \
-    "5 Daily Reboot" "Enable 12-hourly reboot for Repeater Operation" \
-    "6 Stop Reboot" "Disable 12-hourly reboot for Repeater Operation" \
-    "7 Hardware Shutdown" "Enable or disable hardware shutdown function" \
+    "3 Check HDMI" "List HDMI settings for fault-finding" \
+    "4 Debug Menu" "Enable or Disable the Debug Menu" \
+    "5 Power Button" "Set behaviour on double press of power button" \
+    "6 Daily Reboot" "Enable 12-hourly reboot for Repeater Operation" \
+    "7 Stop Reboot" "Disable 12-hourly reboot for Repeater Operation" \
+    "8 Hardware Shutdown" "Enable or disable hardware shutdown function" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
       1\ *) do_Set_TSTimeout ;;
       2\ *) do_Restore_Factory ;;
-      3\ *) do_Debug_Menu ;;
-      4\ *) do_Power_Button ;;
-      5\ *) sudo crontab /home/pi/ryde-build/configs/rptrcron ;;
-      6\ *) sudo crontab /home/pi/ryde-build/configs/blankcron ;;
-      7\ *) do_SD_Button ;;
+      3\ *) do_Check_HDMI ;;
+      4\ *) do_Debug_Menu ;;
+      5\ *) do_Power_Button ;;
+      6\ *) sudo crontab /home/pi/ryde-build/configs/rptrcron ;;
+      7\ *) sudo crontab /home/pi/ryde-build/configs/blankcron ;;
+      8\ *) do_SD_Button ;;
     esac
 }
 
@@ -2335,35 +2509,37 @@ while [ "$status" -eq 0 ]
   do
     # Display main menu
 
-    menuchoice=$(whiptail --title "BATC Ryde Receiver Main Menu" --menu "Select Choice and press enter:" 20 78 12 \
+    menuchoice=$(whiptail --title "BATC Ryde Receiver Main Menu" --menu "Select Choice and press enter:" 20 78 13 \
 	"0 Receive" "Start the Ryde Receiver" \
-        "1 Stop" "Stop the Ryde Receiver" \
-        "2 Start-up" "Set the start-up Preset" \
-        "3 Bands" "Set the band details such as LNB Offset" \
-        "4 Presets" "Set the details for each preset" \
+    "1 Stop" "Stop the Ryde Receiver" \
+    "2 Start-up" "Set the start-up Preset" \
+    "3 Bands" "Set the band details such as LNB Offset" \
+    "4 Presets" "Set the details for each preset" \
 	"5 Video" "Select the Video Output Mode" \
 	"6 Remote" "Select the Remote Control Type" \
 	"7 IR Check" "View the IR Codes From a new Remote" \
-        "8 Settings" "Advanced Settings" \
-	"9 Info" "Display System Information" \
+    "8 Settings" "Advanced Settings" \
+	"9 Info" "Show the System Information" \
 	"10 Update" "Check for Software Update" \
-	"11 Shutdown" "Shutdown, Reboot or exit to the Linux command prompt" \
+	"11 DVB-T RX" "Menu-driven DVB-T RX using Knucker Tuner"\
+    "12 Shutdown" "Shutdown, Reboot or exit to the Linux command prompt" \
  	3>&2 2>&1 1>&3)
 
         case "$menuchoice" in
 	    0\ *) do_receive   ;;
-            1\ *) do_stop   ;;
-            2\ *) do_Set_Defaults ;;
-            3\ *) do_Set_Bands ;;
-            4\ *) do_Set_Presets ;;
+        1\ *) do_stop   ;;
+        2\ *) do_Set_Defaults ;;
+        3\ *) do_Set_Bands ;;
+        4\ *) do_Set_Presets ;;
 	    5\ *) do_video_change ;;
    	    6\ *) do_Set_RC_Type ;;
    	    7\ *) do_Check_RC_Codes ;;
 	    8\ *) do_Settings ;;
-            9\ *) do_info ;;
+        9\ *) do_info ;;
 	    10\ *) do_update ;;
-	    11\ *) do_shutdown_menu ;;
-               *)
+	    11\ *) do_dvbt ;;
+        12\ *) do_shutdown_menu ;;
+            *)
 
         # Display exit message if user jumps out of menu
         whiptail --title "Exiting to Linux Prompt" --msgbox "To return to the menu system, type menu" 8 78

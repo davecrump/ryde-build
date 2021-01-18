@@ -1,0 +1,5 @@
+freq=437000
+bw=333
+chan=0
+audio=hdmi
+
