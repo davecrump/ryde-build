@@ -188,28 +188,33 @@ sudo bash -c 'echo -e "\n# Shorten dhcpcd timeout from 30 to 5 secs" >> /etc/dhc
 sudo bash -c 'echo -e "timeout 5\n" >> /etc/dhcpcd.conf'
 
 # Modify .bashrc for hardware shutdown, set RPi Jack audio volume and autostart
-echo  >> ~/.bashrc
-echo "# Autostart Ryde on Boot" >> ~/.bashrc
-echo if test -z \"\$SSH_CLIENT\" >> ~/.bashrc 
-echo then >> ~/.bashrc
+if grep -q Ryde /home/pi/.bashrc; then  # Second Install over a previous install
+  echo
+  echo *********** Warning, you have installed Ryde before ************
+  echo
+else  # First install
+  echo  >> ~/.bashrc
+  echo "# Autostart Ryde on Boot" >> ~/.bashrc
+  echo if test -z \"\$SSH_CLIENT\" >> ~/.bashrc 
+  echo then >> ~/.bashrc
+  echo "  # If pi-sdn is not running, check if it is required to run" >> ~/.bashrc
+  echo "  ps -cax | grep 'pi-sdn' >/dev/null 2>/dev/null" >> ~/.bashrc
+  echo "  RESULT=\"\$?\"" >> ~/.bashrc
+  echo "  if [ \"\$RESULT\" -ne 0 ]; then" >> ~/.bashrc
+  echo "    if [ -f /home/pi/.pi-sdn ]; then" >> ~/.bashrc
+  echo "      . /home/pi/.pi-sdn" >> ~/.bashrc
+  echo "    fi" >> ~/.bashrc
+  echo "  fi" >> ~/.bashrc
 
-echo "  # If pi-sdn is not running, check if it is required to run" >> ~/.bashrc
-echo "  ps -cax | grep 'pi-sdn' >/dev/null 2>/dev/null" >> ~/.bashrc
-echo "  RESULT=\"\$?\"" >> ~/.bashrc
-echo "  if [ \"\$RESULT\" -ne 0 ]; then" >> ~/.bashrc
-echo "    if [ -f /home/pi/.pi-sdn ]; then" >> ~/.bashrc
-echo "      . /home/pi/.pi-sdn" >> ~/.bashrc
-echo "    fi" >> ~/.bashrc
-echo "  fi" >> ~/.bashrc
+  echo "  # Set RPi Audio Jack volume" >> ~/.bashrc
+  echo "  amixer set Headphone 0db >/dev/null 2>/dev/null" >> ~/.bashrc
+  echo  >> ~/.bashrc
 
-echo "  # Set RPi Audio Jack volume" >> ~/.bashrc
-echo "  amixer set Headphone 0db >/dev/null 2>/dev/null" >> ~/.bashrc
-echo  >> ~/.bashrc
-
-echo "  # Start Ryde" >> ~/.bashrc
-echo "  /home/pi/ryde-build/rx.sh" >> ~/.bashrc
-echo fi >> ~/.bashrc
-echo  >> ~/.bashrc
+  echo "  # Start Ryde" >> ~/.bashrc
+  echo "  /home/pi/ryde-build/rx.sh" >> ~/.bashrc
+  echo fi >> ~/.bashrc
+  echo  >> ~/.bashrc
+fi
 
 echo
 echo "-----------------------------------------"
@@ -222,6 +227,19 @@ cd /home/pi/ryde-build/pi-sdn-build
 make
 mv pi-sdn /home/pi/
 cd /home/pi
+
+echo
+echo "-----------------------------------------"
+echo "----- Building the Interim DVB-T RX -----"
+echo "-----------------------------------------"
+echo
+
+sudo rm -rf /home/pi/dvbt/ >/dev/null 2>/dev/null
+cp /home/pi/ryde-build/configs/dvbt /home/pi/dvbt
+cd /home/pi/dvbt
+make
+cd /home/pi
+
 
 echo
 echo "--------------------------------------"

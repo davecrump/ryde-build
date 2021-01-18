@@ -1,3 +1,8 @@
+202101190
+Add SSH-Console-Driven Interim DVB-T Receive
+Prevent multiple installs failing in future
+Add HDMI info to SSH Menu 
+
 202012250
 Correct OSD for 4:3 displays
 Round displayed SR to nearest kS
