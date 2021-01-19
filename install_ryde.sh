@@ -79,6 +79,7 @@ sudo apt-get -y install python3-vlc
 sudo apt-get -y install python3-evdev
 sudo apt-get -y install python3-pil
 sudo apt-get -y install python3-gpiozero
+sudo apt-get -y install libfftw3-dev libjpeg-dev  # for DVB-T
 
 # Install WiringPi for the hardware shutdown button
 echo
@@ -190,7 +191,9 @@ sudo bash -c 'echo -e "timeout 5\n" >> /etc/dhcpcd.conf'
 # Modify .bashrc for hardware shutdown, set RPi Jack audio volume and autostart
 if grep -q Ryde /home/pi/.bashrc; then  # Second Install over a previous install
   echo
-  echo *********** Warning, you have installed Ryde before ************
+  echo "*********** Warning, you have installed Ryde before ************"
+  echo "****** Results are unpredictable after multiple installs *******"
+  echo "*********** Please build a new card and start again ************"
   echo
 else  # First install
   echo  >> ~/.bashrc
