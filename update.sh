@@ -79,6 +79,7 @@ sudo apt-get -y dist-upgrade # Upgrade all the installed packages to their lates
 
 sudo apt-get -y install python3-gpiozero  # for GPIOs
 sudo apt-get -y install libfftw3-dev libjpeg-dev  # for DVB-T
+sudo apt-get -y install fbi netcat imagemagick    # for DVB-T
 
 # --------- Overwrite and compile all the software components -----
 
@@ -181,6 +182,13 @@ if [ $? -ne 0 ]; then  #  "#gpu_mem=128" is not there, so check if "gpu_mem=128"
   fi
 else  ## "#gpu_mem=128" is there, so amend it to read "gpu_mem=128"
   sudo sed -i 's/^#gpu_mem=128/gpu_mem=128/' /boot/config.txt 
+fi
+
+# Amend /etc/fstab to create a tmpfs drive at ~/tmp for multiple writes (202101190)
+if grep -q /home/pi/tmp /etc/fstab; then
+  echo "tmpfs already requested"
+else
+  sudo sed -i '4itmpfs           /home/pi/tmp    tmpfs   defaults,noatime,nosuid,size=10m  0  0' /etc/fstab
 fi
 
 echo
