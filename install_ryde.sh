@@ -80,6 +80,7 @@ sudo apt-get -y install python3-evdev
 sudo apt-get -y install python3-pil
 sudo apt-get -y install python3-gpiozero
 sudo apt-get -y install libfftw3-dev libjpeg-dev  # for DVB-T
+sudo apt-get -y install fbi netcat imagemagick    # for DVB-T
 
 # Install WiringPi for the hardware shutdown button
 echo
@@ -217,6 +218,13 @@ else  # First install
   echo "  /home/pi/ryde-build/rx.sh" >> ~/.bashrc
   echo fi >> ~/.bashrc
   echo  >> ~/.bashrc
+fi
+
+# Amend /etc/fstab to create a tmpfs drive at ~/tmp for multiple writes (202101190)
+if grep -q /home/pi/tmp /etc/fstab; then
+  echo "tmpfs already requested"
+else
+  sudo sed -i '4itmpfs           /home/pi/tmp    tmpfs   defaults,noatime,nosuid,size=10m  0  0' /etc/fstab
 fi
 
 echo

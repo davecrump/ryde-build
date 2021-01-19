@@ -51,15 +51,15 @@ if [ "$CHAN" != "0" ] && [ "$CHAN" != "" ]; then
 fi
 
 # Create dummy marquee overlay file
-sudo rm /tmp/vlc_overlay.txt >/dev/null 2>/dev/null
-echo " " > /tmp/vlc_overlay.txt
+sudo rm /home/pi/tmp/vlc_overlay.txt >/dev/null 2>/dev/null
+echo " " > /home/pi/tmp/vlc_overlay.txt
 
 sudo killall CombiTunerExpress >/dev/null 2>/dev/null
 sudo killall vlc >/dev/null 2>/dev/null
 
 # Play a very short dummy file to prime VLC
-cvlc -I rc --rc-host 127.0.0.1:1111 --quiet -f --codec ffmpeg --video-title-timeout=100 \
-  --sub-filter marq --marq-x 25 --marq-file "/home/pi/tmp/vlc_overlay.txt" \
+cvlc -I rc --rc-host 127.0.0.1:1111 --quiet --codec ffmpeg --video-title-timeout=10 \
+  --sub-filter marq --marq-size 20 --marq-x 25 --marq-file "/home/pi/tmp/vlc_overlay.txt" \
   --gain 3 --alsa-audio-device $AUDIO_DEVICE \
    /home/pi/dvbt/blank.ts vlc:quit >/dev/null 2>/dev/null &
 sleep 1
@@ -77,6 +77,6 @@ sleep 0.1
 
 # Start VLC
 cvlc -I rc --rc-host 127.0.0.1:1111 --quiet $PROG --codec ffmpeg --video-title-timeout=100 \
-  --sub-filter marq --marq-size 20 --marq-x 25 --marq-file "/tmp/vlc_overlay.txt" \
+  --sub-filter marq --marq-size 20 --marq-x 25 --marq-file "/home/pi/tmp/vlc_overlay.txt" \
   --gain 3 --alsa-audio-device $AUDIO_DEVICE \
   udp://@127.0.0.1:1314 >/dev/null 2>/dev/null &

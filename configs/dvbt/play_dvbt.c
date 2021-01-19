@@ -193,30 +193,24 @@ void ReadConfig()
 void DisplayMsg(char* ScreenMessage)
 {
   // Delete any old image
-  strcpy(LinuxCommand, "rm /tmp/message.jpg >/dev/null 2>/dev/null");
-  system(LinuxCommand);
+  system("sudo rm /home/pi/tmp/message.jpg >/dev/null 2>/dev/null");
 
   // Build and run the convert command for the image
-  strcpy(LinuxCommand, "convert -size 1280x720 xc:black -stroke white ");
-
+  strcpy(LinuxCommand, "sudo convert -size 1280x720 xc:black -stroke white ");
   strcat(LinuxCommand, "-gravity NorthWest -pointsize 40 -annotate 0 ");
   strcat(LinuxCommand, "\"Ryde Interim DVB-T Receiver\n\n");
   strcat(LinuxCommand, ScreenMessage);
- 
-  strcat(LinuxCommand, "\" /tmp/message.jpg");
+  strcat(LinuxCommand, "\" /home/pi/tmp/message.jpg");
 
   //printf("\n\n%s\n\n", LinuxCommand);
-  system("sudo killall -9 fbi >/dev/null 2>/dev/null");
   system(LinuxCommand);
+  usleep(1000);
 
   // Display the image on the desktop
-  strcpy(LinuxCommand, "sudo fbi -T 1 -noverbose -a /tmp/message.jpg ");
-  strcat(LinuxCommand, ">/dev/null 2>/dev/null");
-  system(LinuxCommand);
+  system("sudo fbi -T 1 -noverbose -a /home/pi/tmp/message.jpg >/dev/null 2>/dev/null");
 
   // Kill fbi
-  //strcpy(LinuxCommand, "(sleep 0.1; sudo killall -9 fbi >/dev/null 2>/dev/null) &");
-  //system(LinuxCommand);
+  system("(sleep 0.1; sudo killall -9 fbi >/dev/null 2>/dev/null) &");
 }
 
 
@@ -529,7 +523,7 @@ void DVBTRX()
             strcat(vlctext, "%n");
             strcat(vlctext, line14);
 
-            FILE *fw=fopen("/tmp/vlc_temp_overlay.txt","w+");
+            FILE *fw=fopen("/home/pi/tmp/vlc_temp_overlay.txt","w+");
             if(fw!=0)
             {
               fprintf(fw, "%s\n", vlctext);
@@ -537,7 +531,7 @@ void DVBTRX()
             fclose(fw);
 
             // Copy temp file to file to be read by VLC to prevent file collisions
-            system("cp /tmp/vlc_temp_overlay.txt /tmp/vlc_overlay.txt");
+            system("cp /home/pi/tmp/vlc_temp_overlay.txt /home/pi/tmp/vlc_overlay.txt");
           }
           else
           {
@@ -564,8 +558,6 @@ void DVBTRX()
 
   close(fd_status_fifo); 
   usleep(1000);
-
-  printf("Stopping receive process\n");
 
   printf("Stopped receive process\n");
 }
