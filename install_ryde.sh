@@ -235,7 +235,7 @@ echo "-----------------------------------------"
 echo
 
 sudo rm -rf /home/pi/dvbt/ >/dev/null 2>/dev/null
-cp /home/pi/ryde-build/configs/dvbt /home/pi/dvbt
+cp -r /home/pi/ryde-build/configs/dvbt /home/pi/dvbt
 cd /home/pi/dvbt
 make
 cd /home/pi
