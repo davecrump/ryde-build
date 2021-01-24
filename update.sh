@@ -81,6 +81,14 @@ sudo apt-get -y install python3-gpiozero  # for GPIOs
 sudo apt-get -y install libfftw3-dev libjpeg-dev  # for DVB-T
 sudo apt-get -y install fbi netcat imagemagick    # for DVB-T
 
+if [ ! -f "/usr/lib/libwiringPi.so" ]; then       # Need to install WiringPi
+  echo "Installing WiringPi"
+  cd /tmp
+  wget https://project-downloads.drogon.net/wiringpi-latest.deb
+  sudo dpkg -i wiringpi-latest.deb
+  cd /home/pi
+fi
+
 # --------- Overwrite and compile all the software components -----
 
 # Download the previously selected version of Ryde Build
@@ -343,6 +351,14 @@ else # User's config file needs updating, so copy master and reset remote contro
   grep -q "xtrendkt1252" "$PATHUBACKUP"/config.yaml
   if  [ $? == 0 ]; then   ## Amend new file for "xtrendkt1252" 32
     sed -i "/handsets:/{n;s/.*/        - xtrendkt1252/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "salora" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "salora" 33
+    sed -i "/handsets:/{n;s/.*/        - salora/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "streamzap" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "streamzap" 34
+    sed -i "/handsets:/{n;s/.*/        - streamzap/}" /home/pi/ryde/config.yaml
   fi
 fi
 

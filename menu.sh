@@ -323,11 +323,15 @@ do_Set_RC_Type_4()
   menuchoice=$(whiptail --title "Set Remote Control Model (4)" --menu "Select Choice and press enter" 20 78 11 \
     "31 Humax PVR" "Humax RM-F04 PVR" \
     "32 Xtrend TV" "Xtrend KT1252-XHY TV" \
+    "33 Salora" "Salora TV or DVD Remote" \
+    "34 StreamZap" "StreamZap PC Remote Control" \
     "99 Exit" "Exit without changing remote control model" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
         31\ *) RC_FILE="humaxrmf04" ;;
         32\ *) RC_FILE="xtrendkt1252" ;;
+        33\ *) RC_FILE="salora" ;;
+        34\ *) RC_FILE="streamzap" ;;
         99\ *) RC_FILE="exit" ;;
     esac
 

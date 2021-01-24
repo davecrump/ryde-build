@@ -12,10 +12,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Initial code by Evariste F5OEO
-Rewitten by Dave, G8GKQ
+Written by Dave, G8GKQ
 */
-//
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,17 +37,7 @@ Rewitten by Dave, G8GKQ
 
 #define PATH_DVBTCONFIG "/home/pi/dvbt/dvb-t_config.txt"
 
-
-#define PI 3.14159265358979323846
-#define deg2rad(DEG) ((DEG)*((PI)/(180.0)))
-#define rad2deg(RAD) ((RAD)*180/PI)
-#define DELIM "."
-
-
-
-
 //GLOBAL PARAMETERS
-
 
 int debug_level = 1;
 int FinishedButton = 1;
@@ -59,47 +47,6 @@ char ConfigFreq[63];
 char ConfigBW[63];
 char ConfigChan[63];
 char ConfigAudio[63];
-
-// LongMynd RX Parameters. [0] is current.
-int LMRXfreq[22];           // Integer frequency in kHz 0 current, 1-10 q, 11-20 t, 21 second tuner current
-int LMRXsr[14];             // Symbol rate in K. 0 current, 1-6 q, 6-12 t, 13 second tuner current
-int LMRXqoffset;            // Offset in kHz
-char LMRXinput[2];          // Input a or b
-char LMRXudpip[20];         // UDP IP address
-char LMRXudpport[10];       // UDP IP port
-char LMRXmode[10];          // sat or terr
-char LMRXaudio[15];         // rpi or usb
-char LMRXvolts[7];          // off, v or h
-char RXmod[7];              // DVB-S or DVB-T                      
-
-// LongMynd RX Received Parameters for display
-
-// Stream Display Parameters. [0] is current
-char StreamAddress[9][127];  // Full rtmp address of stream
-char StreamLabel[9][31];     // Button Label for stream
-int IQAvailable = 1;         // Flag set to 0 if RPi audio output has been used
-int StreamStoreTrigger = 0;  // Set to 1 if stream amendment needed
-
-// Stream Output Parameters. [0] is current
-char StreamURL[9][127];      // Full rtmp address of stream server (except for key)
-char StreamKey[9][31];       // streamname-key for stream
-int StreamerStoreTrigger = 0;   // Set to 1 if streamer amendment needed
-
-// TS in/out parameters
-char UDPOutAddr[31];
-char UDPOutPort[31];
-char UDPInPort[31];
-char TSVideoFile[63];
-
-
-
-
-// Threads for Touchscreen monitoring
-pthread_t thfft;        //
-pthread_t thbutton;     //
-pthread_t thview;       //
-pthread_t thwait3;      //  Used to count 3 seconds for WebCam reset after transmit
-
 
 
 /***************************************************************************//**
@@ -172,15 +119,21 @@ void strcpyn(char *outstring, char *instring, int n)
   outstring[n] = '\0'; // Terminate the outstring
 }
 
+/***************************************************************************//**
+ * @Reads the Configuration from the Config file
+ *
+ * @param None
+ *
+ * @return void
+*******************************************************************************/
 void ReadConfig()
 {
   // Read the current vision source and encoding
-  GetConfigParam(PATH_DVBTCONFIG,"freq", ConfigFreq);
-  GetConfigParam(PATH_DVBTCONFIG,"bw", ConfigBW);
-  GetConfigParam(PATH_DVBTCONFIG,"chan", ConfigChan);
-  GetConfigParam(PATH_DVBTCONFIG,"audio", ConfigAudio);
+  GetConfigParam(PATH_DVBTCONFIG, "freq",  ConfigFreq);
+  GetConfigParam(PATH_DVBTCONFIG, "bw",    ConfigBW);
+  GetConfigParam(PATH_DVBTCONFIG, "chan",  ConfigChan);
+  GetConfigParam(PATH_DVBTCONFIG, "audio", ConfigAudio);
 }
-
 
 /***************************************************************************//**
  * @brief Displays a blank screen with parameter details
@@ -216,9 +169,7 @@ void DisplayMsg(char* ScreenMessage)
 
 void DVBTRX()
 {
-  //FILE *fp;
   int num;
-
   int fd_status_fifo;
   char status_message_char[14];
   char stat_string[255];
@@ -245,6 +196,7 @@ void DVBTRX()
   char linex[127] = "";
   int TunerPollCount = 0;
   bool TunerFound = FALSE;
+  bool UpdateDisplay = TRUE;
 
   // Set globals
   FinishedButton = 1;
@@ -314,21 +266,25 @@ void DVBTRX()
                 strcpy(line5, "USB Error.  Change Cable");
               }
             }
+          UpdateDisplay = TRUE;
           }
           
           if (strcmp(stat_string, "[GetFamilyId] Family ID:0x4955") == 0)
           {
             strcpy(line5, "Initialising Tuner, Please Wait");
+            UpdateDisplay = TRUE;
           }
 
           if (strcmp(stat_string, "[AVL_Init] AVL_Initialize Failed!") == 0)
           {
             strcpy(line5, "Failed to Initialise Tuner.  Change USB Cable");
+            UpdateDisplay = TRUE;
           }
 
           if (strcmp(stat_string, "[AVL_Init] ok") == 0)
           {
             strcpy(line5, "Tuner Initialised");
+            UpdateDisplay = TRUE;
           }
 
           if ((stat_string[0] == '=') && (stat_string[5] == 'F'))  // Frequency
@@ -362,6 +318,7 @@ void DVBTRX()
               line4[3] = '\0';
             }
             strcat(line4, " kHz");
+            UpdateDisplay = TRUE;
           }
 
           // Now detect start of signal search
@@ -369,24 +326,28 @@ void DVBTRX()
           if (strcmp(linex, "[AVL_ChannelScan_Tx] Freq") == 0)
           {
             strcpy(line5, "Searching for signal");
+            UpdateDisplay = TRUE;
           }
 
           // And detect failed search
           if (strcmp(stat_string, "[DVBTx_Channel_ScanLock_Example] DVBTx channel scan is fail,Err.") == 0)
           {
             strcpy(line5, "Search failed, resetting for another search");
+            UpdateDisplay = TRUE;
           }
 
           // Notify signal detection (linex is already the first 25 chars of stat_string)
           if (strcmp(linex, "[AVL_LockChannel_T] Freq ") == 0)
           {
             strcpy(line5, "Signal detected, attempting to lock");
+            UpdateDisplay = TRUE;
           }
 
           // Notify lock
           if (strcmp(stat_string, "locked") == 0)
           {
             strcpy(line5, "Signal locked");
+            UpdateDisplay = TRUE;
           }
 
           // Notify unlocked
@@ -403,6 +364,7 @@ void DVBTRX()
             {
               FirstLock = 1;
             }
+            UpdateDisplay = TRUE;
           }
 
           // Display reported modulation
@@ -438,6 +400,7 @@ void DVBTRX()
           if (strcmp(linex, "Guard:") == 0)
           {
             strcpy(line10, stat_string);
+            UpdateDisplay = TRUE;
           }
 
           // Display reported SSI
@@ -467,6 +430,7 @@ void DVBTRX()
           {
             strcpy(line14, stat_string);
             strcpy(line5, "|");            // Clear any old text from line 5
+            UpdateDisplay = TRUE;
           }
 
           stat_string[0] = '\0';   // Finished processing this info, so clear the stat_string
@@ -496,7 +460,13 @@ void DVBTRX()
             strcat(composite, line12);
             strcat(composite, "\n");
             strcat(composite, line13);
-            DisplayMsg(composite);
+
+            // Only build the display image if needed (takes too long to display every update)
+            if (UpdateDisplay)
+            {    
+              DisplayMsg(composite);
+              UpdateDisplay = FALSE;
+            }
 
             // Build string for VLC
             strcpy(vlctext, line5);
@@ -554,11 +524,8 @@ void DVBTRX()
         }
       }
   }
-    
-
   close(fd_status_fifo); 
   usleep(1000);
-
   printf("Stopped receive process\n");
 }
 
