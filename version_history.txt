@@ -1,3 +1,7 @@
+202101250
+Improve Parameter overlay refresh rate for DVB-T
+Include WiringPi in update script
+
 202101190
 Add SSH-Console-Driven Interim DVB-T Receive
 Prevent multiple installs failing in future
