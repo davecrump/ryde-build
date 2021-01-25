@@ -1,3 +1,6 @@
+202101260
+Add Quick Tune and Nwetwork control support
+
 202101250
 Improve Parameter overlay refresh rate for DVB-T
 Include WiringPi in update script
