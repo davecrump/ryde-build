@@ -122,10 +122,18 @@ echo "--------------------------------"
 echo "----- Updating pyDispmanx -----"
 echo "--------------------------------"
 echo
-wget https://github.com/eclispe/pyDispmanx/archive/master.zip
+
+# Download old version of pyDispmanx
+wget https://github.com/eclispe/pyDispmanx/archive/388e40cddfad5f24791c85687abace531d18e7d8.zip -O master.zip
 unzip -o master.zip
 rm -rf pydispmanx
-mv pyDispmanx-master pydispmanx
+cp -f -r pyDispmanx-388e40cddfad5f24791c85687abace531d18e7d8 pydispmanx
+rm -rf pyDispmanx-388e40cddfad5f24791c85687abace531d18e7d8
+
+# wget https://github.com/eclispe/pyDispmanx/archive/master.zip
+# unzip -o master.zip
+# rm -rf pydispmanx
+# mv pyDispmanx-master pydispmanx
 rm master.zip
 cd pydispmanx
 python3 setup.py build_ext --inplace
@@ -190,6 +198,13 @@ if [ $? -ne 0 ]; then  #  "#gpu_mem=128" is not there, so check if "gpu_mem=128"
   fi
 else  ## "#gpu_mem=128" is there, so amend it to read "gpu_mem=128"
   sudo sed -i 's/^#gpu_mem=128/gpu_mem=128/' /boot/config.txt 
+fi
+
+# If not already done, set the Composite Video Aspect Ratio to 4:3
+grep -q "sdtv_aspect" /boot/config.txt
+if [ $? -ne 0 ]; then  #  "sdtv_aspect" is not there so add it
+  sudo bash -c 'echo -e "\n# Set the Composite Video Aspect Ratio. 1=4:3, 3=16:9" >> /boot/config.txt'
+  sudo bash -c 'echo -e "sdtv_aspect=1\n" >> //boot/config.txt'
 fi
 
 # Amend /etc/fstab to create a tmpfs drive at ~/tmp for multiple writes (202101190)

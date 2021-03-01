@@ -126,9 +126,16 @@ echo "----- Installing pyDispmanx -----"
 echo "---------------------------------"
 echo
 
-wget https://github.com/eclispe/pyDispmanx/archive/master.zip
+# Download old version of pyDispmanx
+wget https://github.com/eclispe/pyDispmanx/archive/388e40cddfad5f24791c85687abace531d18e7d8.zip -O master.zip
 unzip -o master.zip
-mv pyDispmanx-master pydispmanx
+cp -f -r pyDispmanx-388e40cddfad5f24791c85687abace531d18e7d8 pydispmanx
+rm -rf pyDispmanx-388e40cddfad5f24791c85687abace531d18e7d8
+
+
+# wget https://github.com/eclispe/pyDispmanx/archive/master.zip
+# unzip -o master.zip
+# mv pyDispmanx-master pydispmanx
 rm master.zip
 cd pydispmanx
 python3 setup.py build_ext --inplace
@@ -184,6 +191,10 @@ sudo bash -c 'echo " " >> /boot/config.txt '
 sudo bash -c 'echo "# Increase GPU memory for 4k displays" >> /boot/config.txt '
 sudo bash -c 'echo "gpu_mem=128" >> /boot/config.txt '
 sudo bash -c 'echo " " >> /boot/config.txt '
+
+# Set the Composite Video Aspect Ratio to 4:3
+sudo bash -c 'echo -e "\n# Set the Composite Video Aspect Ratio. 1=4:3, 3=16:9" >> /boot/config.txt'
+sudo bash -c 'echo -e "sdtv_aspect=1\n" >> //boot/config.txt'
 
 # Reduce the dhcp client timeout to speed off-network startup
 sudo bash -c 'echo -e "\n# Shorten dhcpcd timeout from 30 to 5 secs" >> /etc/dhcpcd.conf'
