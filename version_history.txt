@@ -1,5 +1,8 @@
+202103010
+Hold back/undo pyDispmanx update that was not compatible with RydePlayer
+
 202101260
-Add Quick Tune and Nwetwork control support
+Add Quick Tune and Network control support
 
 202101250
 Improve Parameter overlay refresh rate for DVB-T
