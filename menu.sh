@@ -198,11 +198,102 @@ do_update()
   /home/pi/ryde-build/check_for_update.sh
 }
 
+do_keypad()
+{
+  /home/pi/ryde-build/rx.sh &
+
+  cd /home/pi/ryde-utils
+  python3 consolehandset.py -i
+  cd /home/pi
+  do_stop
+}
+
+do_ftdi()
+{
+  cd /home/pi/ryde-utils
+  python3 ftdiconf.py -u
+  cd /home/pi
+}
+
 do_info()
 {
   /home/pi/ryde-build/display_info.sh
 }
 
+do_vlc()
+{
+  VLCPAR=""
+  # First check if it is a comp vid display set to 16:9
+  grep -q "^enable_tvout=1" /boot/config.txt
+  if [ $? -eq 0 ]; then    # comp vid display
+    grep -q "sdtv_aspect=3" /boot/config.txt
+    if [ $? -eq 0 ]; then  #  "sdtv_aspect=3" 16:9
+      VLCPAR="--monitor-par=4:3"
+    fi
+  fi
+
+  cvlc $VLCPAR rtmp://rtmp.batc.org.uk/live/"$STREAM" 
+}
+
+do_custom_stream()
+{
+  STREAM=$(whiptail --inputbox "Enter Stream Name (lower Case)" 8 78 $STREAM --title "Stream Name" 3>&1 1>&2 2>&3)
+}
+
+do_stream_display()
+{
+  status=0
+  while [ "$status" -eq 0 ] 
+  do
+    menuchoice=$(whiptail --title "BATC Stream Viewer Menu" --menu "Select Choice, ctrl-c to stop stream:" 20 78 10 \
+	"0 GB3BH" "View GB3BH" \
+    "1 GB3HV" "View GB3HV" \
+    "2 GB3KM" "View GB3KM" \
+    "3 GB3TV" "View GB3TV" \
+    "4 GB3TZ" "View GB3TZ" \
+    "5 GB3SQ" "View GB3SQ" \
+    "6 GB3VL" "View GB3VL" \
+    "7 GB3ZZ" "View GB3ZZ" \
+    "8 Custom" "Set Custom Stream" \
+	"9 Main Menu" "Go back to the Main Menu" \
+ 	3>&2 2>&1 1>&3)
+
+    case "$menuchoice" in
+	  0\ *) STREAM="gb3bh" ;;
+      1\ *) STREAM="gb3hv" ;;
+      2\ *) STREAM="gb3km" ;;
+      3\ *) STREAM="gb3tv" ;;
+      4\ *) STREAM="gb3tz" ;;
+      5\ *) STREAM="gb3sq" ;;
+      6\ *) STREAM="gb3vl" ;;
+      7\ *) STREAM="gb3zz" ;;
+      8\ *) do_custom_stream ;;
+	  9\ *) status=1 ;;
+    esac
+
+    if [ $status -eq 0 ]; then
+      do_vlc 
+    fi
+  done
+  status=0
+}
+
+do_utils()
+{
+  menuchoice=$(whiptail --title "Select Ryde Utility" --menu "Select Choice" 20 78 5 \
+    "1 Keypad" "Ryde Network Control Handset"  \
+    "2 FTDI" "FTDI Module Configuration Utility" \
+    "3 Stream" "BATC Stream Viewer" \
+    "4 Info" "Display System Information" \
+      3>&2 2>&1 1>&3)
+    case "$menuchoice" in
+      1\ *) do_keypad ;;
+      2\ *) do_ftdi ;;
+      3\ *) do_stream_display ;;
+      4\ *) do_info ;;
+    esac
+
+}
 
 do_Set_RC_Type_1()
 {
@@ -2300,6 +2391,59 @@ do_Safe_HDMI()
   fi
 }
 
+do_Comp_Vid_Aspect_4_3()
+{
+  grep -q "sdtv_aspect=1" /boot/config.txt
+  if [ $? -ne 0 ]; then  #  "sdtv_aspect=1" is not there so change it
+    sudo sed -i 's/sdtv_aspect=3/sdtv_aspect=1/' /boot/config.txt
+  fi
+}
+
+do_Comp_Vid_Aspect_16_9()
+{
+  grep -q "sdtv_aspect=3" /boot/config.txt
+  if [ $? -ne 0 ]; then  #  "sdtv_aspect=3" is not there so change it
+    sudo sed -i 's/sdtv_aspect=1/sdtv_aspect=3/' /boot/config.txt
+  fi
+}
+
+
+do_Comp_Vid_Aspect()
+{
+  Radio1=OFF
+  Radio2=OFF
+  Radio3=OFF
+
+  grep -q "sdtv_aspect=1" /boot/config.txt
+  if [ $? -eq 0 ]; then  #  "sdtv_aspect=1" 4:3
+    Radio1=ON
+  else
+    grep -q "sdtv_aspect=3" /boot/config.txt
+    if [ $? -eq 0 ]; then  #  "sdtv_aspect=3" 16:9
+      Radio2=ON
+    else
+      Radio3=ON
+    fi
+  fi
+
+  NEW_VA=$(whiptail --title "Choose the Composite Video Aspect Ratio" --radiolist \
+    "Highlight choice, select with space bar and then press enter" 20 78 5 \
+    "4:3" "4:3 for older displays" $Radio1 \
+    "16:9" "16:9 for widescreen displays" $Radio2 \
+    "Not Set" "Defaults to 4:3" $Radio3 \
+    3>&2 2>&1 1>&3)
+  if [ $? -eq 0 ]; then
+    case "$NEW_VA" in
+      "4:3")
+        do_Comp_Vid_Aspect_4_3
+      ;;
+      "16:9")
+        do_Comp_Vid_Aspect_16_9
+      ;;
+    esac
+  fi
+}
+
 
 do_Comp_Vid_PAL()
 {
@@ -2360,6 +2504,9 @@ do_Comp_Vid_PAL()
       sudo bash -c 'echo " " >> /boot/config.txt '
     fi
   fi
+
+  # Ask about aspect ratio
+  do_Comp_Vid_Aspect
 }
 
 
@@ -2422,6 +2569,9 @@ do_Comp_Vid_NTSC()
       sudo bash -c 'echo " " >> /boot/config.txt '
     fi
   fi
+
+  # Ask about aspect ratio
+  do_Comp_Vid_Aspect
 }
 
 
@@ -2504,6 +2654,7 @@ do_receive()
 #************************* Execution of Console Menu starts here *************************
 
 status=0
+STREAM="oscar100net"
 
 # Stop the Receiver
 do_stop
@@ -2523,7 +2674,7 @@ while [ "$status" -eq 0 ]
 	"6 Remote" "Select the Remote Control Type" \
 	"7 IR Check" "View the IR Codes From a new Remote" \
     "8 Settings" "Advanced Settings" \
-	"9 Info" "Show the System Information" \
+	"9 Utils" "Ryde Utilities and Stream Viewer" \
 	"10 Update" "Check for Software Update" \
 	"11 DVB-T RX" "Menu-driven DVB-T RX using Knucker Tuner"\
     "12 Shutdown" "Shutdown, Reboot or exit to the Linux command prompt" \
@@ -2539,7 +2690,7 @@ while [ "$status" -eq 0 ]
    	    6\ *) do_Set_RC_Type ;;
    	    7\ *) do_Check_RC_Codes ;;
 	    8\ *) do_Settings ;;
-        9\ *) do_info ;;
+        9\ *) do_utils ;;
 	    10\ *) do_update ;;
 	    11\ *) do_dvbt ;;
         12\ *) do_shutdown_menu ;;

@@ -80,6 +80,9 @@ sudo apt-get -y dist-upgrade # Upgrade all the installed packages to their lates
 sudo apt-get -y install python3-gpiozero  # for GPIOs
 sudo apt-get -y install libfftw3-dev libjpeg-dev  # for DVB-T
 sudo apt-get -y install fbi netcat imagemagick    # for DVB-T
+sudo apt-get -y install python3-urwid             # for Ryde Utils
+
+pip3 install pyftdi                               # for Ryde Utils
 
 if [ ! -f "/usr/lib/libwiringPi.so" ]; then       # Need to install WiringPi
   echo "Installing WiringPi"
@@ -123,17 +126,10 @@ echo "----- Updating pyDispmanx -----"
 echo "--------------------------------"
 echo
 
-# Download old version of pyDispmanx
-wget https://github.com/eclispe/pyDispmanx/archive/388e40cddfad5f24791c85687abace531d18e7d8.zip -O master.zip
+wget https://github.com/eclispe/pyDispmanx/archive/master.zip
 unzip -o master.zip
 rm -rf pydispmanx
-cp -f -r pyDispmanx-388e40cddfad5f24791c85687abace531d18e7d8 pydispmanx
-rm -rf pyDispmanx-388e40cddfad5f24791c85687abace531d18e7d8
-
-# wget https://github.com/eclispe/pyDispmanx/archive/master.zip
-# unzip -o master.zip
-# rm -rf pydispmanx
-# mv pyDispmanx-master pydispmanx
+mv pyDispmanx-master pydispmanx
 rm master.zip
 cd pydispmanx
 python3 setup.py build_ext --inplace
@@ -224,6 +220,18 @@ cp -r /home/pi/ryde-build/configs/dvbt /home/pi/dvbt
 cd /home/pi/dvbt
 make
 cd /home/pi
+
+echo
+echo "-----------------------------------"
+echo "----- Updating the Ryde Utils -----"
+echo "-----------------------------------"
+echo
+
+wget https://github.com/eclispe/ryde-utils/archive/master.zip
+unzip -o master.zip
+rm -rf ryde-utils
+mv ryde-utils-master ryde-utils
+rm master.zip
 
 echo
 echo "---------------------------------------------"

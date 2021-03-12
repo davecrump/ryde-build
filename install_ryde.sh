@@ -81,6 +81,9 @@ sudo apt-get -y install python3-pil
 sudo apt-get -y install python3-gpiozero
 sudo apt-get -y install libfftw3-dev libjpeg-dev  # for DVB-T
 sudo apt-get -y install fbi netcat imagemagick    # for DVB-T
+sudo apt-get -y install python3-urwid             # for Ryde Utils
+
+pip3 install pyftdi                               # for Ryde Utils
 
 # Install WiringPi for the hardware shutdown button
 echo
@@ -126,16 +129,9 @@ echo "----- Installing pyDispmanx -----"
 echo "---------------------------------"
 echo
 
-# Download old version of pyDispmanx
-wget https://github.com/eclispe/pyDispmanx/archive/388e40cddfad5f24791c85687abace531d18e7d8.zip -O master.zip
+wget https://github.com/eclispe/pyDispmanx/archive/master.zip
 unzip -o master.zip
-cp -f -r pyDispmanx-388e40cddfad5f24791c85687abace531d18e7d8 pydispmanx
-rm -rf pyDispmanx-388e40cddfad5f24791c85687abace531d18e7d8
-
-
-# wget https://github.com/eclispe/pyDispmanx/archive/master.zip
-# unzip -o master.zip
-# mv pyDispmanx-master pydispmanx
+mv pyDispmanx-master pydispmanx
 rm master.zip
 cd pydispmanx
 python3 setup.py build_ext --inplace
@@ -261,6 +257,17 @@ cp -r /home/pi/ryde-build/configs/dvbt /home/pi/dvbt
 cd /home/pi/dvbt
 make
 cd /home/pi
+
+echo
+echo "-------------------------------------"
+echo "----- Installing the Ryde Utils -----"
+echo "-------------------------------------"
+echo
+
+wget https://github.com/eclispe/ryde-utils/archive/master.zip
+unzip -o master.zip
+mv ryde-utils-master ryde-utils
+rm master.zip
 
 
 echo
