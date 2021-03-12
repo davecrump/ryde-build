@@ -1,3 +1,13 @@
+202103130
+Add 4:3 <> 16:9 switching for the composite video output
+Add ssh console-based virtual handset for easy control
+Add FTDI Module programming utility
+Add interim BATC Stream Player
+Allow MiniTiouner and Knucker to be both connected at once
+Bugfix 1.7 MHz DVB-T decode
+Allow pyDispmanx update
+Use Raspios Buster Lite 2021-01-11 for new builds
+
 202103010
 Hold back/undo pyDispmanx update that was not compatible with RydePlayer
 
