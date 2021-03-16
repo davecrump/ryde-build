@@ -232,7 +232,17 @@ do_vlc()
     fi
   fi
 
-  cvlc $VLCPAR rtmp://rtmp.batc.org.uk/live/"$STREAM" 
+  cvlc -I rc --rc-host 127.0.0.1:1111 $VLCPAR rtmp://rtmp.batc.org.uk/live/"$STREAM" /dev/null 2>/dev/null & 
+
+  # Wait here displaying the stream until user presses a key
+  whiptail --title "Displaying "$STREAM" Stream" --msgbox "Touch any key to stop the stream display and return to the menu" 8 78
+
+  echo shutdown | nc 127.0.0.1 1111
+  sleep 0.5
+  if  $(pgrep vlc >/dev/null)  ; then
+    sleep 0.5
+    sudo killall -9 vlc >/dev/null 2>/dev/null
+  fi
 }
 
 do_custom_stream()
