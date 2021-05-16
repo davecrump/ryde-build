@@ -83,7 +83,7 @@ sudo apt-get -y install libfftw3-dev libjpeg-dev  # for DVB-T
 sudo apt-get -y install fbi netcat imagemagick    # for DVB-T
 sudo apt-get -y install python3-urwid             # for Ryde Utils
 
-pip3 install pyftdi                               # for Ryde Utils
+pip3 install pyftdi==0.52.9                       # for Ryde Utils
 
 # Install WiringPi for the hardware shutdown button
 echo

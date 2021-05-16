@@ -1,3 +1,8 @@
+202105160
+Fix pyftdi version issue
+Update recommended Raspios Lite build to 2021-03-04
+Add Toshiba and Sky remotes
+
 202103130
 Add 4:3 <> 16:9 switching for the composite video output
 Add ssh console-based virtual handset for easy control
