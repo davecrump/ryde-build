@@ -426,6 +426,8 @@ do_Set_RC_Type_4()
     "32 Xtrend TV" "Xtrend KT1252-XHY TV" \
     "33 Salora" "Salora TV or DVD Remote" \
     "34 StreamZap" "StreamZap PC Remote Control" \
+    "35 Sky" "Sky Remote Control" \
+    "36 CT-8541" "Toshiba CT-8541 Remote Control" \
     "99 Exit" "Exit without changing remote control model" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
@@ -433,6 +435,8 @@ do_Set_RC_Type_4()
         32\ *) RC_FILE="xtrendkt1252" ;;
         33\ *) RC_FILE="salora" ;;
         34\ *) RC_FILE="streamzap" ;;
+        35\ *) RC_FILE="sky1" ;;
+        36\ *) RC_FILE="tosh_ct_8541" ;;
         99\ *) RC_FILE="exit" ;;
     esac
 
