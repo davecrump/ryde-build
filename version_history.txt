@@ -1,3 +1,6 @@
+202105161
+Bugfix Ryde Utils
+
 202105160
 Fix pyftdi version issue
 Update recommended Raspios Lite build to 2021-03-04
