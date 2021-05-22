@@ -288,22 +288,62 @@ do_stream_display()
   status=0
 }
 
+do_pydispmanx_test()
+{
+  reset
+  printf "Circles should flash on display and text should look like this:\n\n" 
+  printf "pygame 1.9.4.post1\n"
+  printf "Hello from the pygame community. https://www.pygame.org/contribute.html\n"
+  printf "(1920, 1080)\n"
+  printf "(1, 1)\n"
+  printf "29.270518356986372\n"
+  printf "no surface\n"
+  printf "no layer\n\n"
+  printf "Your System Response:\n\n"
+  cd /home/pi/pydispmanx
+  python3 demo.py
+  cd /home/pi
+  printf "\nPress any key to return to the menu\n"
+  read -n 1
+}
+
+do_cmd_line_ryde()
+{
+  reset
+  cd /home/pi/ryde
+  python3 -m rydeplayer /home/pi/ryde/config.yaml
+  cd /home/pi
+  printf "\nPress any key to return to the menu\n"
+  read -n 1
+}
+
 do_utils()
 {
-  menuchoice=$(whiptail --title "Select Ryde Utility" --menu "Select Choice" 20 78 5 \
+  status=0
+  while [ "$status" -eq 0 ] 
+  do
+    menuchoice=$(whiptail --title "Select Ryde Utility" --menu "Select Choice" 20 78 7 \
     "1 Keypad" "Ryde Network Control Handset"  \
     "2 FTDI" "FTDI Module Configuration Utility" \
     "3 Stream" "BATC Stream Viewer" \
     "4 Info" "Display System Information" \
+    "5 Display Test" "Test the display for use with the Ryde" \
+    "6 Ryde Test" "Run Ryde with the ability to read errors" \
+	"7 Main Menu" "Go back to the Main Menu" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
       1\ *) do_keypad ;;
       2\ *) do_ftdi ;;
       3\ *) do_stream_display ;;
       4\ *) do_info ;;
+      5\ *) do_pydispmanx_test ;;
+      6\ *) do_cmd_line_ryde ;;
+	  7\ *) status=1 ;;
     esac
-
+  done
+  status=0
 }
+
 
 do_Set_RC_Type_1()
 {
@@ -428,6 +468,7 @@ do_Set_RC_Type_4()
     "34 StreamZap" "StreamZap PC Remote Control" \
     "35 Sky" "Sky Remote Control" \
     "36 CT-8541" "Toshiba CT-8541 Remote Control" \
+    "37 GTMedia" "GTMedia Remote Control" \
     "99 Exit" "Exit without changing remote control model" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
@@ -437,6 +478,7 @@ do_Set_RC_Type_4()
         34\ *) RC_FILE="streamzap" ;;
         35\ *) RC_FILE="sky1" ;;
         36\ *) RC_FILE="tosh_ct_8541" ;;
+        37\ *) RC_FILE="gtmedia" ;;
         99\ *) RC_FILE="exit" ;;
     esac
 
@@ -1347,7 +1389,7 @@ do_Settings()
 
 do_Set_Bands()
 {
-  menuchoice=$(whiptail --title "Select band for Amendment" --menu "Select Choice and then press enter" 20 78 10 \
+  menuchoice=$(whiptail --title "Select band for Amendment" --menu "Select Choice and then press enter" 20 78 11 \
     "1 QO-100" "Set the LNB Offset frequency for QO-100" \
     "2 146" "Amend details for the 146 MHz Band" \
     "3 437" "Amend details for the 437 MHz Band" \
@@ -1356,6 +1398,7 @@ do_Set_Bands()
     "6 3400" "Amend details for the 3400 MHz Band" \
     "7 5760" "Amend details for the 5760 MHz Band" \
     "8 10368" "Amend details for the 10368 MHz Band" \
+    "9 Exit" "Return to the Main Menu" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
       1\ *) AMEND_BAND="QO-100" ;;
@@ -1366,6 +1409,7 @@ do_Set_Bands()
       6\ *) AMEND_BAND="3400"  ;;
       7\ *) AMEND_BAND="5760" ;;
       8\ *) AMEND_BAND="10368"  ;;
+      9\ *) AMEND_BAND="menu_exit"  ;;
     esac
 
   case "$AMEND_BAND" in
@@ -2233,7 +2277,8 @@ do_Set_Bands()
         sed -i "/    10368:/!b;n;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
       fi
     ;;
-
+    "menu_exit")
+    ;;
   esac
 }
 

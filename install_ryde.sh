@@ -83,7 +83,7 @@ sudo apt-get -y install libfftw3-dev libjpeg-dev  # for DVB-T
 sudo apt-get -y install fbi netcat imagemagick    # for DVB-T
 sudo apt-get -y install python3-urwid             # for Ryde Utils
 
-pip3 install pyftdi==0.52.9                       # for Ryde Utils
+pip3 install pyftdi==0.53.1                       # for Ryde Utils
 
 # Install WiringPi for the hardware shutdown button
 echo
@@ -122,7 +122,7 @@ cd longmynd
 make
 cd /home/pi
 
-# Download the previously selected version of pyDispmanx
+# Download the eclispe version of pyDispmanx
 echo
 echo "---------------------------------"
 echo "----- Installing pyDispmanx -----"
@@ -264,11 +264,11 @@ echo "----- Installing the Ryde Utils -----"
 echo "-------------------------------------"
 echo
 
-# wget https://github.com/eclispe/ryde-utils/archive/master.zip
-wget https://github.com/eclispe/ryde-utils/archive/9099a85e7c38bee6b1237c57fc5ef362fbb8292a.zip -O master.zip
+wget https://github.com/eclispe/ryde-utils/archive/master.zip
+# wget https://github.com/eclispe/ryde-utils/archive/9099a85e7c38bee6b1237c57fc5ef362fbb8292a.zip -O master.zip
 unzip -o master.zip
-# mv ryde-utils-master ryde-utils
-mv ryde-utils-9099a85e7c38bee6b1237c57fc5ef362fbb8292a ryde-utils
+mv ryde-utils-master ryde-utils
+# mv ryde-utils-9099a85e7c38bee6b1237c57fc5ef362fbb8292a ryde-utils
 rm master.zip
 
 
