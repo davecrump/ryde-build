@@ -82,7 +82,8 @@ sudo apt-get -y install libfftw3-dev libjpeg-dev  # for DVB-T
 sudo apt-get -y install fbi netcat imagemagick    # for DVB-T
 sudo apt-get -y install python3-urwid             # for Ryde Utils
 
-pip3 install pyftdi==0.52.9                       # for Ryde Utils
+pip3 uninstall -y pyftdi                          # uninstall old version of pyftdi
+pip3 install pyftdi==0.53.1                       # and install new version
 
 if [ ! -f "/usr/lib/libwiringPi.so" ]; then       # Need to install WiringPi
   echo "Installing WiringPi"
@@ -227,12 +228,12 @@ echo "----- Updating the Ryde Utils -----"
 echo "-----------------------------------"
 echo
 
-# wget https://github.com/eclispe/ryde-utils/archive/master.zip
-wget https://github.com/eclispe/ryde-utils/archive/9099a85e7c38bee6b1237c57fc5ef362fbb8292a.zip -O master.zip
+wget https://github.com/eclispe/ryde-utils/archive/master.zip
+# wget https://github.com/eclispe/ryde-utils/archive/9099a85e7c38bee6b1237c57fc5ef362fbb8292a.zip -O master.zip
 unzip -o master.zip
 rm -rf ryde-utils
-# mv ryde-utils-master ryde-utils
-mv ryde-utils-9099a85e7c38bee6b1237c57fc5ef362fbb8292a ryde-utils
+mv ryde-utils-master ryde-utils
+# mv ryde-utils-9099a85e7c38bee6b1237c57fc5ef362fbb8292a ryde-utils
 rm master.zip
 
 echo
@@ -384,6 +385,18 @@ else # User's config file needs updating, so copy master and reset remote contro
   grep -q "streamzap" "$PATHUBACKUP"/config.yaml
   if  [ $? == 0 ]; then   ## Amend new file for "streamzap" 34
     sed -i "/handsets:/{n;s/.*/        - streamzap/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "sky1" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "sky1" 35
+    sed -i "/handsets:/{n;s/.*/        - sky1/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "tosh_ct_8541" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "tosh_ct_8541" 36
+    sed -i "/handsets:/{n;s/.*/        - tosh_ct_8541/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "gtmedia" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "gtmedia" 37
+    sed -i "/handsets:/{n;s/.*/        - gtmedia/}" /home/pi/ryde/config.yaml
   fi
 fi
 
