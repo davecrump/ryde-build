@@ -67,9 +67,9 @@ echo "----- Updating the System Software Packages -----"
 echo "-------------------------------------------------"
 echo
 
-sudo dpkg --configure -a     # Make sure that all the packages are properly configured
-sudo apt-get clean           # Clean up the old archived packages
-sudo apt-get update          # Update the package list
+sudo dpkg --configure -a                          # Make sure that all the packages are properly configured
+sudo apt-get clean                                # Clean up the old archived packages
+sudo apt-get update --allow-releaseinfo-change    # Update the package list
 
 # --------- Update Packages ------
 

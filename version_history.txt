@@ -1,3 +1,6 @@
+202108220
+Allow system update release info change
+
 202105220
 Update pyftdi version to 0.53.1 and related code changes
 Reduce LongMynd scan width to +/- 0.6 * SR
