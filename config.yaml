@@ -127,7 +127,7 @@ presets:
         band: *band1255
     146_333_T: &preset11
         freq: 146500
-        bw:   334
+        bw:   333
         band: *band146T
     437_333T: &preset12
         freq: 437000
