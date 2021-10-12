@@ -1,3 +1,9 @@
+202110120
+Full DVB-T Integration
+Handle special characters in SI
+Add AC3 to audio decoder list
+Add 4 new remotes
+
 202108220
 Allow system update release info change
 

@@ -1,60 +1,82 @@
 ---
-configRev: 2
-longmynd:
-    binpath: /home/pi/longmynd/longmynd
-    mediapath: /home/pi/lmmedia
-    statuspath: /home/pi/lmstatus
-    tstimeout: 5000
+configRev: 3
+sources:
+    LONGMYND:
+        binpath: /home/pi/longmynd/longmynd
+        mediapath: /home/pi/lmmedia
+        statuspath: /home/pi/lmstatus
+        tstimeout: -1
+    COMBITUNER:
+        binpath: /home/pi/dvbt/CombiTunerExpress
+        mediapath: /home/pi/ctmedia
 
 bands:
     QO-100: &bandlnblow
+        source: LONGMYND
         lofreq: 9750000
         loside: LOW
         pol: NONE
         port: TOP
         gpioid: 7
     146: &band146
+        source: LONGMYND
         lofreq: 0
         loside: SUM
         pol: NONE
         port: BOTTOM
         gpioid: 1
     437: &band437
+        source: LONGMYND
         lofreq: 0
         loside: SUM
         pol:  NONE
         port: BOTTOM
         gpioid: 2
     1255: &band1255
+        source: LONGMYND
         lofreq: 0
         loside: SUM
-        pol:  NONE
+        pol: NONE
         port: BOTTOM
         gpioid: 3
     2400: &band2400
+        source: LONGMYND
         lofreq: 0
         loside: SUM
         pol:  NONE
         port: BOTTOM
         gpioid: 4
     3400: &band3400
+        source: LONGMYND
         lofreq: 5150000
         loside: HIGH
         pol: NONE
         port: BOTTOM
         gpioid: 5
     5760: &band5760
+        source: LONGMYND
         lofreq: 5328000
         loside: LOW
         pol: NONE
         port: BOTTOM
         gpioid: 6
     10368: &band10368
+        source: LONGMYND
         lofreq: 9750000
         loside: LOW
         pol: NONE
         port: BOTTOM
         gpioid: 7
+    146T: &band146T
+        source: COMBITUNER
+        lofreq: 0
+        loside: SUM
+        gpioid: 1
+    437T: &band437T
+        source: COMBITUNER
+        lofreq: 0
+        loside: SUM
+        gpioid: 2
 presets:
     QO-100_Beacon: &preset01
         freq: 10491500
@@ -103,6 +125,14 @@ presets:
         freq: 1255000
         sr:   1000
         band: *band1255
+    146_333_T: &preset11
+        freq: 146500
+        bw:   334
+        band: *band146T
+    437_333T: &preset12
+        freq: 437000
+        bw:   333
+        band: *band437T
 
 default: *preset01
 
@@ -140,12 +170,19 @@ osd:
         USERTRIGGER: 10
         PROGRAMTRIGGER: 10
     active:
-        MUTE: null
+        MUTE:
+            datum: TR
+            x: 0.03
+            y: 0.3
+            w: 0.3
+            h: 0.3
+        SIGLEVEL: null
         MER: null
         REPORT: null
         PROGRAM: null
         FREQ: null
         SR: null
+        BW: null
     inactive:
         MUTE: null
 

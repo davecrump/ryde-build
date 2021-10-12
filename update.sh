@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Created by davecrump 20200714 for Ryde on Buster Raspios
-# Updated for version 202101260
+# Updated for version 202110120
 
 echo
 echo "----------------------------------------"
@@ -229,11 +229,9 @@ echo "-----------------------------------"
 echo
 
 wget https://github.com/eclispe/ryde-utils/archive/master.zip
-# wget https://github.com/eclispe/ryde-utils/archive/9099a85e7c38bee6b1237c57fc5ef362fbb8292a.zip -O master.zip
 unzip -o master.zip
 rm -rf ryde-utils
 mv ryde-utils-master ryde-utils
-# mv ryde-utils-9099a85e7c38bee6b1237c57fc5ef362fbb8292a ryde-utils
 rm master.zip
 
 echo
@@ -242,7 +240,7 @@ echo "----- Restoring the User's Config Files -----"
 echo "---------------------------------------------"
 
 
-grep -q "network:" "$PATHUBACKUP"/config.yaml
+grep -q "CombiTunerExpress" "$PATHUBACKUP"/config.yaml
 if [ $? == 0 ]; then # User's config file is latest version, so simply copy back
   cp -f -r "$PATHUBACKUP"/config.yaml /home/pi/ryde/config.yaml >/dev/null 2>/dev/null
 else # User's config file needs updating, so copy master and reset remote control
@@ -397,6 +395,22 @@ else # User's config file needs updating, so copy master and reset remote contro
   grep -q "gtmedia" "$PATHUBACKUP"/config.yaml
   if  [ $? == 0 ]; then   ## Amend new file for "gtmedia" 37
     sed -i "/handsets:/{n;s/.*/        - gtmedia/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "strong5434" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "strong5434" 38
+    sed -i "/handsets:/{n;s/.*/        - strong5434/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "oldvirgin" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "oldvirgin" 39
+    sed -i "/handsets:/{n;s/.*/        - oldvirgin/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "scottdvd" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "scottdvd" 40
+    sed -i "/handsets:/{n;s/.*/        - scottdvd/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "sagemstb" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "sagemstb" 41
+    sed -i "/handsets:/{n;s/.*/        - sagemstb/}" /home/pi/ryde/config.yaml
   fi
 fi
 
