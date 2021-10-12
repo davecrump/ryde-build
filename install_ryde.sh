@@ -265,12 +265,9 @@ echo "-------------------------------------"
 echo
 
 wget https://github.com/eclispe/ryde-utils/archive/master.zip
-# wget https://github.com/eclispe/ryde-utils/archive/9099a85e7c38bee6b1237c57fc5ef362fbb8292a.zip -O master.zip
 unzip -o master.zip
 mv ryde-utils-master ryde-utils
-# mv ryde-utils-9099a85e7c38bee6b1237c57fc5ef362fbb8292a ryde-utils
 rm master.zip
-
 
 echo
 echo "--------------------------------------"

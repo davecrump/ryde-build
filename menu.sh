@@ -469,6 +469,9 @@ do_Set_RC_Type_4()
     "35 Sky" "Sky Remote Control" \
     "36 CT-8541" "Toshiba CT-8541 Remote Control" \
     "37 GTMedia" "GTMedia Remote Control" \
+    "38 Strong 5434" "Strong SRT-5434" \
+    "39 Old Virgin" "Old-model Virgin Media" \
+    "40 Scott DVD" "Scott DVD Player" \
     "99 Exit" "Exit without changing remote control model" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
@@ -479,6 +482,29 @@ do_Set_RC_Type_4()
         35\ *) RC_FILE="sky1" ;;
         36\ *) RC_FILE="tosh_ct_8541" ;;
         37\ *) RC_FILE="gtmedia" ;;
+        38\ *) RC_FILE="strong5434" ;;
+        39\ *) RC_FILE="oldvirgin" ;;
+        40\ *) RC_FILE="scottdvd" ;;
+        99\ *) RC_FILE="exit" ;;
+    esac
+
+  if [ "$RC_FILE" != "exit" ]; then # Amend the config file
+    RC_FILE="        - ${RC_FILE}"
+    sed -i "/handsets:/{n;s/.*/$RC_FILE/}" /home/pi/ryde/config.yaml
+  fi
+}
+
+
+do_Set_RC_Type_5()
+{
+  RC_FILE="exit"
+
+  menuchoice=$(whiptail --title "Set Remote Control Model (5)" --menu "Select Choice and press enter" 20 78 11 \
+    "41 Sagem STB" "Sagem Set Top box" \
+    "99 Exit" "Exit without changing remote control model" \
+      3>&2 2>&1 1>&3)
+    case "$menuchoice" in
+        41\ *) RC_FILE="sagemstb" ;;
         99\ *) RC_FILE="exit" ;;
     esac
 
@@ -491,17 +517,19 @@ do_Set_RC_Type_4()
 
 do_Set_RC_Type()
 {
-  menuchoice=$(whiptail --title "Select Page 1, 2 or 3" --menu "Select Choice (key on BATC Wiki)" 20 78 5 \
+  menuchoice=$(whiptail --title "Select Page 1, 2 or 3" --menu "Select Choice (key on BATC Wiki)" 20 78 6 \
     "1  1 - 10" "Virgin, Nebula, LG, Samsung"  \
     "2 11 - 20" "Various Sat Receivers" \
     "3 21 - 30" "Odds and Ends" \
     "4 31 - 40" "More Odds and Ends" \
+    "5 41 - 50" "Even More Odds and Ends" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
       1\ *) do_Set_RC_Type_1 ;;
       2\ *) do_Set_RC_Type_2 ;;
       3\ *) do_Set_RC_Type_3 ;;
       4\ *) do_Set_RC_Type_4 ;;
+      5\ *) do_Set_RC_Type_5 ;;
     esac
 }
 
@@ -1038,6 +1066,8 @@ do_Set_Preset_Band()
   Radio6=OFF
   Radio7=OFF
   Radio8=OFF
+  Radio9=OFF
+  Radio10=OFF
 
   case "$BAND" in
     "*bandlnblow")
@@ -1064,13 +1094,19 @@ do_Set_Preset_Band()
     "*band10368")
       Radio8=ON
     ;;
+    "*band146T")
+      Radio9=ON
+    ;;
+    "*band437T")
+      Radio10=ON
+    ;;
     *)
       Radio1=ON
     ;;
   esac
 
   NEW_BAND=$(whiptail --title "Select the new $AMEND_PRESET preset band" --radiolist \
-    "Highlight choice, select with space bar and then press enter" 20 78 10 \
+    "Highlight choice, select with space bar and then press enter" 20 78 12 \
     "QO-100" "QO-100 Band" $Radio1 \
     "146" "146 MHz Band" $Radio2 \
     "437" "437 MHz Band" $Radio3 \
@@ -1079,6 +1115,8 @@ do_Set_Preset_Band()
     "3400" "3400 MHz Band" $Radio6 \
     "5760" "5760 MHz Band" $Radio7 \
     "10368" "10368 MHz Band" $Radio8 \
+    "146T" "146 MHz Band DVB-T" $Radio9 \
+    "437T" "437 MHz Band DVB-T" $Radio10 \
     3>&2 2>&1 1>&3)
 
   if [ $? -eq 0 ]; then  # The band has changed, so amend it
@@ -1107,12 +1145,19 @@ do_Set_Preset_Band()
       "10368")
       NEW_BAND=*band10368
       ;;
+      "146T")
+        NEW_BAND=*band146T
+      ;;
+      "437T")
+        NEW_BAND=*band437T
+      ;;
+
     esac
 
     # First, detect how may freq: lines there are
 
     PRESET_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep presets__"$AMEND_PRESET"__freq=)"
-    if [ "$PRESET_FREQ_LINE" != "" ]; then
+    if [ "$PRESET_FREQ_LINE" != "" ] || [ "$NEW_BAND" == "*band146T" ] || [ "$NEW_BAND" == "*band437T" ]; then
       SCAN_FREQ_VALUES=0
     else
       PRESET_SCAN_FREQ_1_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep presets__"$AMEND_PRESET"__freq_1=)"
@@ -1137,7 +1182,7 @@ do_Set_Preset_Band()
     # Next, detect how may sr: lines there are
 
     PRESET_SR_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep presets__"$AMEND_PRESET"__sr=)"
-    if [ "$PRESET_SR_LINE" != "" ]; then
+    if [ "$PRESET_SR_LINE" != "" ] || [ "$NEW_BAND" == "*band146T" ] || [ "$NEW_BAND" == "*band437T" ] ; then
       SCAN_SR_VALUES=0
     else
       PRESET_SCAN_SR_1_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep presets__"$AMEND_PRESET"__sr_1=)"
@@ -1186,7 +1231,7 @@ do_Set_Preset_Band()
 
 do_Set_Presets()
 {
-  menuchoice=$(whiptail --title "Select Preset for Amendment" --menu "Select Choice" 20  78 11 \
+  menuchoice=$(whiptail --title "Select Preset for Amendment" --menu "Select Choice" 20  78 12 \
     "1  QO-100_Beacon" "Amend details for the QO-100_Beacon preset" \
     "2  QO-100_9.25_333" "Amend details for the QO-100_9.25_333 preset" \
     "3  QO-100_Custom" "Amend details for the QO-100_Custom preset" \
@@ -1197,40 +1242,81 @@ do_Set_Presets()
     "8  437.0_MHz_1000" "Amend details for the 437.0_MHz_1000 preset" \
     "9  1255_MHz_333" "Amend details for the 1255_MHz_333 preset" \
     "10 1255_MHz_Custom" "Amend details for the 1255_MHz_Custom preset" \
+    "11 146_MHz_333_T" "Amend details for the 146.5_MHz_333 DVB-T preset" \
+    "12 437_MHz_333_T" "Amend details for the 437.0_MHz_333 DVB-T preset" \
       3>&2 2>&1 1>&3)
-    case "$menuchoice" in
-      1\ *) AMEND_PRESET="QO-100_Beacon" ;;
-      2\ *) AMEND_PRESET="QO-100_9.25_333"  ;;
-      3\ *) AMEND_PRESET="QO-100_Custom" ;;
-      4\ *) AMEND_PRESET="QO-100_Scan"  ;;
-      5\ *) AMEND_PRESET="146.5_MHz_125" ;;
-      6\ *) AMEND_PRESET="146.5_MHz_333"  ;;
-      7\ *) AMEND_PRESET="437.0_MHz_333" ;;
-      8\ *) AMEND_PRESET="437.0_MHz_1000"  ;;
-      9\ *) AMEND_PRESET="1255_MHz_333" ;;
-      10\ *) AMEND_PRESET="1255_MHz_Custom"  ;;
-    esac
+
+      case "$menuchoice" in
+        1\ *) AMEND_PRESET="QO-100_Beacon" ;;
+        2\ *) AMEND_PRESET="QO-100_9.25_333"  ;;
+        3\ *) AMEND_PRESET="QO-100_Custom" ;;
+        4\ *) AMEND_PRESET="QO-100_Scan"  ;;
+        5\ *) AMEND_PRESET="146.5_MHz_125" ;;
+        6\ *) AMEND_PRESET="146.5_MHz_333"  ;;
+        7\ *) AMEND_PRESET="437.0_MHz_333" ;;
+        8\ *) AMEND_PRESET="437.0_MHz_1000"  ;;
+        9\ *) AMEND_PRESET="1255_MHz_333" ;;
+        10\ *) AMEND_PRESET="1255_MHz_Custom"  ;;
+        11\ *) AMEND_PRESET="146_333_T" ;;
+        12\ *) AMEND_PRESET="437_333_T"  ;;
+      esac
 
   do_Set_Preset_Band
+  if [ "$AMEND_PRESET" != "146_333_T" ] && [ "$AMEND_PRESET" != "146_333_T" ]; then
+    # DVB-S and DVB-S2 presets
 
-  menuchoice=$(whiptail --title "Amend frequency details for the $AMEND_PRESET preset" --menu "Select Choice" 16 78 10 \
-    "1 Freq" "Set a Single Receive Frequency" \
-    "2 Scan Freqs" "Set Multiple Receive Frequencies for Scanning" \
-      3>&2 2>&1 1>&3)
-    case "$menuchoice" in
-      1\ *) do_Set_Freq ;;
-      2\ *) do_Set_Scan_Freq ;;
-    esac
 
-  menuchoice=$(whiptail --title "Amend SR details for the $AMEND_PRESET preset" --menu "Select Choice" 16 78 10 \
-    "1 SR" "Set a Single Receive SR" \
-    "2 Scan SRs" "Set Multiple Receive SRs for Scanning" \
-      3>&2 2>&1 1>&3)
-    case "$menuchoice" in
-      1\ *) do_Set_SR ;;
-      2\ *) do_Set_Scan_SR ;;
-    esac
+    menuchoice=$(whiptail --title "Amend frequency details for the $AMEND_PRESET preset" --menu "Select Choice" 16 78 10 \
+      "1 Freq" "Set a Single Receive Frequency" \
+      "2 Scan Freqs" "Set Multiple Receive Frequencies for Scanning" \
+        3>&2 2>&1 1>&3)
+      case "$menuchoice" in
+        1\ *) do_Set_Freq ;;
+        2\ *) do_Set_Scan_Freq ;;
+      esac
 
+    menuchoice=$(whiptail --title "Amend SR details for the $AMEND_PRESET preset" --menu "Select Choice" 16 78 10 \
+      "1 SR" "Set a Single Receive SR" \
+      "2 Scan SRs" "Set Multiple Receive SRs for Scanning" \
+        3>&2 2>&1 1>&3)
+      case "$menuchoice" in
+        1\ *) do_Set_SR ;;
+        2\ *) do_Set_Scan_SR ;;
+      esac
+  else
+    # DVB-T presets
+    PRESET_FREQ=0
+    PRESET_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep presets__"$AMEND_PRESET"__freq=)"
+    if [ "$PRESET_FREQ_LINE" != "" ]; then
+      PRESET_FREQ="$(echo "$PRESET_FREQ_LINE" | sed "s/presets__"$AMEND_PRESET"__freq=\"//" | sed 's/\"//')"
+    fi
+    PRESET_FREQ=$(whiptail --inputbox "Enter the new $AMEND_PRESET preset frequency in kHz" 8 78 $PRESET_FREQ --title "Frequency Entry Menu" 3>&1 1>&2 2>&3)
+    if [ $? -eq 0 ]; then
+      # Delete the first line that just said "        freq:"
+      sed -i "/^    "$AMEND_PRESET":/!b;n;d" /home/pi/ryde/config.yaml
+      # Insert a new frequency line
+      sed -i "/^    "$AMEND_PRESET":/!{p;d;};a \        freq: $PRESET_FREQ" /home/pi/ryde/config.yaml
+    fi
+
+    SCAN_FREQ_VALUES=0
+    # Now create a pad element that counts down that many lines
+    PAD=";n"
+
+    PRESET_BW=0
+
+    # Read and trim the preset BW Value
+    PRESET_BW_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep presets__"$AMEND_PRESET"__bw=)"
+    if [ "$PRESET_BW_LINE" != "" ]; then
+      PRESET_BW="$(echo "$PRESET_BW_LINE" | sed "s/presets__"$AMEND_PRESET"__bw=\"//" | sed 's/\"//')"
+    fi
+    PRESET_BW=$(whiptail --inputbox "Enter the new $AMEND_PRESET preset BW in kHz" 8 78 $PRESET_BW --title "DVB-T Bandwidth Entry Menu" 3>&1 1>&2 2>&3)
+    if [ $? -eq 0 ]; then
+      # Delete the first line that just said "        bw:"
+      sed -i "/^    "$AMEND_PRESET":/!b;n"$PAD";d" /home/pi/ryde/config.yaml
+      # Insert a new bw line
+      sed -i "/^    "$AMEND_PRESET":/!{p;d;}"$PAD";a \        bw:   $PRESET_BW" /home/pi/ryde/config.yaml
+    fi
+  fi
 }
 
 
@@ -1398,7 +1484,9 @@ do_Set_Bands()
     "6 3400" "Amend details for the 3400 MHz Band" \
     "7 5760" "Amend details for the 5760 MHz Band" \
     "8 10368" "Amend details for the 10368 MHz Band" \
-    "9 Exit" "Return to the Main Menu" \
+    "9 146T" "Amend details for the 146 MHz DVB-T Band" \
+    "10 437T" "Amend details for the 437 MHz DVB-T Band" \
+    "11 Exit" "Return to the Main Menu" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
       1\ *) AMEND_BAND="QO-100" ;;
@@ -1409,19 +1497,48 @@ do_Set_Bands()
       6\ *) AMEND_BAND="3400"  ;;
       7\ *) AMEND_BAND="5760" ;;
       8\ *) AMEND_BAND="10368"  ;;
-      9\ *) AMEND_BAND="menu_exit"  ;;
+      9\ *) AMEND_BAND="146T"  ;;
+      10\ *) AMEND_BAND="437T" ;;
+      11\ *) AMEND_BAND="menu_exit"  ;;
     esac
 
   case "$AMEND_BAND" in
     "QO-100")
+      # Read and trim the source
+      SOURCE_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__QO-100__source=')"
+      SOURCE="$(echo "$SOURCE_LINE" | sed 's/bands__QO-100__source=\"//' | sed 's/\"//')"
+
+      Radio1=OFF
+      Radio2=OFF
+
+      case "$SOURCE" in
+        "LONGMYND")
+          Radio1=ON
+        ;;
+        "COMBITUNER")
+          Radio2=ON
+        ;;
+        *)
+          Radio1=ON
+        ;;
+      esac
+      SOURCE=$(whiptail --title "Select the Source (tuner) for the QO-100 Band" --radiolist \
+        "Highlight choice, select with space bar and then press enter" 20 78 5 \
+        "LONGMYND" "DVB-S or DVB-S2 using a MiniTiouner" $Radio1 \
+        "COMBITUNER" "DVB-T using a Knucker Tuner" $Radio2 \
+        3>&2 2>&1 1>&3)
+      if [ $? -eq 0 ]; then
+        sed -i "/    QO-100:/!b;n;c\        source: $SOURCE" /home/pi/ryde/config.yaml
+      fi
+
       # Read and trim the LO frequency
       LO_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__QO-100__lofreq=')"
       LO_FREQ="$(echo "$LO_FREQ_LINE" | sed 's/bands__QO-100__lofreq=\"//' | sed 's/\"//')"
       LO_FREQ=$(whiptail --inputbox "Enter the new QO-100 LO frequency in kHz (for example 9750000)" 8 78 $LO_FREQ --title "LO Frequency Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    QO-100:/!b;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
+        sed -i "/    QO-100:/!b;n;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
         if [ "$LO_FREQ" == "0" ]; then  # set LO Side to SUM
-          sed -i "/    QO-100:/!b;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
+          sed -i "/    QO-100:/!b;n;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
         fi
       fi
 
@@ -1453,7 +1570,7 @@ do_Set_Bands()
           "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
           3>&2 2>&1 1>&3)
         if [ $? -eq 0 ]; then
-          sed -i "/    QO-100:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
+          sed -i "/    QO-100:/!b;n;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
         fi
       fi
 
@@ -1484,7 +1601,7 @@ do_Set_Bands()
         "HORIZONTAL" "Horizontal Polarity 18 Volts (QO-100)" $Radio3 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    QO-100:/!b;n;n;n;c\        pol: $NEW_POL" /home/pi/ryde/config.yaml
+        sed -i "/    QO-100:/!b;n;n;n;n;c\        pol: $NEW_POL" /home/pi/ryde/config.yaml
       fi
 
       # Read and trim the port
@@ -1509,7 +1626,7 @@ do_Set_Bands()
         "BOTTOM" "Bottom Tuner Port (Socket B)" $Radio2 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    QO-100:/!b;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
+        sed -i "/    QO-100:/!b;n;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
       fi
 
       # Read and trim the GPIO Band Setting
@@ -1518,18 +1635,45 @@ do_Set_Bands()
       GPIOID=$(whiptail --inputbox "Enter the new QO-100 Band GPIO setting (0 - 7)" 8 78 \
       $GPIOID --title "Band GPIO Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    QO-100:/!b;n;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
+        sed -i "/    QO-100:/!b;n;n;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
       fi
     ;;
     "146")
+      # Read and trim the source
+      SOURCE_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__146__source=')"
+      SOURCE="$(echo "$SOURCE_LINE" | sed 's/bands__146__source=\"//' | sed 's/\"//')"
+
+      Radio1=OFF
+      Radio2=OFF
+
+      case "$SOURCE" in
+        "LONGMYND")
+          Radio1=ON
+        ;;
+        "COMBITUNER")
+          Radio2=ON
+        ;;
+        *)
+          Radio1=ON
+        ;;
+      esac
+      SOURCE=$(whiptail --title "Select the Source (tuner) for the 146 Band" --radiolist \
+        "Highlight choice, select with space bar and then press enter" 20 78 5 \
+        "LONGMYND" "DVB-S or DVB-S2 using a MiniTiouner" $Radio1 \
+        "COMBITUNER" "DVB-T using a Knucker Tuner" $Radio2 \
+        3>&2 2>&1 1>&3)
+      if [ $? -eq 0 ]; then
+        sed -i "/    146:/!b;n;c\        source: $SOURCE" /home/pi/ryde/config.yaml
+      fi
+
       # Read and trim the LO frequency
       LO_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__146__lofreq=')"
       LO_FREQ="$(echo "$LO_FREQ_LINE" | sed 's/bands__146__lofreq=\"//' | sed 's/\"//')"
       LO_FREQ=$(whiptail --inputbox "Enter the new 146 MHz Band LO frequency in kHz (for example 9750000)" 8 78 $LO_FREQ --title "LO Frequency Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    146:/!b;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
+        sed -i "/    146:/!b;n;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
         if [ "$LO_FREQ" == "0" ]; then  # set LO Side to SUM
-          sed -i "/    146:/!b;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
+          sed -i "/    146:/!b;n;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
         fi
       fi
 
@@ -1561,7 +1705,7 @@ do_Set_Bands()
           "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
           3>&2 2>&1 1>&3)
         if [ $? -eq 0 ]; then
-          sed -i "/    146:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
+          sed -i "/    146:/!b;n;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
         fi
       fi
 
@@ -1592,7 +1736,7 @@ do_Set_Bands()
         "HORIZONTAL" "Horizontal Polarity 18 Volts" $Radio3 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    146:/!b;n;n;n;c\        pol: $NEW_POL" /home/pi/ryde/config.yaml
+        sed -i "/    146:/!b;n;n;n;n;c\        pol: $NEW_POL" /home/pi/ryde/config.yaml
       fi
 
       # Read and trim the port
@@ -1617,7 +1761,7 @@ do_Set_Bands()
         "BOTTOM" "Bottom Tuner Port (Socket B)" $Radio2 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    146:/!b;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
+        sed -i "/    146:/!b;n;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
       fi
 
       # Read and trim the GPIO Band Setting
@@ -1626,18 +1770,45 @@ do_Set_Bands()
       GPIOID=$(whiptail --inputbox "Enter the new 146 MHz Band GPIO setting (0 - 7)" 8 78 \
       $GPIOID --title "Band GPIO Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    146:/!b;n;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
+        sed -i "/    146:/!b;n;n;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
       fi
     ;;
     "437")
+      # Read and trim the source
+      SOURCE_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__437__source=')"
+      SOURCE="$(echo "$SOURCE_LINE" | sed 's/bands__437__source=\"//' | sed 's/\"//')"
+
+      Radio1=OFF
+      Radio2=OFF
+
+      case "$SOURCE" in
+        "LONGMYND")
+          Radio1=ON
+        ;;
+        "COMBITUNER")
+          Radio2=ON
+        ;;
+        *)
+          Radio1=ON
+        ;;
+      esac
+      SOURCE=$(whiptail --title "Select the Source (tuner) for the 437 Band" --radiolist \
+        "Highlight choice, select with space bar and then press enter" 20 78 5 \
+        "LONGMYND" "DVB-S or DVB-S2 using a MiniTiouner" $Radio1 \
+        "COMBITUNER" "DVB-T using a Knucker Tuner" $Radio2 \
+        3>&2 2>&1 1>&3)
+      if [ $? -eq 0 ]; then
+        sed -i "/    437:/!b;n;c\        source: $SOURCE" /home/pi/ryde/config.yaml
+      fi
+
       # Read and trim the LO frequency
       LO_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__437__lofreq=')"
       LO_FREQ="$(echo "$LO_FREQ_LINE" | sed 's/bands__437__lofreq=\"//' | sed 's/\"//')"
       LO_FREQ=$(whiptail --inputbox "Enter the new 437 MHz Band LO frequency in kHz (for example 9750000)" 8 78 $LO_FREQ --title "LO Frequency Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    437:/!b;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
+        sed -i "/    437:/!b;n;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
         if [ "$LO_FREQ" == "0" ]; then  # set LO Side to SUM
-          sed -i "/    437:/!b;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
+          sed -i "/    437:/!b;n;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
         fi
       fi
 
@@ -1669,7 +1840,7 @@ do_Set_Bands()
           "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
           3>&2 2>&1 1>&3)
         if [ $? -eq 0 ]; then
-          sed -i "/    437:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
+          sed -i "/    437:/!b;n;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
         fi
       fi
 
@@ -1700,7 +1871,7 @@ do_Set_Bands()
         "HORIZONTAL" "Horizontal Polarity 18 Volts" $Radio3 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    437:/!b;n;n;n;c\        pol: $NEW_POL" /home/pi/ryde/config.yaml
+        sed -i "/    437:/!b;n;n;n;n;c\        pol: $NEW_POL" /home/pi/ryde/config.yaml
       fi
 
       # Read and trim the port
@@ -1725,7 +1896,7 @@ do_Set_Bands()
         "BOTTOM" "Bottom Tuner Port (Socket B)" $Radio2 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    437:/!b;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
+        sed -i "/    437:/!b;n;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
       fi
 
       # Read and trim the GPIO Band Setting
@@ -1734,18 +1905,45 @@ do_Set_Bands()
       GPIOID=$(whiptail --inputbox "Enter the new 437 MHz Band GPIO setting (0 - 7)" 8 78 \
       $GPIOID --title "Band GPIO Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    437:/!b;n;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
+        sed -i "/    437:/!b;n;n;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
       fi
     ;;
     "1255")
+      # Read and trim the source
+      SOURCE_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__1255__source=')"
+      SOURCE="$(echo "$SOURCE_LINE" | sed 's/bands__1255__source=\"//' | sed 's/\"//')"
+
+      Radio1=OFF
+      Radio2=OFF
+
+      case "$SOURCE" in
+        "LONGMYND")
+          Radio1=ON
+        ;;
+        "COMBITUNER")
+          Radio2=ON
+        ;;
+        *)
+          Radio1=ON
+        ;;
+      esac
+      SOURCE=$(whiptail --title "Select the Source (tuner) for the 1255 Band" --radiolist \
+        "Highlight choice, select with space bar and then press enter" 20 78 5 \
+        "LONGMYND" "DVB-S or DVB-S2 using a MiniTiouner" $Radio1 \
+        "COMBITUNER" "DVB-T using a Knucker Tuner" $Radio2 \
+        3>&2 2>&1 1>&3)
+      if [ $? -eq 0 ]; then
+        sed -i "/    1255:/!b;n;c\        source: $SOURCE" /home/pi/ryde/config.yaml
+      fi
+
       # Read and trim the LO frequency
       LO_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__1255__lofreq=')"
       LO_FREQ="$(echo "$LO_FREQ_LINE" | sed 's/bands__1255__lofreq=\"//' | sed 's/\"//')"
       LO_FREQ=$(whiptail --inputbox "Enter the new 1255 MHz Band LO frequency in kHz (for example 9750000)" 8 78 $LO_FREQ --title "LO Frequency Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    1255:/!b;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
+        sed -i "/    1255:/!b;n;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
         if [ "$LO_FREQ" == "0" ]; then  # set LO Side to SUM
-          sed -i "/    1255:/!b;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
+          sed -i "/    1255:/!b;n;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
         fi
       fi
 
@@ -1777,7 +1975,7 @@ do_Set_Bands()
           "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
           3>&2 2>&1 1>&3)
         if [ $? -eq 0 ]; then
-          sed -i "/    1255:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
+          sed -i "/    1255:/!b;n;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
         fi
       fi
 
@@ -1808,7 +2006,7 @@ do_Set_Bands()
         "HORIZONTAL" "Horizontal Polarity 18 Volts" $Radio3 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    1255:/!b;n;n;n;c\        pol: $NEW_POL" /home/pi/ryde/config.yaml
+        sed -i "/    1255:/!b;n;n;n;n;c\        pol: $NEW_POL" /home/pi/ryde/config.yaml
       fi
 
       # Read and trim the port
@@ -1833,7 +2031,7 @@ do_Set_Bands()
         "BOTTOM" "Bottom Tuner Port (Socket B)" $Radio2 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    1255:/!b;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
+        sed -i "/    1255:/!b;n;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
       fi
 
       # Read and trim the GPIO Band Setting
@@ -1842,18 +2040,45 @@ do_Set_Bands()
       GPIOID=$(whiptail --inputbox "Enter the new 1255 MHz Band GPIO setting (0 - 7)" 8 78 \
       $GPIOID --title "Band GPIO Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    1255:/!b;n;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
+        sed -i "/    1255:/!b;n;n;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
       fi
     ;;
     "2400")
+      # Read and trim the source
+      SOURCE_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__2400__source=')"
+      SOURCE="$(echo "$SOURCE_LINE" | sed 's/bands__2400__source=\"//' | sed 's/\"//')"
+
+      Radio1=OFF
+      Radio2=OFF
+
+      case "$SOURCE" in
+        "LONGMYND")
+          Radio1=ON
+        ;;
+        "COMBITUNER")
+          Radio2=ON
+        ;;
+        *)
+          Radio1=ON
+        ;;
+      esac
+      SOURCE=$(whiptail --title "Select the Source (tuner) for the 2400 Band" --radiolist \
+        "Highlight choice, select with space bar and then press enter" 20 78 5 \
+        "LONGMYND" "DVB-S or DVB-S2 using a MiniTiouner" $Radio1 \
+        "COMBITUNER" "DVB-T using a Knucker Tuner" $Radio2 \
+        3>&2 2>&1 1>&3)
+      if [ $? -eq 0 ]; then
+        sed -i "/    2400:/!b;n;c\        source: $SOURCE" /home/pi/ryde/config.yaml
+      fi
+
       # Read and trim the LO frequency
       LO_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__2400__lofreq=')"
       LO_FREQ="$(echo "$LO_FREQ_LINE" | sed 's/bands__2400__lofreq=\"//' | sed 's/\"//')"
       LO_FREQ=$(whiptail --inputbox "Enter the new 2400 MHz Band LO frequency in kHz (for example 9750000)" 8 78 $LO_FREQ --title "LO Frequency Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    2400:/!b;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
+        sed -i "/    2400:/!b;n;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
         if [ "$LO_FREQ" == "0" ]; then  # set LO Side to SUM
-          sed -i "/    2400:/!b;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
+          sed -i "/    2400:/!b;n;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
         fi
       fi
 
@@ -1885,7 +2110,7 @@ do_Set_Bands()
           "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
           3>&2 2>&1 1>&3)
         if [ $? -eq 0 ]; then
-          sed -i "/    2400:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
+          sed -i "/    2400:/!b;n;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
         fi
       fi
 
@@ -1916,7 +2141,7 @@ do_Set_Bands()
         "HORIZONTAL" "Horizontal Polarity 18 Volts" $Radio3 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    2400:/!b;n;n;n;c\        pol: $NEW_POL" /home/pi/ryde/config.yaml
+        sed -i "/    2400:/!b;n;n;n;n;c\        pol: $NEW_POL" /home/pi/ryde/config.yaml
       fi
 
       # Read and trim the port
@@ -1941,7 +2166,7 @@ do_Set_Bands()
         "BOTTOM" "Bottom Tuner Port (Socket B)" $Radio2 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    2400:/!b;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
+        sed -i "/    2400:/!b;n;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
       fi
 
       # Read and trim the GPIO Band Setting
@@ -1950,18 +2175,45 @@ do_Set_Bands()
       GPIOID=$(whiptail --inputbox "Enter the new 2400 MHz Band GPIO setting (0 - 7)" 8 78 \
       $GPIOID --title "Band GPIO Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    2400:/!b;n;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
+        sed -i "/    2400:/!b;n;n;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
       fi
     ;;
     "3400")
+      # Read and trim the source
+      SOURCE_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__3400__source=')"
+      SOURCE="$(echo "$SOURCE_LINE" | sed 's/bands__3400__source=\"//' | sed 's/\"//')"
+
+      Radio1=OFF
+      Radio2=OFF
+
+      case "$SOURCE" in
+        "LONGMYND")
+          Radio1=ON
+        ;;
+        "COMBITUNER")
+          Radio2=ON
+        ;;
+        *)
+          Radio1=ON
+        ;;
+      esac
+      SOURCE=$(whiptail --title "Select the Source (tuner) for the 3400 Band" --radiolist \
+        "Highlight choice, select with space bar and then press enter" 20 78 5 \
+        "LONGMYND" "DVB-S or DVB-S2 using a MiniTiouner" $Radio1 \
+        "COMBITUNER" "DVB-T using a Knucker Tuner" $Radio2 \
+        3>&2 2>&1 1>&3)
+      if [ $? -eq 0 ]; then
+        sed -i "/    3400:/!b;n;c\        source: $SOURCE" /home/pi/ryde/config.yaml
+      fi
+
       # Read and trim the LO frequency
       LO_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__3400__lofreq=')"
       LO_FREQ="$(echo "$LO_FREQ_LINE" | sed 's/bands__3400__lofreq=\"//' | sed 's/\"//')"
       LO_FREQ=$(whiptail --inputbox "Enter the new 3400 MHz Band LO frequency in kHz (for example 9750000)" 8 78 $LO_FREQ --title "LO Frequency Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    3400:/!b;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
+        sed -i "/    3400:/!b;n;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
         if [ "$LO_FREQ" == "0" ]; then  # set LO Side to SUM
-          sed -i "/    3400:/!b;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
+          sed -i "/    3400:/!b;n;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
         fi
       fi
 
@@ -1993,7 +2245,7 @@ do_Set_Bands()
           "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
           3>&2 2>&1 1>&3)
         if [ $? -eq 0 ]; then
-          sed -i "/    3400:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
+          sed -i "/    3400:/!b;n;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
         fi
       fi
 
@@ -2024,7 +2276,7 @@ do_Set_Bands()
         "HORIZONTAL" "Horizontal Polarity 18 Volts" $Radio3 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    3400:/!b;n;n;n;c\        pol: $NEW_POL" /home/pi/ryde/config.yaml
+        sed -i "/    3400:/!b;n;n;n;n;c\        pol: $NEW_POL" /home/pi/ryde/config.yaml
       fi
 
       # Read and trim the port
@@ -2049,7 +2301,7 @@ do_Set_Bands()
         "BOTTOM" "Bottom Tuner Port (Socket B)" $Radio2 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    3400:/!b;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
+        sed -i "/    3400:/!b;n;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
       fi
 
       # Read and trim the GPIO Band Setting
@@ -2058,18 +2310,45 @@ do_Set_Bands()
       GPIOID=$(whiptail --inputbox "Enter the new 3400 MHz Band GPIO setting (0 - 7)" 8 78 \
       $GPIOID --title "Band GPIO Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    3400:/!b;n;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
+        sed -i "/    3400:/!b;n;n;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
       fi
     ;;
     "5760")
+      # Read and trim the source
+      SOURCE_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__5760__source=')"
+      SOURCE="$(echo "$SOURCE_LINE" | sed 's/bands__5760__source=\"//' | sed 's/\"//')"
+
+      Radio1=OFF
+      Radio2=OFF
+
+      case "$SOURCE" in
+        "LONGMYND")
+          Radio1=ON
+        ;;
+        "COMBITUNER")
+          Radio2=ON
+        ;;
+        *)
+          Radio1=ON
+        ;;
+      esac
+      SOURCE=$(whiptail --title "Select the Source (tuner) for the 5760 Band" --radiolist \
+        "Highlight choice, select with space bar and then press enter" 20 78 5 \
+        "LONGMYND" "DVB-S or DVB-S2 using a MiniTiouner" $Radio1 \
+        "COMBITUNER" "DVB-T using a Knucker Tuner" $Radio2 \
+        3>&2 2>&1 1>&3)
+      if [ $? -eq 0 ]; then
+        sed -i "/    5760:/!b;n;c\        source: $SOURCE" /home/pi/ryde/config.yaml
+      fi
+
       # Read and trim the LO frequency
       LO_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__5760__lofreq=')"
       LO_FREQ="$(echo "$LO_FREQ_LINE" | sed 's/bands__5760__lofreq=\"//' | sed 's/\"//')"
       LO_FREQ=$(whiptail --inputbox "Enter the new 5760 MHz Band LO frequency in kHz (for example 9750000)" 8 78 $LO_FREQ --title "LO Frequency Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    5760:/!b;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
+        sed -i "/    5760:/!b;n;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
         if [ "$LO_FREQ" == "0" ]; then  # set LO Side to SUM
-          sed -i "/    5760:/!b;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
+          sed -i "/    5760:/!b;n;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
         fi
       fi
 
@@ -2101,7 +2380,7 @@ do_Set_Bands()
           "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
           3>&2 2>&1 1>&3)
         if [ $? -eq 0 ]; then
-          sed -i "/    5760:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
+          sed -i "/    5760:/!b;n;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
         fi
       fi
 
@@ -2132,7 +2411,7 @@ do_Set_Bands()
         "HORIZONTAL" "Horizontal Polarity 18 Volts" $Radio3 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    5760:/!b;n;n;n;c\        pol: $NEW_POL" /home/pi/ryde/config.yaml
+        sed -i "/    5760:/!b;n;n;n;n;c\        pol: $NEW_POL" /home/pi/ryde/config.yaml
       fi
 
       # Read and trim the port
@@ -2157,7 +2436,7 @@ do_Set_Bands()
         "BOTTOM" "Bottom Tuner Port (Socket B)" $Radio2 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    5760:/!b;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
+        sed -i "/    5760:/!b;n;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
       fi
 
       # Read and trim the GPIO Band Setting
@@ -2166,18 +2445,45 @@ do_Set_Bands()
       GPIOID=$(whiptail --inputbox "Enter the new 5760 MHz Band GPIO setting (0 - 7)" 8 78 \
       $GPIOID --title "Band GPIO Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    5760:/!b;n;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
+        sed -i "/    5760:/!b;n;n;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
       fi
     ;;
     "10368")
+      # Read and trim the source
+      SOURCE_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__10368__source=')"
+      SOURCE="$(echo "$SOURCE_LINE" | sed 's/bands__10368__source=\"//' | sed 's/\"//')"
+
+      Radio1=OFF
+      Radio2=OFF
+
+      case "$SOURCE" in
+        "LONGMYND")
+          Radio1=ON
+        ;;
+        "COMBITUNER")
+          Radio2=ON
+        ;;
+        *)
+          Radio1=ON
+        ;;
+      esac
+      SOURCE=$(whiptail --title "Select the Source (tuner) for the 10368 Band" --radiolist \
+        "Highlight choice, select with space bar and then press enter" 20 78 5 \
+        "LONGMYND" "DVB-S or DVB-S2 using a MiniTiouner" $Radio1 \
+        "COMBITUNER" "DVB-T using a Knucker Tuner" $Radio2 \
+        3>&2 2>&1 1>&3)
+      if [ $? -eq 0 ]; then
+        sed -i "/    10368:/!b;n;c\        source: $SOURCE" /home/pi/ryde/config.yaml
+      fi
+
       # Read and trim the LO frequency
       LO_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__10368__lofreq=')"
       LO_FREQ="$(echo "$LO_FREQ_LINE" | sed 's/bands__10368__lofreq=\"//' | sed 's/\"//')"
       LO_FREQ=$(whiptail --inputbox "Enter the new 10368 MHz Band LO frequency in kHz (for example 9750000)" 8 78 $LO_FREQ --title "LO Frequency Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    10368:/!b;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
+        sed -i "/    10368:/!b;n;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
         if [ "$LO_FREQ" == "0" ]; then  # set LO Side to SUM
-          sed -i "/    10368:/!b;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
+          sed -i "/    10368:/!b;n;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
         fi
       fi
 
@@ -2209,7 +2515,7 @@ do_Set_Bands()
           "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
           3>&2 2>&1 1>&3)
         if [ $? -eq 0 ]; then
-          sed -i "/    10368:/!b;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
+          sed -i "/    10368:/!b;n;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
         fi
       fi
 
@@ -2240,7 +2546,7 @@ do_Set_Bands()
         "HORIZONTAL" "Horizontal Polarity 18 Volts" $Radio3 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    10368:/!b;n;n;n;c\        pol: $NEW_POL" /home/pi/ryde/config.yaml
+        sed -i "/    10368:/!b;n;n;n;n;c\        pol: $NEW_POL" /home/pi/ryde/config.yaml
       fi
 
       # Read and trim the port
@@ -2265,7 +2571,7 @@ do_Set_Bands()
         "BOTTOM" "Bottom Tuner Port (Socket B)" $Radio2 \
         3>&2 2>&1 1>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    10368:/!b;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
+        sed -i "/    10368:/!b;n;n;n;n;n;c\        port: $NEW_PORT" /home/pi/ryde/config.yaml
       fi
 
       # Read and trim the GPIO Band Setting
@@ -2274,9 +2580,174 @@ do_Set_Bands()
       GPIOID=$(whiptail --inputbox "Enter the new 10368 MHz Band GPIO setting (0 - 7)" 8 78 \
       $GPIOID --title "Band GPIO Entry Menu" 3>&1 1>&2 2>&3)
       if [ $? -eq 0 ]; then
-        sed -i "/    10368:/!b;n;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
+        sed -i "/    10368:/!b;n;n;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
       fi
     ;;
+
+    "146T")
+
+      # Read and trim the source
+      SOURCE_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__146T__source=')"
+      SOURCE="$(echo "$SOURCE_LINE" | sed 's/bands__146T__source=\"//' | sed 's/\"//')"
+
+      Radio1=OFF
+      Radio2=OFF
+
+      case "$SOURCE" in
+        "LONGMYND")
+          Radio1=ON
+        ;;
+        "COMBITUNER")
+          Radio2=ON
+        ;;
+        *)
+          Radio1=ON
+        ;;
+      esac
+      SOURCE=$(whiptail --title "Select the Source (tuner) for the 146T Band" --radiolist \
+        "Highlight choice, select with space bar and then press enter" 20 78 5 \
+        "LONGMYND" "DVB-S or DVB-S2 using a MiniTiouner" $Radio1 \
+        "COMBITUNER" "DVB-T using a Knucker Tuner" $Radio2 \
+        3>&2 2>&1 1>&3)
+      if [ $? -eq 0 ]; then
+        sed -i "/    146T:/!b;n;c\        source: $SOURCE" /home/pi/ryde/config.yaml
+      fi
+
+      # Read and trim the LO frequency
+      LO_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__146T__lofreq=')"
+      LO_FREQ="$(echo "$LO_FREQ_LINE" | sed 's/bands__146T__lofreq=\"//' | sed 's/\"//')"
+      LO_FREQ=$(whiptail --inputbox "Enter the new 146 MHz DVB-T Band LO frequency in kHz (for example 9750000)" 8 78 $LO_FREQ --title "LO Frequency Entry Menu" 3>&1 1>&2 2>&3)
+      if [ $? -eq 0 ]; then
+        sed -i "/    146T:/!b;n;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
+        if [ "$LO_FREQ" == "0" ]; then  # set LO Side to SUM
+          sed -i "/    146T:/!b;n;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
+        fi
+      fi
+
+      # Read and trim the LO side
+      LO_SIDE_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__146T__loside=')"
+      LO_SIDE="$(echo "$LO_SIDE_LINE" | sed 's/bands__146T__loside=\"//' | sed 's/\"//')"
+      if [ "$LO_FREQ" != "0" ]; then  # Set LO side
+        Radio1=OFF
+        Radio2=OFF
+        Radio3=OFF
+        case "$LO_SIDE" in
+          "LOW")
+            Radio1=ON
+          ;;
+          "HIGH")
+            Radio2=ON
+          ;;
+          "SUM")
+            Radio3=ON
+          ;;
+          *)
+            Radio1=ON
+          ;;
+        esac
+        LO_SIDE=$(whiptail --title "Select the LO Configuration for the 146 MHz DVB-T Band" --radiolist \
+          "Highlight choice, select with space bar and then press enter" 20 78 5 \
+          "LOW" "Tuner Frequency = Signal Frequency - LO Frequency (normal)" $Radio1 \
+          "HIGH" "Tuner Frequency = LO Frequency - Signal Frequency" $Radio2 \
+          "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
+          3>&2 2>&1 1>&3)
+        if [ $? -eq 0 ]; then
+          sed -i "/    146T:/!b;n;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
+        fi
+      fi
+
+      # Read and trim the GPIO Band Setting
+      GPIOID_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__146T__gpioid=')"
+      GPIOID="$(echo "$GPIOID_LINE" | sed 's/bands__146T__gpioid=\"//' | sed 's/\"//')"
+      GPIOID=$(whiptail --inputbox "Enter the new 146 MHz DVB-T Band GPIO setting (0 - 7)" 8 78 \
+      $GPIOID --title "Band GPIO Entry Menu" 3>&1 1>&2 2>&3)
+      if [ $? -eq 0 ]; then
+        sed -i "/    146T:/!b;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
+      fi
+    ;;
+
+    "437T")
+
+      # Read and trim the source
+      SOURCE_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__437T__source=')"
+      SOURCE="$(echo "$SOURCE_LINE" | sed 's/bands__437T__source=\"//' | sed 's/\"//')"
+
+      Radio1=OFF
+      Radio2=OFF
+
+      case "$SOURCE" in
+        "LONGMYND")
+          Radio1=ON
+        ;;
+        "COMBITUNER")
+          Radio2=ON
+        ;;
+        *)
+          Radio1=ON
+        ;;
+      esac
+      SOURCE=$(whiptail --title "Select the Source (tuner) for the 437T Band" --radiolist \
+        "Highlight choice, select with space bar and then press enter" 20 78 5 \
+        "LONGMYND" "DVB-S or DVB-S2 using a MiniTiouner" $Radio1 \
+        "COMBITUNER" "DVB-T using a Knucker Tuner" $Radio2 \
+        3>&2 2>&1 1>&3)
+      if [ $? -eq 0 ]; then
+        sed -i "/    437T:/!b;n;c\        source: $SOURCE" /home/pi/ryde/config.yaml
+      fi
+
+      # Read and trim the LO frequency
+      LO_FREQ_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__437T__lofreq=')"
+      LO_FREQ="$(echo "$LO_FREQ_LINE" | sed 's/bands__437T__lofreq=\"//' | sed 's/\"//')"
+      LO_FREQ=$(whiptail --inputbox "Enter the new 437 MHz DVB-T Band LO frequency in kHz (for example 9750000)" 8 78 $LO_FREQ --title "LO Frequency Entry Menu" 3>&1 1>&2 2>&3)
+      if [ $? -eq 0 ]; then
+        sed -i "/    437T:/!b;n;n;c\        lofreq: $LO_FREQ" /home/pi/ryde/config.yaml
+        if [ "$LO_FREQ" == "0" ]; then  # set LO Side to SUM
+          sed -i "/    437T:/!b;n;n;n;c\        loside: SUM" /home/pi/ryde/config.yaml
+        fi
+      fi
+
+      # Read and trim the LO side
+      LO_SIDE_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__437T__loside=')"
+      LO_SIDE="$(echo "$LO_SIDE_LINE" | sed 's/bands__437T__loside=\"//' | sed 's/\"//')"
+      if [ "$LO_FREQ" != "0" ]; then  # Set LO side
+        Radio1=OFF
+        Radio2=OFF
+        Radio3=OFF
+        case "$LO_SIDE" in
+          "LOW")
+            Radio1=ON
+          ;;
+          "HIGH")
+            Radio2=ON
+          ;;
+          "SUM")
+            Radio3=ON
+          ;;
+          *)
+            Radio1=ON
+          ;;
+        esac
+        LO_SIDE=$(whiptail --title "Select the LO Configuration for the 437 MHz DVB-T Band" --radiolist \
+          "Highlight choice, select with space bar and then press enter" 20 78 5 \
+          "LOW" "Tuner Frequency = Signal Frequency - LO Frequency (normal)" $Radio1 \
+          "HIGH" "Tuner Frequency = LO Frequency - Signal Frequency" $Radio2 \
+          "SUM" "Tuner Frequency = LO Frequency + Signal Frequency" $Radio3 \
+          3>&2 2>&1 1>&3)
+        if [ $? -eq 0 ]; then
+          sed -i "/    437T:/!b;n;n;n;c\        loside: $LO_SIDE" /home/pi/ryde/config.yaml
+        fi
+      fi
+
+      # Read and trim the GPIO Band Setting
+      GPIOID_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'bands__437T__gpioid=')"
+      GPIOID="$(echo "$GPIOID_LINE" | sed 's/bands__437T__gpioid=\"//' | sed 's/\"//')"
+      GPIOID=$(whiptail --inputbox "Enter the new 437 MHz DVB-T Band GPIO setting (0 - 7)" 8 78 \
+      $GPIOID --title "Band GPIO Entry Menu" 3>&1 1>&2 2>&3)
+      if [ $? -eq 0 ]; then
+        sed -i "/    437T:/!b;n;n;n;n;c\        gpioid: $GPIOID" /home/pi/ryde/config.yaml
+      fi
+    ;;
+
     "menu_exit")
     ;;
   esac
