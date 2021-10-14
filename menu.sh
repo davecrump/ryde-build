@@ -372,7 +372,7 @@ do_Set_RC_Type_1()
         7\ *) RC_FILE="samsung_32" ;;
         8\ *) RC_FILE="elekta_tv" ;;
         9\ *) RC_FILE="wdtv_live" ;;
-        10\ *) RC_FILE="Hauppauge_mvp" ;;
+        10\ *) RC_FILE="hauppauge_mvp" ;;
         99\ *) RC_FILE="exit" ;;
     esac
 
