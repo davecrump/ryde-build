@@ -5,7 +5,7 @@ sources:
         binpath: /home/pi/longmynd/longmynd
         mediapath: /home/pi/lmmedia
         statuspath: /home/pi/lmstatus
-        tstimeout: -1
+        tstimeout: 5000
     COMBITUNER:
         binpath: /home/pi/dvbt/CombiTunerExpress
         mediapath: /home/pi/ctmedia
@@ -127,7 +127,7 @@ presets:
         band: *band1255
     146_333_T: &preset11
         freq: 146500
-        bw:   333
+        bw:   334
         band: *band146T
     437_333T: &preset12
         freq: 437000

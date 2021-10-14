@@ -372,7 +372,7 @@ do_Set_RC_Type_1()
         7\ *) RC_FILE="samsung_32" ;;
         8\ *) RC_FILE="elekta_tv" ;;
         9\ *) RC_FILE="wdtv_live" ;;
-        10\ *) RC_FILE="hauppauge_mvp" ;;
+        10\ *) RC_FILE="Hauppauge_mvp" ;;
         99\ *) RC_FILE="exit" ;;
     esac
 
@@ -1332,12 +1332,17 @@ do_Check_RC_Codes()
 do_Set_TSTimeout()
 {
   # Read and trim the current TS Timeout
-  TS_TIMEOUT_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'longmynd__tstimeout=')"
-  TS_TIMEOUT="$(echo "$TS_TIMEOUT_LINE" | sed 's/longmynd__tstimeout=\"//' | sed 's/\"//')"
+  TS_TIMEOUT_LINE="$(parse_yaml /home/pi/ryde/config.yaml | grep 'LONGMYND__tstimeout=')"
+  TS_TIMEOUT="$(echo "$TS_TIMEOUT_LINE" | sed 's/sources__LONGMYND__tstimeout=\"//' | sed 's/\"//')"
+
+  # Deal with the $TS_TIMEOUT=-1 case, which does not work with whiptail
+  if [ "$TS_TIMEOUT" == "-1" ]; then
+    TS_TIMEOUT=""
+  fi
 
   TS_TIMEOUT=$(whiptail --inputbox "Enter the new TS Timeout in mS (default 5000 - ie 5 seconds)" 8 78 $TS_TIMEOUT --title "TS TimeOut Entry Menu" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
-    sed -i "/    tstimeout:/c\    tstimeout: $TS_TIMEOUT" /home/pi/ryde/config.yaml
+    sed -i "/        tstimeout:/c\        tstimeout: $TS_TIMEOUT" /home/pi/ryde/config.yaml
   fi
 }
 
