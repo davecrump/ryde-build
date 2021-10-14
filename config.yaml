@@ -5,7 +5,7 @@ sources:
         binpath: /home/pi/longmynd/longmynd
         mediapath: /home/pi/lmmedia
         statuspath: /home/pi/lmstatus
-        tstimeout: -1
+        tstimeout: 5000
     COMBITUNER:
         binpath: /home/pi/dvbt/CombiTunerExpress
         mediapath: /home/pi/ctmedia
