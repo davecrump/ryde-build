@@ -170,18 +170,11 @@ osd:
         USERTRIGGER: 10
         PROGRAMTRIGGER: 10
     active:
-        MUTE:
-            datum: TR
-            x: 0.03
-            y: 0.3
-            w: 0.3
-            h: 0.3
+        MUTE: null
         SIGLEVEL: null
-        MER: null
         REPORT: null
         PROGRAM: null
         FREQ: null
-        SR: null
         BW: null
     inactive:
         MUTE: null
