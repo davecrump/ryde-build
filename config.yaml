@@ -175,6 +175,7 @@ osd:
         REPORT: null
         PROGRAM: null
         FREQ: null
+        VOLUME: null
         BW: null
     inactive:
         MUTE: null
@@ -184,6 +185,11 @@ network:
     port: 8765
 
 shutdownBehavior: APPSTOP
+
+audio:
+    muteOnStartup: False
+    volumeOnStartup: 60
+    volumeStep: 10
 
 debug:
     enableMenu: False

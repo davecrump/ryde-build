@@ -1,3 +1,9 @@
+202111050
+Add Remote Control of audio level
+Improve band list display
+Add audio output device selection in ssh menu
+Use latest Raspios Buster Version
+
 202110120
 Full DVB-T Integration
 Handle special characters in SI

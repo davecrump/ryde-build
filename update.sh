@@ -43,6 +43,12 @@ else
   echo "Updating to the latest ${GIT_SRC} development Ryde build";
 fi
 
+echo
+echo "-----------------------------------------"
+echo "----- Noting Previous Configuration -----"
+echo "-----------------------------------------"
+echo
+
 cd /home/pi
 
 PATHUBACKUP="/home/pi/user_backups"
@@ -55,11 +61,26 @@ cp -f -r /home/pi/ryde-build/installed_version.txt "$PATHUBACKUP"/prev_installed
 
 cp -f -r /home/pi/ryde/config.yaml "$PATHUBACKUP"/config.yaml >/dev/null 2>/dev/null
 
-# And capture the RC protocol in the rx.sh file:
+# Capture the RC protocol in the rx.sh file:
 cp -f -r /home/pi/ryde-build/rx.sh "$PATHUBACKUP"/rx.sh
 
 # And the dvb-t config
 cp -f -r /home/pi/dvbt/dvb-t_config.txt "$PATHUBACKUP"/dvb-t_config.txt >/dev/null 2>/dev/null
+
+# Check the user's audio output to re-apply it after the update.  HDMI is default.
+AUDIO_JACK=HDMI
+grep -q "^        vlcArgs += '--gain 4 --alsa-audio-device hw:CARD=Headphones,DEV=0 '" \
+  /home/pi/ryde/rydeplayer/player.py
+if [ $? -eq 0 ]; then  #  RPi Jack currently selected
+  AUDIO_JACK="RPi Jack"
+else
+  grep -q "^        vlcArgs += '--gain 4 --alsa-audio-device hw:CARD=Device,DEV=0 '" \
+    /home/pi/ryde/rydeplayer/player.py
+  if [ $? -eq 0 ]; then  #  USB Dongle currently selected
+    AUDIO_JACK=USB
+  fi
+fi
+
 
 echo
 echo "-------------------------------------------------"
@@ -412,6 +433,32 @@ else # User's config file needs updating, so copy master and reset remote contro
   if  [ $? == 0 ]; then   ## Amend new file for "sagemstb" 41
     sed -i "/handsets:/{n;s/.*/        - sagemstb/}" /home/pi/ryde/config.yaml
   fi
+fi
+
+# Restore the user's original audio output (Default is HDMI)
+case "$AUDIO_JACK" in
+  "RPi Jack")
+    sed -i "/--alsa-audio-device/c\        vlcArgs += '--gain 4 --alsa-audio-device hw:CARD=Headphones,DEV=0 '" \
+      /home/pi/ryde/rydeplayer/player.py
+  ;;
+  "USB")
+    sed -i "/--alsa-audio-device/c\        vlcArgs += '--gain 4 --alsa-audio-device hw:CARD=Device,DEV=0 '" \
+      /home/pi/ryde/rydeplayer/player.py
+  ;;
+esac
+
+
+
+# Add RC Volume Control if needed for the update
+if ! grep -q "audio:" /home/pi/ryde/config.yaml; then
+
+  # add audio to config.yaml
+  awk '/debug:/{system("cat /home/pi/ryde-build/configs/audio.yaml");next}1' \
+    /home/pi/ryde/config.yaml > /home/pi/ryde-build/configs/temp.yaml
+  cp /home/pi/ryde-build/configs/temp.yaml /home/pi/ryde/config.yaml
+
+  # And the OSD:
+  sed -i "/^        FREQ: null/a \        VOLUME: null" /home/pi/ryde/config.yaml
 fi
 
 cp -f -r "$PATHUBACKUP"/dvb-t_config.txt /home/pi/dvbt/dvb-t_config.txt >/dev/null 2>/dev/null
