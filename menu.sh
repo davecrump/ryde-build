@@ -3109,30 +3109,88 @@ do_Comp_Vid_NTSC()
   do_Comp_Vid_Aspect
 }
 
+do_Audio_Jack()
+{
+  Radio1=OFF
+  Radio2=OFF
+  Radio3=OFF
+  Radio4=OFF
+
+  grep -q "^#        vlcArgs += '--gain 4 --alsa-audio-device hw:CARD=Headphones,DEV=0 '" \
+    /home/pi/ryde/rydeplayer/player.py
+  if [ $? -eq 0 ]; then  #  Line commented, so HDMI currently selected
+    Radio1=ON
+  else
+    grep -q "^        vlcArgs += '--gain 4 --alsa-audio-device hw:CARD=Headphones,DEV=0 '" \
+      /home/pi/ryde/rydeplayer/player.py
+    if [ $? -eq 0 ]; then  #  RPi Jack currently selected
+      Radio2=ON
+    else
+      grep -q "^        vlcArgs += '--gain 4 --alsa-audio-device hw:CARD=Device,DEV=0 '" \
+        /home/pi/ryde/rydeplayer/player.py
+      if [ $? -eq 0 ]; then  #  USB Dongle currently selected
+        Radio3=ON
+      else
+        Radio4=ON
+      fi
+    fi
+  fi
+
+  AUDIO_JACK=$(whiptail --title "Choose the Audio Output Port" --radiolist \
+    "Highlight choice, select with space bar and then press enter" 20 78 6 \
+    "HDMI" "Audio on HDMI" $Radio1 \
+    "RPi Jack" "Audio on the RPi 3.5 mm Jack" $Radio2 \
+    "USB" "Audio on a White USB Dongle" $Radio3 \
+    "Not Set" "Defaults to same as video" $Radio4 \
+    3>&2 2>&1 1>&3)
+  if [ $? -eq 0 ]; then
+    case "$AUDIO_JACK" in
+      "HDMI")
+        sed -i "/--alsa-audio-device/c\#        vlcArgs += '--gain 4 --alsa-audio-device hw:CARD=Headphones,DEV=0 '" \
+          /home/pi/ryde/rydeplayer/player.py
+      ;;
+      "RPi Jack")
+        sed -i "/--alsa-audio-device/c\        vlcArgs += '--gain 4 --alsa-audio-device hw:CARD=Headphones,DEV=0 '" \
+          /home/pi/ryde/rydeplayer/player.py
+      ;;
+      "USB")
+        sed -i "/--alsa-audio-device/c\        vlcArgs += '--gain 4 --alsa-audio-device hw:CARD=Device,DEV=0 '" \
+          /home/pi/ryde/rydeplayer/player.py
+      ;;
+    esac
+  fi
+  REBOOT_REQUIRED=no
+}
+
 
 do_video_change()
 {
-  menuchoice=$(whiptail --title "Video Output Menu" --menu "Select Choice" 16 78 5 \
+  REBOOT_REQUIRED=yes
+  menuchoice=$(whiptail --title "Video Output Menu" --menu "Select Choice" 16 78 6 \
     "1 Normal HDMI" "Recommended Mode"  \
     "2 HDMI Safe Mode" "Use for HDMI Troubleshooting" \
     "3 PAL Composite Video" "Use the RPi Video Output Jack" \
     "4 NTSC Composite Video" "Use the RPi Video Output Jack" \
+    "5 Audio Output" "Change Audio Output Destination" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
         1\ *) do_Norm_HDMI ;;
         2\ *) do_Safe_HDMI ;;
         3\ *) do_Comp_Vid_PAL ;;
         4\ *) do_Comp_Vid_NTSC ;;
+        5\ *) do_Audio_Jack ;;
     esac
 
-  menuchoice=$(whiptail --title "Reboot Now?" --menu "Reboot to Apply Changes?" 16 78 10 \
-    "1 Yes" "Immediate Reboot"  \
-    "2 No" "Apply changes at next Reboot" \
-      3>&2 2>&1 1>&3)
-    case "$menuchoice" in
+  if [ "$REBOOT_REQUIRED" == "yes" ]; then
+    menuchoice=$(whiptail --title "Reboot Now?" --menu "Reboot to Apply Changes?" 16 78 10 \
+      "1 Yes" "Immediate Reboot"  \
+      "2 No" "Apply changes at next Reboot" \
+        3>&2 2>&1 1>&3)
+      case "$menuchoice" in
         1\ *) do_Reboot ;;
         2\ *) do_Nothing ;;
-    esac
+      esac
+  fi
 }
 
 
@@ -3205,7 +3263,7 @@ while [ "$status" -eq 0 ]
     "2 Start-up" "Set the start-up Preset" \
     "3 Bands" "Set the band details such as LNB Offset" \
     "4 Presets" "Set the details for each preset" \
-	"5 Video" "Select the Video Output Mode" \
+	"5 Video" "Select the Video and Audio Output Mode" \
 	"6 Remote" "Select the Remote Control Type" \
 	"7 IR Check" "View the IR Codes From a new Remote" \
     "8 Settings" "Advanced Settings" \

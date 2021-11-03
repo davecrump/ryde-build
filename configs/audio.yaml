@@ -1,0 +1,6 @@
+audio:
+    muteOnStartup: False
+    volumeOnStartup: 60
+    volumeStep: 10
+
+debug:
