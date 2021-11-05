@@ -3,6 +3,7 @@ Add Remote Control of audio level
 Improve band list display
 Implement GPIO Band Switching
 Add audio output device selection in ssh menu
+Correct DVB-T2 1.7 MHz setting to use 1.614 MHz bandwidth
 Use latest Raspios Buster Version
 
 202110120
