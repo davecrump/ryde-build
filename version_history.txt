@@ -1,6 +1,7 @@
-202111050
+202111051
 Add Remote Control of audio level
 Improve band list display
+Implement GPIO Band Switching
 Add audio output device selection in ssh menu
 Use latest Raspios Buster Version
 

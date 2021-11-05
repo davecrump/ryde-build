@@ -447,22 +447,32 @@ case "$AUDIO_JACK" in
   ;;
 esac
 
-
-
 # Add RC Volume Control if needed for the update
+rm /home/pi/ryde-build/configs/temp.yaml  >/dev/null 2>/dev/null
 if ! grep -q "audio:" /home/pi/ryde/config.yaml; then
 
   # add audio to config.yaml
   awk '/debug:/{system("cat /home/pi/ryde-build/configs/audio.yaml");next}1' \
     /home/pi/ryde/config.yaml > /home/pi/ryde-build/configs/temp.yaml
   cp /home/pi/ryde-build/configs/temp.yaml /home/pi/ryde/config.yaml
+  rm /home/pi/ryde-build/configs/temp.yaml
 
   # And the OSD:
   sed -i "/^        FREQ: null/a \        VOLUME: null" /home/pi/ryde/config.yaml
 fi
 
-cp -f -r "$PATHUBACKUP"/dvb-t_config.txt /home/pi/dvbt/dvb-t_config.txt >/dev/null 2>/dev/null
+# Add Band GPIOs if needed for the update
+if ! grep -q "^    band:" /home/pi/ryde/config.yaml; then
 
+  # add gpio bcm numbers to config.yaml
+  awk '/osd:/{system("cat /home/pi/ryde-build/configs/bandgpio.yaml");next}1' \
+    /home/pi/ryde/config.yaml > /home/pi/ryde-build/configs/temp.yaml
+  cp /home/pi/ryde-build/configs/temp.yaml /home/pi/ryde/config.yaml
+  rm /home/pi/ryde-build/configs/temp.yaml
+
+fi
+
+cp -f -r "$PATHUBACKUP"/dvb-t_config.txt /home/pi/dvbt/dvb-t_config.txt >/dev/null 2>/dev/null
 
 # Record the version numbers
 
