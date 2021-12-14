@@ -149,6 +149,48 @@ uint8_t stv0910_read_puncture_rate(uint8_t demod, uint8_t *rate) {
 
 
 /* -------------------------------------------------------------------------------------------------- */
+uint8_t stv0910_read_agc1_gain(uint8_t demod, uint16_t *agc) {
+/* -------------------------------------------------------------------------------------------------- */
+/* reads the AGC1 Gain registers in the Demodulator and returns the results                           */
+/*  demod: STV0910_DEMOD_TOP | STV0910_DEMOD_BOTTOM: which demodulator is being read                  */
+/* agc: place to store the results                                                                    */
+/* return: error state                                                                                */
+/* -------------------------------------------------------------------------------------------------- */
+    uint8_t err;
+    uint8_t agc_low, agc_high;
+
+                         err=stv0910_read_reg(demod==STV0910_DEMOD_TOP ? RSTV0910_P2_AGCIQIN0 : RSTV0910_P1_AGCIQIN0, &agc_low);
+    if (err==ERROR_NONE) err=stv0910_read_reg(demod==STV0910_DEMOD_TOP ? RSTV0910_P2_AGCIQIN1 : RSTV0910_P1_AGCIQIN1, &agc_high);
+    if (err==ERROR_NONE) *agc = (uint16_t)agc_high << 8 | (uint16_t)agc_low;
+
+    if (err!=ERROR_NONE) printf("ERROR: STV0910 read agc1 gain\n");
+
+    return err;
+}
+
+
+/* -------------------------------------------------------------------------------------------------- */
+uint8_t stv0910_read_agc2_gain(uint8_t demod, uint16_t *agc) {
+/* -------------------------------------------------------------------------------------------------- */
+/* reads the AGC2 Gain registers in the Demodulator and returns the results                           */
+/*  demod: STV0910_DEMOD_TOP | STV0910_DEMOD_BOTTOM: which demodulator is being read                  */
+/* agc: place to store the results                                                                    */
+/* return: error state                                                                                */
+/* -------------------------------------------------------------------------------------------------- */
+    uint8_t err;
+    uint8_t agc_low, agc_high;
+
+                         err=stv0910_read_reg(demod==STV0910_DEMOD_TOP ? RSTV0910_P2_AGC2I0 : RSTV0910_P1_AGC2I0, &agc_low);
+    if (err==ERROR_NONE) err=stv0910_read_reg(demod==STV0910_DEMOD_TOP ? RSTV0910_P2_AGC2I1 : RSTV0910_P1_AGC2I1, &agc_high);
+    if (err==ERROR_NONE) *agc = (uint16_t)agc_high << 8 | (uint16_t)agc_low;
+
+    if (err!=ERROR_NONE) printf("ERROR: STV0910 read agc2 gain\n");
+
+    return err;
+}
+
+
+/* -------------------------------------------------------------------------------------------------- */
 uint8_t stv0910_read_power(uint8_t demod, uint8_t *power_i, uint8_t *power_q) {
 /* -------------------------------------------------------------------------------------------------- */
 /* reads the power registers in the Demodulator and returns the results                               */
@@ -226,7 +268,7 @@ uint8_t stv0910_read_ber(uint8_t demod, uint32_t *ber) {
 }
 
 /* -------------------------------------------------------------------------------------------------- */
-uint8_t stv0910_read_mer(uint8_t demod, uint32_t *mer) {
+uint8_t stv0910_read_mer(uint8_t demod, int32_t *mer) {
 /* -------------------------------------------------------------------------------------------------- */
 /*    demod: STV0910_DEMOD_TOP | STV0910_DEMOD_BOTTOM: which demodulator is being read                */
 /*      mer: place to store the result                                                                */
@@ -237,11 +279,20 @@ uint8_t stv0910_read_mer(uint8_t demod, uint32_t *mer) {
 
                          err=stv0910_read_reg(demod==STV0910_DEMOD_TOP ? RSTV0910_P2_NOSRAMPOS : RSTV0910_P1_NOSRAMPOS, &high);
     if (err==ERROR_NONE) err=stv0910_read_reg(demod==STV0910_DEMOD_TOP ? RSTV0910_P2_NOSRAMVAL : RSTV0910_P1_NOSRAMVAL, &low);
-    
+
     if(((high >> 2) & 0x01) == 1)
     {
         /* Px_NOSRAM_CNRVAL is valid */
-        *mer = ((high & 0x03) << 8) | low;
+        if(((high >> 1) & 0x01) == 1)
+        {
+            /* Negative */
+            *mer = (((high & 0x01) << 8) | low) - 512;
+        }
+        else
+        {
+            *mer = ((high & 0x01) << 8) | low;
+        }
+        
     }
     else
     {
@@ -438,7 +489,7 @@ uint8_t stv0910_setup_equalisers(uint8_t demod) {
 
 
 /* -------------------------------------------------------------------------------------------------- */
-uint8_t stv0910_setup_carrier_loop(uint8_t demod, uint32_t sr) {
+uint8_t stv0910_setup_carrier_loop(uint8_t demod, uint32_t halfscan_sr) {
 /* -------------------------------------------------------------------------------------------------- */
 /* 3 stages:                                                                                          */
 /*   course:                                                                                          */
@@ -460,7 +511,7 @@ uint8_t stv0910_setup_carrier_loop(uint8_t demod, uint32_t sr) {
 /*  return: error code                                                                                */
 /* -------------------------------------------------------------------------------------------------- */
     uint8_t err;
-	int64_t temp ;
+    int64_t temp;
 
     printf("Flow: Setup carrier loop %i\n", demod);
 
@@ -468,8 +519,8 @@ uint8_t stv0910_setup_carrier_loop(uint8_t demod, uint32_t sr) {
                          err=stv0910_write_reg((demod==STV0910_DEMOD_TOP ? RSTV0910_P2_CFRINIT0 : RSTV0910_P1_CFRINIT0), 0);
     if (err==ERROR_NONE) err=stv0910_write_reg((demod==STV0910_DEMOD_TOP ? RSTV0910_P2_CFRINIT1 : RSTV0910_P1_CFRINIT1), 0);
 
-    temp = (6 * sr) / 10 ;             // 0.6 * SR seems to give +/- 0.5 SR lock
-    temp = temp * 65536 / 135000 ;
+    // 0.6 * SR seems to give +/- 0.5 SR lock
+    temp = halfscan_sr * 65536 / 135000;
 
     // Upper Limit
     if (err==ERROR_NONE)
@@ -478,7 +529,7 @@ uint8_t stv0910_setup_carrier_loop(uint8_t demod, uint32_t sr) {
         err = stv0910_write_reg( (demod==STV0910_DEMOD_TOP ? RSTV0910_P2_CFRUP1 : RSTV0910_P1_CFRUP1), (uint8_t) ((temp >> 8) & 0xff));
     }
     // the lower value is the negative of the upper value
-    temp = -temp ;
+    temp = -temp;
     if (err==ERROR_NONE)
     {
         err = stv0910_write_reg( (demod==STV0910_DEMOD_TOP ? RSTV0910_P2_CFRLOW0 : RSTV0910_P1_CFRLOW0), (uint8_t) (temp & 0xff));
@@ -654,7 +705,7 @@ uint8_t stv0910_init_regs() {
 }
 
 /* -------------------------------------------------------------------------------------------------- */
-uint8_t stv0910_init(uint32_t sr1, uint32_t sr2) {
+uint8_t stv0910_init(uint32_t sr1, uint32_t sr2, float halfscan_ratio1, float halfscan_ratio2) {
 /* -------------------------------------------------------------------------------------------------- */
 /* demodulator search sequence is:                                                                    */
 /*   setup the carrier loop                                                                           */
@@ -685,13 +736,13 @@ uint8_t stv0910_init(uint32_t sr1, uint32_t sr2) {
     /* now we do the inits for each specific demodulator */
     if (sr1!=0) {
         if (err==ERROR_NONE) err=stv0910_setup_equalisers(STV0910_DEMOD_TOP);
-        if (err==ERROR_NONE) err=stv0910_setup_carrier_loop(STV0910_DEMOD_TOP, sr1);
+        if (err==ERROR_NONE) err=stv0910_setup_carrier_loop(STV0910_DEMOD_TOP, sr1 * halfscan_ratio1);
         if (err==ERROR_NONE) err=stv0910_setup_timing_loop(STV0910_DEMOD_TOP, sr1);
     }
 
     if (sr2!=0) {
         if (err==ERROR_NONE) err=stv0910_setup_equalisers(STV0910_DEMOD_BOTTOM);
-        if (err==ERROR_NONE) err=stv0910_setup_carrier_loop(STV0910_DEMOD_BOTTOM, sr2);
+        if (err==ERROR_NONE) err=stv0910_setup_carrier_loop(STV0910_DEMOD_BOTTOM, sr2 * halfscan_ratio2);
         if (err==ERROR_NONE) err=stv0910_setup_timing_loop(STV0910_DEMOD_BOTTOM, sr2);
     }
 

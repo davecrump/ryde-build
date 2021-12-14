@@ -472,6 +472,11 @@ if ! grep -q "^    band:" /home/pi/ryde/config.yaml; then
 
 fi
 
+# Add POWER LEVEL to the OSD if needed for the update
+if ! grep -q "POWERLEVEL:" /home/pi/ryde/config.yaml; then
+  sed -i "/^        REPORT: null/a \        POWERLEVEL: null" /home/pi/ryde/config.yaml
+fi
+
 cp -f -r "$PATHUBACKUP"/dvb-t_config.txt /home/pi/dvbt/dvb-t_config.txt >/dev/null 2>/dev/null
 
 # Record the version numbers
