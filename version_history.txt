@@ -1,3 +1,6 @@
+202201010
+Add Altech and Marantz Remotes
+
 202112120
 Add Indication of RF Power Level
 Support for 2nd HDMI port if 1st unusable

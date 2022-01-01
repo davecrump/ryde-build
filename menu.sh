@@ -501,10 +501,14 @@ do_Set_RC_Type_5()
 
   menuchoice=$(whiptail --title "Set Remote Control Model (5)" --menu "Select Choice and press enter" 20 78 11 \
     "41 Sagem STB" "Sagem Set Top box" \
+    "42 Altech TV" "Altech UEC Vast TV" \
+    "43 Marantz CD" "Marantz RTC002 CD Player" \
     "99 Exit" "Exit without changing remote control model" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
         41\ *) RC_FILE="sagemstb" ;;
+        42\ *) RC_FILE="altech_uec_vast_tv" ;;
+        43\ *) RC_FILE="marantz_rtc002cd" ;;
         99\ *) RC_FILE="exit" ;;
     esac
 
