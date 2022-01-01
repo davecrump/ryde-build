@@ -433,6 +433,14 @@ else # User's config file needs updating, so copy master and reset remote contro
   if  [ $? == 0 ]; then   ## Amend new file for "sagemstb" 41
     sed -i "/handsets:/{n;s/.*/        - sagemstb/}" /home/pi/ryde/config.yaml
   fi
+  grep -q "altech_uec_vast_tv" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "altech_uec_vast_tv" 42
+    sed -i "/handsets:/{n;s/.*/        - altech_uec_vast_tv/}" /home/pi/ryde/config.yaml
+  fi
+  grep -q "marantz_rtc002cd" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "marantz_rtc002cd" 43
+    sed -i "/handsets:/{n;s/.*/        - marantz_rtc002cd/}" /home/pi/ryde/config.yaml
+  fi
 fi
 
 # Restore the user's original audio output (Default is HDMI)
