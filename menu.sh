@@ -1446,6 +1446,7 @@ do_SD_Button()
   fi
 }
 
+
 do_Check_HDMI()
 {
   reset
@@ -1455,30 +1456,60 @@ do_Check_HDMI()
   cd /home/pi
   read -p "Press enter to continue"
 }
+ 
+do_VtoH()
+{
+  mv /home/pi/ryde-build/rx.sh /home/pi/ryde-build/configs/ryde_rx.sh
+  cp /home/pi/ryde-build/configs/cv_rx.sh /home/pi/ryde-build/rx.sh
+  printf "\nComposite Video conversion starts on reboot\n"
+  printf "\nPress any key to return to the menu\n"
+  read -n 1
+}
+
+
+do_Reverse_VtoH()
+{
+  rm /home/pi/ryde-build/rx.sh
+  cp /home/pi/ryde-build/configs/ryde_rx.sh /home/pi/ryde-build/rx.sh
+  printf "\nNormal Ryde Functionality Restored\n"
+  printf "\nPress any key to return to the menu\n"
+  read -n 1
+}
 
 
 do_Settings()
 {
-  menuchoice=$(whiptail --title "Advanced Settings Menu" --menu "Select Choice and press enter" 16 78 8 \
-    "1 Tuner Timeout" "Adjust the Tuner Reset Time when no valid TS " \
-    "2 Restore Factory" "Reset all settings to default" \
-    "3 Check HDMI" "List HDMI settings for fault-finding" \
-    "4 Debug Menu" "Enable or Disable the Debug Menu" \
-    "5 Power Button" "Set behaviour on double press of power button" \
-    "6 Daily Reboot" "Enable 12-hourly reboot for Repeater Operation" \
-    "7 Stop Reboot" "Disable 12-hourly reboot for Repeater Operation" \
-    "8 Hardware Shutdown" "Enable or disable hardware shutdown function" \
-      3>&2 2>&1 1>&3)
-    case "$menuchoice" in
-      1\ *) do_Set_TSTimeout ;;
-      2\ *) do_Restore_Factory ;;
-      3\ *) do_Check_HDMI ;;
-      4\ *) do_Debug_Menu ;;
-      5\ *) do_Power_Button ;;
-      6\ *) sudo crontab /home/pi/ryde-build/configs/rptrcron ;;
-      7\ *) sudo crontab /home/pi/ryde-build/configs/blankcron ;;
-      8\ *) do_SD_Button ;;
-    esac
+  status=0
+  while [ "$status" -eq 0 ] 
+  do
+    menuchoice=$(whiptail --title "Advanced Settings Menu" --menu "Select Choice and press enter" 18 78 11 \
+      "1 Tuner Timeout" "Adjust the Tuner Reset Time when no valid TS " \
+      "2 Restore Factory" "Reset all settings to default" \
+      "3 Check HDMI" "List HDMI settings for fault-finding" \
+      "4 Debug Menu" "Enable or Disable the Debug Menu" \
+      "5 Power Button" "Set behaviour on double press of power button" \
+      "6 Daily Reboot" "Enable 12-hourly reboot for Repeater Operation" \
+      "7 Stop Reboot" "Disable 12-hourly reboot for Repeater Operation" \
+      "8 Video to HDMI" "Convert to a Video to HDMI Converter" \
+      "9 Stop V to H" "Restore normal Ryde Functionality" \
+      "10 Hardware Shutdown" "Enable or disable hardware shutdown function" \
+	  "11 Main Menu" "Go back to the Main Menu" \
+        3>&2 2>&1 1>&3)
+      case "$menuchoice" in
+        1\ *) do_Set_TSTimeout ;;
+        2\ *) do_Restore_Factory ;;
+        3\ *) do_Check_HDMI ;;
+        4\ *) do_Debug_Menu ;;
+        5\ *) do_Power_Button ;;
+        6\ *) sudo crontab /home/pi/ryde-build/configs/rptrcron ;;
+        7\ *) sudo crontab /home/pi/ryde-build/configs/blankcron ;;
+        8\ *) do_VtoH ;;
+        9\ *) do_Reverse_VtoH ;;
+        10\ *) do_SD_Button ;;
+	    11\ *) status=1 ;;
+      esac
+  done
+  status=0
 }
 
 
@@ -3233,6 +3264,15 @@ do_stop()
   if pgrep -x "python3" >/dev/null 2>/dev/null
   then
     sudo killall -9 python3 >/dev/null 2>/dev/null
+  fi
+
+  sudo killall longmynd >/dev/null 2>/dev/null
+
+  sudo pkill rx.sh >/dev/null 2>/dev/null
+  pgrep vlc >/dev/null 2>/dev/null
+  if [[ "$?" == "0" ]]; then
+    sleep 1
+    sudo killall vlc >/dev/null 2>/dev/null
   fi
 }
 

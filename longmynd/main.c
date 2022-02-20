@@ -224,7 +224,7 @@ uint8_t process_command_line(int argc, char *argv[], longmynd_config_t *config) 
 
     /* Defaults */
     config->port_swap = false;
-    config->halfscan_ratio = 1.5;
+    config->halfscan_ratio = 0.6;
     config->beep_enabled = false;
     config->device_usb_addr = 0;
     config->device_usb_bus = 0;
