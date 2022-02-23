@@ -1,3 +1,6 @@
+202202230
+Adjust composite video to 4:3 and reduce caption size
+
 202202200
 Add SSH Menu Selected Composite Video Input Mode
 Reduce default frequency scan to +/- 0.5 SR

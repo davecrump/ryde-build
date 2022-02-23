@@ -28,7 +28,7 @@ while true; do
 
     (cvlc -I rc --rc-host 127.0.0.1:1111 \
       v4l2:///dev/video0:width=720:height=576 :input-slave=alsa://plughw:CARD=usbtv,DEV=0 \
-      --aspect-ratio 16:9 \
+      --sub-filter marq --marq-x 30 --marq-y 30 --marq-size 20 --marq-marquee "Analogue Input" \
       --gain 3 --alsa-audio-device hw:CARD=b1,DEV=0 \
       >/dev/null 2>/dev/null) &
 
@@ -45,7 +45,13 @@ done
 
 exit
 
+# Audio passthrough Tests:
+# arecord -f S16_LE -c 2 -r 48000 -D hw:CARD=usbtv,DEV=0 | aplay -D hw:CARD=b1,DEV=0 # works with Fushicai
+# arecord -f S16_LE -c 2 -r 48000 -D hw:CARD=USB20,DEV=0 | aplay -D hw:CARD=b1,DEV=0 # doesn't work with Macrosil
 
-# arecord -f S16_LE -c 2 -r 48000 -D hw:CARD=usbtv,DEV=0 | aplay -D hw:CARD=b1,DEV=0 # works
+# VLC Options:
+#      --aspect-ratio 16:9 \  # for Full width
+#      --gain 3 --alsa-audio-device hw:CARD=b1,DEV=0 \  # Audio on HDMI
+#      --gain 3 --alsa-audio-device hw:CARD=Headphones,DEV=0 \   # Audio on Jack
 
-# arecord -f S16_LE -c 2 -r 48000 -D hw:CARD=USB20,DEV=0 | aplay -D hw:CARD=b1,DEV=0 # doesn't
+
