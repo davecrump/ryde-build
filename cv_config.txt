@@ -1,0 +1,11 @@
+# Config file for HDMI to Comp Video Converter
+
+# Audio output: hdmi, jack or usb
+audio=hdmi
+
+# Format: 4:3 or 16:9
+format=4:3
+
+# Ident Caption
+# Must not include hyphens (-)
+caption=Analogue Input
