@@ -1,3 +1,6 @@
+202203040
+Add Config file and options for Comp Video input mode
+
 202202230
 Adjust composite video to 4:3 and reduce caption size
 
