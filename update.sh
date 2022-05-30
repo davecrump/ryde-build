@@ -102,6 +102,8 @@ sudo apt-get -y install python3-gpiozero  # for GPIOs
 sudo apt-get -y install libfftw3-dev libjpeg-dev  # for DVB-T
 sudo apt-get -y install fbi netcat imagemagick    # for DVB-T
 sudo apt-get -y install python3-urwid             # for Ryde Utils
+sudo apt-get -y install python3-librtmp           # for Stream RX
+sudo apt-get -y install vlc-plugin-base           # for Stream RX
 
 pip3 uninstall -y pyftdi                          # uninstall old version of pyftdi
 pip3 install pyftdi==0.53.1                       # and install new version
@@ -477,7 +479,6 @@ if ! grep -q "^    band:" /home/pi/ryde/config.yaml; then
     /home/pi/ryde/config.yaml > /home/pi/ryde-build/configs/temp.yaml
   cp /home/pi/ryde-build/configs/temp.yaml /home/pi/ryde/config.yaml
   rm /home/pi/ryde-build/configs/temp.yaml
-
 fi
 
 # Add POWER LEVEL to the OSD if needed for the update
@@ -485,7 +486,42 @@ if ! grep -q "POWERLEVEL:" /home/pi/ryde/config.yaml; then
   sed -i "/^        REPORT: null/a \        POWERLEVEL: null" /home/pi/ryde/config.yaml
 fi
 
+# Add Stream RX features to config.yaml if needed for the update
+if ! grep -q "RTMPSTREAM" /home/pi/ryde/config.yaml; then
+  sed -i "/^presets:/i \    BATC Streamer: &stream"        /home/pi/ryde/config.yaml
+  sed -i "/^presets:/i \        source: RTMPSTREAM"        /home/pi/ryde/config.yaml
+  sed -i "/^presets:/i \        domain: rtmp.batc.org.uk"  /home/pi/ryde/config.yaml
+  sed -i "/^presets:/i \        rtmpapp: live"             /home/pi/ryde/config.yaml
+  sed -i "/^presets:/i \        networkTimeout: 5"         /home/pi/ryde/config.yaml
+  sed -i "/^presets:/i \        networkTimeoutInit: 25"    /home/pi/ryde/config.yaml
+  sed -i "/^presets:/i \        gpioid: 0\\n"              /home/pi/ryde/config.yaml
+
+  sed -i "/^default:/i \    GB3HV Stream: &presethv"       /home/pi/ryde/config.yaml
+  sed -i "/^default:/i \        band: *stream"             /home/pi/ryde/config.yaml
+  sed -i "/^default:/i \        streamname: gb3hv"         /home/pi/ryde/config.yaml
+  sed -i "/^default:/i \    GB3JV Stream: &presetjv"       /home/pi/ryde/config.yaml
+  sed -i "/^default:/i \        band: *stream"             /home/pi/ryde/config.yaml
+  sed -i "/^default:/i \        streamname: gb3jv"         /home/pi/ryde/config.yaml
+  sed -i "/^default:/i \    GB3KM Stream: &presetkm"       /home/pi/ryde/config.yaml
+  sed -i "/^default:/i \        band: *stream"             /home/pi/ryde/config.yaml
+  sed -i "/^default:/i \        streamname: gb3km"         /home/pi/ryde/config.yaml
+  sed -i "/^default:/i \    GB3SQ Stream: &presetsq"       /home/pi/ryde/config.yaml
+  sed -i "/^default:/i \        band: *stream"             /home/pi/ryde/config.yaml
+  sed -i "/^default:/i \        streamname: gb3sq\\n"      /home/pi/ryde/config.yaml
+
+  sed -i "/^shutdownBehavior:/i \watchdog:"                /home/pi/ryde/config.yaml
+  sed -i "/^shutdownBehavior:/i \    minRestartTime: 0.1"  /home/pi/ryde/config.yaml
+  sed -i "/^shutdownBehavior:/i \    maxRestartTime: 300"  /home/pi/ryde/config.yaml
+  sed -i "/^shutdownBehavior:/i \    backoffRate: 2\\n"    /home/pi/ryde/config.yaml
+fi
+
 cp -f -r "$PATHUBACKUP"/dvb-t_config.txt /home/pi/dvbt/dvb-t_config.txt >/dev/null 2>/dev/null
+
+# Add new alias if needed for the update
+if ! grep -q "alias dryde" cat /home/pi/.bash_aliases; then
+  echo "alias dryde='/home/pi/ryde-build/debug_rx.sh'" >> /home/pi/.bash_aliases
+fi
+
 
 # Record the version numbers
 

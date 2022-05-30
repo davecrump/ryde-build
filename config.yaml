@@ -77,6 +77,14 @@ bands:
         lofreq: 0
         loside: SUM
         gpioid: 2
+    BATC Streamer: &stream
+        source: RTMPSTREAM
+        domain: rtmp.batc.org.uk
+        rtmpapp: live
+        networkTimeout: 5
+        networkTimeoutInit: 25
+        gpioid: 0
+
 presets:
     QO-100_Beacon: &preset01
         freq: 10491500
@@ -133,6 +141,18 @@ presets:
         freq: 437000
         bw:   333
         band: *band437T
+    GB3HV Stream: &presethv
+        band: *stream
+        streamname: gb3hv
+    GB3JV Stream: &presetjv
+        band: *stream
+        streamname: gb3jv
+    GB3KM Stream: &presetkm
+        band: *stream
+        streamname: gb3km
+    GB3SQ Stream: &presetsq
+        band: *stream
+        streamname: gb3sq
 
 default: *preset01
 
@@ -188,6 +208,11 @@ osd:
 network:
     bindaddr: ''
     port: 8765
+
+watchdog:
+    minRestartTime: 0.1
+    maxRestartTime: 300
+    backoffRate: 2
 
 shutdownBehavior: APPSTOP
 
