@@ -82,6 +82,8 @@ sudo apt-get -y install python3-gpiozero
 sudo apt-get -y install libfftw3-dev libjpeg-dev  # for DVB-T
 sudo apt-get -y install fbi netcat imagemagick    # for DVB-T
 sudo apt-get -y install python3-urwid             # for Ryde Utils
+sudo apt-get -y install python3-librtmp           # for Stream RX
+sudo apt-get -y install vlc-plugin-base           # for Stream RX
 
 pip3 install pyftdi==0.53.1                       # for Ryde Utils
 
@@ -277,6 +279,7 @@ echo
 
 # Install the menu aliases
 echo "alias ryde='/home/pi/ryde-build/rx.sh'" >> /home/pi/.bash_aliases
+echo "alias dryde='/home/pi/ryde-build/debug_rx.sh'" >> /home/pi/.bash_aliases
 echo "alias menu='/home/pi/ryde-build/menu.sh'"  >> /home/pi/.bash_aliases
 echo "alias stop='/home/pi/ryde-build/stop.sh'"  >> /home/pi/.bash_aliases
 
