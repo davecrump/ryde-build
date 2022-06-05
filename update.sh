@@ -443,6 +443,10 @@ else # User's config file needs updating, so copy master and reset remote contro
   if  [ $? == 0 ]; then   ## Amend new file for "marantz_rtc002cd" 43
     sed -i "/handsets:/{n;s/.*/        - marantz_rtc002cd/}" /home/pi/ryde/config.yaml
   fi
+  grep -q "k0qit" "$PATHUBACKUP"/config.yaml
+  if  [ $? == 0 ]; then   ## Amend new file for "k0qit" 43
+    sed -i "/handsets:/{n;s/.*/        - k0qit/}" /home/pi/ryde/config.yaml
+  fi
 fi
 
 # Restore the user's original audio output (Default is HDMI)

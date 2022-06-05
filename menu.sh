@@ -503,12 +503,14 @@ do_Set_RC_Type_5()
     "41 Sagem STB" "Sagem Set Top box" \
     "42 Altech TV" "Altech UEC Vast TV" \
     "43 Marantz CD" "Marantz RTC002 CD Player" \
+    "44 K0QIT" "K0QIT" \
     "99 Exit" "Exit without changing remote control model" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
         41\ *) RC_FILE="sagemstb" ;;
         42\ *) RC_FILE="altech_uec_vast_tv" ;;
         43\ *) RC_FILE="marantz_rtc002cd" ;;
+        44\ *) RC_FILE="k0qit" ;;
         99\ *) RC_FILE="exit" ;;
     esac
 
@@ -2810,6 +2812,10 @@ do_Set_Defaults()
   Radio8=OFF
   Radio9=OFF
   Radio10=OFF
+  Radio11=OFF
+  Radio12=OFF
+  Radio13=OFF
+  Radio14=OFF
 
   case "$DEFAULT_PRESET" in
     "*preset01")
@@ -2842,13 +2848,25 @@ do_Set_Defaults()
     "*preset10")
       Radio10=ON
     ;;
+    "*presethv")
+      Radio11=ON
+    ;;
+    "*presetjv")
+      Radio12=ON
+    ;;
+    "*presetkm")
+      Radio13=ON
+    ;;
+    "*presetsq")
+      Radio14=ON
+    ;;
     *)
       Radio1=ON
     ;;
   esac
   
   NEW_DEFAULT_PRESET=$(whiptail --title "Select the new Default Preset" --radiolist \
-    "Highlight choice, select with space bar and then press enter" 20 78 12 \
+    "Highlight choice, select with space bar and then press enter" 21 78 14 \
     "QO-100_Beacon" "The QO-100_Beacon preset" $Radio1 \
     "QO-100_9.25_333" "The QO-100_9.25_333 preset" $Radio2 \
     "QO-100_Custom" "The QO-100_Custom preset" $Radio3 \
@@ -2859,6 +2877,10 @@ do_Set_Defaults()
     "437.0_MHz_1000" "The 437.0_MHz_1000 preset" $Radio8 \
     "1255_MHz_333" "The 1255_MHz_333 preset" $Radio9 \
     "1255_MHz_Custom" "The 1255_MHz_Custom preset" $Radio10 \
+    "GB3HV Stream" "The GB3HV Repeater Stream" $Radio11 \
+    "GB3JV Stream" "The GB3JV Repeater Stream" $Radio12 \
+    "GB3KM Stream" "The GB3KM Repeater Stream" $Radio13 \
+    "GB3SQ Stream" "The GB3SQ Repeater Stream" $Radio14 \
      3>&2 2>&1 1>&3)
   if [ $? -eq 0 ]; then
     case "$NEW_DEFAULT_PRESET" in
@@ -2872,6 +2894,10 @@ do_Set_Defaults()
       "437.0_MHz_1000") NEW_DEFAULT_PRESET="*preset08" ;;
       "1255_MHz_333") NEW_DEFAULT_PRESET="*preset09" ;;
       "1255_MHz_Custom") NEW_DEFAULT_PRESET="*preset10" ;;
+      "GB3HV Stream") NEW_DEFAULT_PRESET="*presethv" ;;
+      "GB3JV Stream") NEW_DEFAULT_PRESET="*presetjv" ;;
+      "GB3KM Stream") NEW_DEFAULT_PRESET="*presetkm" ;;
+      "GB3SQ Stream") NEW_DEFAULT_PRESET="*presetsq" ;;
     esac
     sed -i "/^default: /c\default: $NEW_DEFAULT_PRESET" /home/pi/ryde/config.yaml
   fi

@@ -1,3 +1,8 @@
+202206050
+BugFix Stream Receiver
+Add K0QIT Remote Control
+Update to latest Raspberry Pi OS Lite Buster (Legacy) for new builds
+
 202205300
 Add Stream Receiver
 
