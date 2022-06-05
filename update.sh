@@ -522,7 +522,7 @@ fi
 cp -f -r "$PATHUBACKUP"/dvb-t_config.txt /home/pi/dvbt/dvb-t_config.txt >/dev/null 2>/dev/null
 
 # Add new alias if needed for the update
-if ! grep -q "alias dryde" cat /home/pi/.bash_aliases; then
+if ! grep -q "alias dryde" /home/pi/.bash_aliases; then
   echo "alias dryde='/home/pi/ryde-build/debug_rx.sh'" >> /home/pi/.bash_aliases
 fi
 
