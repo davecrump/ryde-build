@@ -118,7 +118,8 @@ sudo apt-get -y dist-upgrade # Upgrade all the installed packages to their lates
 
 # --------- Install new packages as Required ---------
 
-sudo apt-get -y install python3-gpiozero  # for GPIOs
+sudo apt-get -y install vlc                       # Just checking!
+sudo apt-get -y install python3-gpiozero          # for GPIOs
 sudo apt-get -y install libfftw3-dev libjpeg-dev  # for DVB-T
 sudo apt-get -y install fbi netcat imagemagick    # for DVB-T
 sudo apt-get -y install python3-urwid             # for Ryde Utils
