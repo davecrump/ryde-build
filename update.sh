@@ -123,6 +123,7 @@ sudo apt-get -y install libfftw3-dev libjpeg-dev  # for DVB-T
 sudo apt-get -y install fbi netcat imagemagick    # for DVB-T
 sudo apt-get -y install python3-urwid             # for Ryde Utils
 sudo apt-get -y install python3-librtmp           # for Stream RX
+sudo apt-get -y install vlc-plugin-base           # for Stream RX
 
 pip3 uninstall -y pyftdi                          # uninstall old version of pyftdi
 pip3 install pyftdi==0.53.1                       # and install new version
