@@ -1,3 +1,6 @@
+202207150
+Unhold VLC and update to Latest Version
+
 202206280
 Roll back and hold VLC to version 3.0.12
 

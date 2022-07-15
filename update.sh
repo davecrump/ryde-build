@@ -92,52 +92,29 @@ sudo dpkg --configure -a                          # Make sure that all the packa
 sudo apt-get clean                                # Clean up the old archived packages
 sudo apt-get update --allow-releaseinfo-change    # Update the package list
 
+# --------- Remove any previous hold on VLC -----------------
+
+if apt-mark showhold | grep -q 'vlc'; then
+  sudo apt-mark unhold vlc
+  sudo apt-mark unhold libvlc-bin
+  sudo apt-mark unhold libvlc5
+  sudo apt-mark unhold libvlccore9
+  sudo apt-mark unhold vlc-bin
+  sudo apt-mark unhold vlc-data
+  sudo apt-mark unhold vlc-plugin-base
+  sudo apt-mark unhold vlc-plugin-qt
+  sudo apt-mark unhold vlc-plugin-video-output
+  sudo apt-mark unhold vlc-l10n
+  sudo apt-mark unhold vlc-plugin-notify
+  sudo apt-mark unhold vlc-plugin-samba
+  sudo apt-mark unhold vlc-plugin-skins2
+  sudo apt-mark unhold vlc-plugin-video-splitter
+  sudo apt-mark unhold vlc-plugin-visualization
+fi
+
 # --------- Update Packages ------
 
 sudo apt-get -y dist-upgrade # Upgrade all the installed packages to their latest version
-
-# --------- Make sure that VLC is the right version ----------
-
-# But make sure all the required bits of VLC are there first
-sudo apt-get -y install vlc-plugin-base           # for Stream RX
-
-if ! dpkg -s vlc | grep -q '^Version: 3.0.12-0+deb10u1+rpt3'; then
-  sudo apt-get --allow-downgrades -y install vlc=3.0.12-0+deb10u1+rpt3 \
-  libvlc-bin=3.0.12-0+deb10u1+rpt3 \
-  libvlc5=3.0.12-0+deb10u1+rpt3 \
-  libvlccore9=3.0.12-0+deb10u1+rpt3 \
-  vlc-bin=3.0.12-0+deb10u1+rpt3 \
-  vlc-data=3.0.12-0+deb10u1+rpt3 \
-  vlc-plugin-base=3.0.12-0+deb10u1+rpt3 \
-  vlc-plugin-qt=3.0.12-0+deb10u1+rpt3 \
-  vlc-plugin-video-output=3.0.12-0+deb10u1+rpt3 \
-  vlc-l10n=3.0.12-0+deb10u1+rpt3 \
-  vlc-plugin-notify=3.0.12-0+deb10u1+rpt3 \
-  vlc-plugin-samba=3.0.12-0+deb10u1+rpt3 \
-  vlc-plugin-skins2=3.0.12-0+deb10u1+rpt3 \
-  vlc-plugin-video-splitter=3.0.12-0+deb10u1+rpt3 \
-  vlc-plugin-visualization=3.0.12-0+deb10u1+rpt3
-fi
-
-# --------- Hold VLC so that it does not get upgraded next time ------
-
-if ! apt-mark showhold | grep -q  'vlc'; then
-  sudo apt-mark hold vlc
-  sudo apt-mark hold libvlc-bin
-  sudo apt-mark hold libvlc5
-  sudo apt-mark hold libvlccore9
-  sudo apt-mark hold vlc-bin
-  sudo apt-mark hold vlc-data
-  sudo apt-mark hold vlc-plugin-base
-  sudo apt-mark hold vlc-plugin-qt
-  sudo apt-mark hold vlc-plugin-video-output
-  sudo apt-mark hold vlc-l10n
-  sudo apt-mark hold vlc-plugin-notify
-  sudo apt-mark hold vlc-plugin-samba
-  sudo apt-mark hold vlc-plugin-skins2
-  sudo apt-mark hold vlc-plugin-video-splitter
-  sudo apt-mark hold vlc-plugin-visualization
-fi
 
 # --------- Install new packages as Required ---------
 
@@ -146,6 +123,7 @@ sudo apt-get -y install libfftw3-dev libjpeg-dev  # for DVB-T
 sudo apt-get -y install fbi netcat imagemagick    # for DVB-T
 sudo apt-get -y install python3-urwid             # for Ryde Utils
 sudo apt-get -y install python3-librtmp           # for Stream RX
+sudo apt-get -y install vlc-plugin-base           # for Stream RX
 
 pip3 uninstall -y pyftdi                          # uninstall old version of pyftdi
 pip3 install pyftdi==0.53.1                       # and install new version
