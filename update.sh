@@ -88,6 +88,14 @@ echo "----- Updating the System Software Packages -----"
 echo "-------------------------------------------------"
 echo
 
+# Download and install the VLC apt Preferences File 202212090
+cd /home/pi
+wget https://github.com/${GIT_SRC}/ryde-build/raw/master/configs/vlc
+sudo cp vlc /etc/apt/preferences.d/vlc
+
+sudo apt remove vlc* libvlc*
+
+
 sudo dpkg --configure -a                          # Make sure that all the packages are properly configured
 sudo apt-get clean                                # Clean up the old archived packages
 sudo apt-get update --allow-releaseinfo-change    # Update the package list
@@ -118,7 +126,8 @@ sudo apt-get -y dist-upgrade # Upgrade all the installed packages to their lates
 
 # --------- Install new packages as Required ---------
 
-sudo apt-get -y install vlc                       # Just checking!
+sudo apt-get -y install vlc                       # May have been removed earlier
+sudo apt-get -y install python3-vlc               # May also have been removed
 sudo apt-get -y install python3-gpiozero          # for GPIOs
 sudo apt-get -y install libfftw3-dev libjpeg-dev  # for DVB-T
 sudo apt-get -y install fbi netcat imagemagick    # for DVB-T

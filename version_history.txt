@@ -1,3 +1,7 @@
+202212090
+Install VLC from http://archive.raspberrypi.org/debian to retain mmal
+Update to latest Raspberry Pi OS Lite Buster (Legacy) for new builds
+
 202207150
 Unhold VLC and update to Latest Version
 

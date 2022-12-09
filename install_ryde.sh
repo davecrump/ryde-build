@@ -38,6 +38,11 @@ else
   echo
 fi
 
+# Download and install the VLC apt Preferences File 202212090
+cd /home/pi
+wget https://github.com/${GIT_SRC}/ryde-build/raw/master/configs/vlc
+sudo cp vlc /etc/apt/preferences.d/vlc
+
 # Update the package manager
 echo
 echo "------------------------------------"
