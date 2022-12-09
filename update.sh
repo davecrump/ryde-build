@@ -93,7 +93,7 @@ cd /home/pi
 wget https://github.com/${GIT_SRC}/ryde-build/raw/master/configs/vlc
 sudo cp vlc /etc/apt/preferences.d/vlc
 
-sudo apt remove vlc* libvlc*
+sudo apt -y remove vlc* libvlc*
 
 
 sudo dpkg --configure -a                          # Make sure that all the packages are properly configured
@@ -128,6 +128,8 @@ sudo apt-get -y dist-upgrade # Upgrade all the installed packages to their lates
 
 sudo apt-get -y install vlc                       # May have been removed earlier
 sudo apt-get -y install python3-vlc               # May also have been removed
+sudo apt -y remove vlc-data                       # Old dependencies seem to hang around
+sudo apt-get -y install vlc-plugin-base           # And re-install
 sudo apt-get -y install python3-gpiozero          # for GPIOs
 sudo apt-get -y install libfftw3-dev libjpeg-dev  # for DVB-T
 sudo apt-get -y install fbi netcat imagemagick    # for DVB-T
