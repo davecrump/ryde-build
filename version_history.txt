@@ -1,3 +1,9 @@
+202305030
+Add identification for H266 video
+Add Facility for Player ID
+Add Emoji support if enabled (but with memory leak)
+Add SAGEM STB2 and Sont RM-ED005 Remotes
+
 202212090
 Install VLC from http://archive.raspberrypi.org/debian to retain mmal
 Update to latest Raspberry Pi OS Lite Buster (Legacy) for new builds

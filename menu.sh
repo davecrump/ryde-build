@@ -504,6 +504,8 @@ do_Set_RC_Type_5()
     "42 Altech TV" "Altech UEC Vast TV" \
     "43 Marantz CD" "Marantz RTC002 CD Player" \
     "44 K0QIT" "K0QIT" \
+    "45 Sagem STB 2" "Another SAGEM Set Top Box" \
+    "46 Sony RM-ED005" "Sony RM-ED005" \
     "99 Exit" "Exit without changing remote control model" \
       3>&2 2>&1 1>&3)
     case "$menuchoice" in
@@ -511,6 +513,8 @@ do_Set_RC_Type_5()
         42\ *) RC_FILE="altech_uec_vast_tv" ;;
         43\ *) RC_FILE="marantz_rtc002cd" ;;
         44\ *) RC_FILE="k0qit" ;;
+        45\ *) RC_FILE="sagemstb2" ;;
+        46\ *) RC_FILE="sony_rm-ed005" ;;
         99\ *) RC_FILE="exit" ;;
     esac
 

@@ -1,11 +1,12 @@
 ---
 configRev: 3
+playerID: "Ryde"
 sources:
     LONGMYND:
         binpath: /home/pi/longmynd/longmynd
         mediapath: /home/pi/lmmedia
         statuspath: /home/pi/lmstatus
-        tstimeout: 5000
+        tstimeout: 10000
     COMBITUNER:
         binpath: /home/pi/dvbt/CombiTunerExpress
         mediapath: /home/pi/ctmedia
@@ -94,7 +95,7 @@ presets:
         freq: 10499250
         sr:   333
         band: *bandlnblow
-    QO-100_Custom: &preset03
+    QO-100_8.75_333: &preset03
         freq: 10498750
         sr:   333
         band: *bandlnblow
@@ -194,6 +195,7 @@ osd:
         USERTRIGGER: 10
         PROGRAMTRIGGER: 10
     active:
+        PLAYERID: null
         MUTE: null
         SIGLEVEL: null
         REPORT: null
@@ -203,6 +205,7 @@ osd:
         VOLUME: null
         BW: null
     inactive:
+        PLAYERID: null
         MUTE: null
 
 network:
@@ -225,3 +228,5 @@ debug:
     enableMenu: False
     autoplay: True
     disableHardwareCodec: True
+    useFTfont: False
+
