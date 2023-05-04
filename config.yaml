@@ -95,7 +95,7 @@ presets:
         freq: 10499250
         sr:   333
         band: *bandlnblow
-    QO-100_8.75_333: &preset03
+    QO-100_Custom: &preset03
         freq: 10498750
         sr:   333
         band: *bandlnblow
