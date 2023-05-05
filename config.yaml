@@ -195,7 +195,6 @@ osd:
         USERTRIGGER: 10
         PROGRAMTRIGGER: 10
     active:
-        PLAYERID: null
         MUTE: null
         SIGLEVEL: null
         REPORT: null
@@ -205,7 +204,6 @@ osd:
         VOLUME: null
         BW: null
     inactive:
-        PLAYERID: null
         MUTE: null
 
 network:
