@@ -1452,6 +1452,68 @@ do_SD_Button()
   fi
 }
 
+do_Watchdog()
+{
+  Radio1=OFF
+  Radio2=OFF
+
+  # Check current status
+  # If /home/pi/ryde-build/watchdog.sh is in .bashrc then it is enabled
+
+  grep -q "^  /home/pi/ryde-build/watchdog.sh" /home/pi/.bashrc
+  if [ $? -eq 0 ]; then  #  "sdtv_aspect=3" 16:9
+    Radio2=ON
+  else
+    Radio1=ON
+  fi
+
+  WATCHDOG=$(whiptail --title "Enable/disable Watchdog Function" --radiolist \
+    "Highlight choice, select with space bar and then press enter" 20 78 5 \
+    "DISABLE" "No Watchdog" $Radio1 \
+    "ENABLE" "Watchdog Enabled" $Radio2 \
+    3>&2 2>&1 1>&3)
+  if [ $? -eq 0 ]; then
+    if [ "$WATCHDOG" == "ENABLE" ]; then
+      # Check if line just needs changing
+      grep -q "~  #/home/pi/ryde-build/watchdog.sh" /home/pi/.bashrc
+      if [ $? -eq 0 ]; then
+        # Line just needs changing to
+        sed -i -E 's+^  \#/home/pi/ryde-build/watchdog.sh \&+  /home/pi/ryde-build/watchdog.sh \&+' /home/pi/.bashrc
+      else
+        # Insert both comment and Watchdog start lines
+
+        ## Set constants for the amendment of /home/pi/.bashrc
+        lead='^  amixer set Headphone 0db >\/dev\/null 2>\/dev\/null'  ## Marker for start of inserted text
+        tail='^  # Start Ryde'                                         ## Marker for end of inserted text
+        CHANGEFILE="/home/pi/.bashrc"                                  ## File requiring added text
+        TRANSFILE="/home/pi/tmp/transfer.txt"                          ## File used for transfer
+        INSERTFILE="/home/pi/ryde-build/watchdog_start_text.txt"       ## File with text to be added
+
+        grep -q "$lead" "$CHANGEFILE"                                  ## Check first marker present
+        if [ $? -ne 0 ]; then
+          echo "Problem with inserting watchdog text. 1st marker not found"
+        else
+          grep -q "$tail" "$CHANGEFILE"                                ## Check second marker present
+          if [ $? -ne 0 ]; then
+            echo "Problem with inserting watchdog text. 2nd marker not found"
+          else
+            ## Replace whatever is between the markers with the watchdog start text
+            sed -e "/$lead/,/$tail/{ /$lead/{p; r $INSERTFILE
+                    }; /$tail/p; d }" $CHANGEFILE >> $TRANSFILE
+
+            cp "$TRANSFILE" "$CHANGEFILE"                              ## Copy from the transfer file
+            rm $TRANSFILE                                              ## Delete the transfer file
+          fi
+        fi
+      fi
+    fi
+
+    if [ "$WATCHDOG" == "DISABLE" ]; then
+      sed -i -E 's+^  /home/pi/ryde-build/watchdog.sh \&+  \#/home/pi/ryde-build/watchdog.sh \&+' /home/pi/.bashrc
+    fi
+  fi
+}
+
 
 do_Check_HDMI()
 {
@@ -1488,7 +1550,7 @@ do_Settings()
   status=0
   while [ "$status" -eq 0 ] 
   do
-    menuchoice=$(whiptail --title "Advanced Settings Menu" --menu "Select Choice and press enter" 18 78 11 \
+    menuchoice=$(whiptail --title "Advanced Settings Menu" --menu "Select Choice and press enter" 18 78 12 \
       "1 Tuner Timeout" "Adjust the Tuner Reset Time when no valid TS " \
       "2 Restore Factory" "Reset all settings to default" \
       "3 Check HDMI" "List HDMI settings for fault-finding" \
@@ -1499,7 +1561,8 @@ do_Settings()
       "8 Video to HDMI" "Convert to a Video to HDMI Converter" \
       "9 Stop V to H" "Restore normal Ryde Functionality" \
       "10 Hardware Shutdown" "Enable or disable hardware shutdown function" \
-	  "11 Main Menu" "Go back to the Main Menu" \
+      "11 LongMynd Watchdog" "Enable or disable DVB-S/S2 Receiver watchdog" \
+	  "12 Main Menu" "Go back to the Main Menu" \
         3>&2 2>&1 1>&3)
       case "$menuchoice" in
         1\ *) do_Set_TSTimeout ;;
@@ -1512,7 +1575,8 @@ do_Settings()
         8\ *) do_VtoH ;;
         9\ *) do_Reverse_VtoH ;;
         10\ *) do_SD_Button ;;
-	    11\ *) status=1 ;;
+        11\ *) do_Watchdog ;;
+	    12\ *) status=1 ;;
       esac
   done
   status=0
@@ -3325,6 +3389,9 @@ STREAM="oscar100net"
 
 # Stop the Receiver
 do_stop
+
+# Disable the Watchdog
+sudo killall watchdog.sh >/dev/null 2>/dev/null
 
 # Loop round main menu
 while [ "$status" -eq 0 ] 

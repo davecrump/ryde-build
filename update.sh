@@ -551,6 +551,14 @@ if ! grep -q "RTMPSTREAM" /home/pi/ryde/config.yaml; then
   sed -i "/^shutdownBehavior:/i \    backoffRate: 2\\n"    /home/pi/ryde/config.yaml
 fi
 
+# Add Watchdog service features to config.yaml if needed for the update
+if ! grep -q "watchdogService:" /home/pi/ryde/config.yaml; then
+  echo >> /home/pi/ryde/config.yaml
+  echo "watchdogService:" >> /home/pi/ryde/config.yaml
+  echo "    serviceInterval: 1" >> /home/pi/ryde/config.yaml
+  echo "    pidPath: \"/home/pi/tmp/rydePlayer.pid\"" >> /home/pi/ryde/config.yaml
+fi
+
 cp -f -r "$PATHUBACKUP"/dvb-t_config.txt /home/pi/dvbt/dvb-t_config.txt >/dev/null 2>/dev/null
 
 # Add new alias if needed for the update
