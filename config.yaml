@@ -215,6 +215,10 @@ watchdog:
     maxRestartTime: 300
     backoffRate: 2
 
+watchdogService:
+    serviceInterval: 1
+    pidPath: "/home/pi/tmp/rydePlayer.pid"
+
 shutdownBehavior: APPSTOP
 
 audio:

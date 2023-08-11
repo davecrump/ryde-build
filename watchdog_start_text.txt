@@ -1,0 +1,4 @@
+
+  # Start Watchdog
+  /home/pi/ryde-build/watchdog.sh &
+
