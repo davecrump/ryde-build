@@ -10,13 +10,6 @@ sleep 15
 
 while true
   do
-    # Check Longmynd is running
-    ps -cax | grep 'longmynd' >/dev/null 2>/dev/null
-    RESULT="$?"
-    if [ "$RESULT" -ne 0 ]; then
-      RESTART_REQUIRED=YES
-    fi
-
     # Check Ryde is running
     pgrep -f rydeplayer >/dev/null 2>/dev/null
     RESULT="$?"
