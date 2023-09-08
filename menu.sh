@@ -1461,7 +1461,7 @@ do_Watchdog()
   # If /home/pi/ryde-build/watchdog.sh is in .bashrc then it is enabled
 
   grep -q "^  /home/pi/ryde-build/watchdog.sh" /home/pi/.bashrc
-  if [ $? -eq 0 ]; then  #  "sdtv_aspect=3" 16:9
+  if [ $? -eq 0 ]; then  #  Watchdog is enabled
     Radio2=ON
   else
     Radio1=ON
